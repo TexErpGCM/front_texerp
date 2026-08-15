@@ -1,0 +1,78 @@
+# Dependencias
+/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Compilación de Angular
+/dist
+/out-tsc
+/bazel-out
+
+# Caché de Angular
+/.angular/cache
+
+# Cobertura de pruebas
+/coverage
+/.nyc_output
+
+# Archivos temporales
+/tmp
+/temp
+*.tmp
+*.log
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
+
+# IDE - Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
+
+# IDE - IntelliJ / WebStorm
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# TypeScript
+*.tsbuildinfo
+
+# Angular Universal / SSR
+/server
+/browser
+
+# Firebase
+.firebase/
+.firebaserc.local
+
+# Cypress
+/cypress/screenshots
+/cypress/videos
+/cypress/downloads
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Paquetes generados
+*.tgz
+
+# Archivos locales
+*.local
+# Capacitor generated mobile environment
+src/environments/environment.mobile.generated.ts
+/android/local.properties

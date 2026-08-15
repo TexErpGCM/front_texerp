@@ -1,0 +1,15 @@
+<main class="dashboard-page">
+  <section class="dashboard-card">
+    <div class="brand-mark">T</div>
+    <span class="status">Autenticación correcta</span>
+    <h1>Bienvenido a TexERP, {{ name }}</h1>
+    <p>Esta pantalla es temporal y confirma que el flujo de login, sesión, interceptor y guard quedó conectado.</p>
+
+    <dl>
+      <div><dt>Correo</dt><dd>{{ email || 'No informado' }}</dd></div>
+      <div><dt>Rol</dt><dd>{{ role }}</dd></div>
+    </dl>
+
+    <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+  </section>
+</main>

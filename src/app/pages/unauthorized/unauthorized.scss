@@ -1,0 +1,7 @@
+:host { display: block; }
+.page { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--texerp-bg); text-align: center; }
+section { width: min(100%, 480px); padding: 36px; border: 1px solid var(--texerp-border); border-radius: 20px; background: #fff; }
+span { color: var(--texerp-primary); font-size: .8rem; font-weight: 900; letter-spacing: .14em; }
+h1 { margin: 10px 0; }
+p { color: var(--texerp-text-muted); line-height: 1.55; }
+a { display: inline-block; margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: var(--texerp-primary); color: white; text-decoration: none; font-weight: 800; }
