@@ -1,0 +1,98 @@
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- LOGO -->
+    <div class="sidebar-brand">
+
+      <div class="logo">
+        T
+      </div>
+
+      <div class="brand-info">
+
+        <strong>
+          TexERP
+        </strong>
+
+        <span>
+          Integrations
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- MENÚ -->
+    <nav class="sidebar-menu">
+
+      <!-- DASHBOARD -->
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+      >
+
+        <span class="menu-icon">
+          📊
+        </span>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- USUARIOS -->
+      <a
+        routerLink="/usuario"
+        routerLinkActive="active"
+      >
+
+        <span class="menu-icon">
+          👥
+        </span>
+
+        <span>
+          Usuarios
+        </span>
+
+      </a>
+
+    </nav>
+
+
+    <!-- FOOTER -->
+    <div class="sidebar-footer">
+
+      <button
+        type="button"
+        class="logout-button"
+        (click)="cerrarSesion()"
+      >
+
+        <span class="logout-icon">
+          🚪
+        </span>
+
+        <span>
+          Cerrar sesión
+        </span>
+
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- CONTENIDO -->
+  <main class="main-content">
+
+    <router-outlet></router-outlet>
+
+  </main>
+
+</div>

@@ -1,0 +1,461 @@
+.usuarios-container {
+  padding: 24px;
+  width: 100%;
+}
+
+.usuarios-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.usuarios-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.usuarios-header p {
+  margin: 6px 0 0;
+  color: #6c757d;
+}
+
+.btn-primary {
+  border: none;
+  background: #0d6efd;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #495057;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-danger {
+  border: none;
+  background: #dc3545;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.usuarios-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-container {
+  position: relative;
+  width: 400px;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 11px 15px 11px 40px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.search-container input:focus {
+  border-color: #0d6efd;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 10px;
+}
+
+.total-usuarios {
+  color: #6c757d;
+}
+
+.table-container {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f8f9fa;
+}
+
+th {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 700;
+}
+
+td {
+  padding: 14px 16px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.actions-column {
+  text-align: center;
+}
+
+.user-id {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #e9ecef;
+  font-weight: 700;
+}
+
+.user-info strong {
+  font-size: 14px;
+}
+
+.email {
+  color: #495057;
+}
+
+.role {
+  background: #f1f3f5;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+
+.status {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status.active {
+  color: #198754;
+}
+
+.status.active .status-dot {
+  background: #198754;
+}
+
+.status.inactive {
+  color: #6c757d;
+}
+
+.status.inactive .status-dot {
+  background: #6c757d;
+}
+
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-action {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-action.edit {
+  background: #fff3cd;
+}
+
+.btn-action.delete {
+  background: #f8d7da;
+}
+
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-icon {
+  font-size: 45px;
+  margin-bottom: 10px;
+}
+
+.empty-content h3 {
+  margin: 5px 0;
+}
+
+.empty-content p {
+  color: #6c757d;
+}
+
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 60px;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #dee2e6;
+  border-top-color: #0d6efd;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.alert-error {
+  background: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.modal-small {
+  max-width: 430px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.modal-header p {
+  margin: 5px 0 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.close-button {
+  border: none;
+  background: transparent;
+  font-size: 26px;
+  cursor: pointer;
+  color: #6c757d;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+
+.form-group {
+  margin-bottom: 17px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 7px;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #0d6efd;
+}
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: auto;
+}
+
+
+.delete-message {
+  color: #495057;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+
+  .usuarios-container {
+    padding: 15px;
+  }
+
+  .usuarios-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .usuarios-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .search-container {
+    width: 100%;
+  }
+
+.modal-error {
+  max-width: 500px;
+}
+
+
+.error-message-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+
+.error-icon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #fee2e2;
+  color: #dc2626;
+
+  font-size: 24px;
+  font-weight: 700;
+}
+
+
+.error-message-container strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+
+.error-message-container p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+
+.error-modal-overlay {
+  z-index: 1100;
+}
+.search-icon i {
+  color: #000000;
+}
+}

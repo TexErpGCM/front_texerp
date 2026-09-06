@@ -16,19 +16,25 @@ export class AuthService {
     private readonly router: Router,
   ) {}
 
-  login(request: LoginRequest): Observable<ApiResponse<LoginData>> {
-    return this.http
-      .post<ApiResponse<LoginData>>(`${this.apiUrl}/login`, request)
-      .pipe(tap(response => this.saveSession(response.data)));
-  }
-
+login(request: LoginRequest): Observable<ApiResponse<LoginData>> {
+  return this.http
+    .post<ApiResponse<LoginData>>(`${this.apiUrl}/login`, request)
+    .pipe(
+      tap((response) => {
+        console.log('1. Objeto data recibido:', response.data);
+        this.saveSession(response.data);
+        console.log('2. ¿Guardó token en localStorage?:', localStorage.getItem('token'));
+        console.log('3. ¿isLoggedIn evalúa a true?:', this.isLoggedIn());
+      })
+    );
+}
   logout(): void {
     clearStoredSession();
     void this.router.navigate(['/login']);
   }
 
   saveSession(data: LoginData): void {
-    localStorage.setItem('token', data.token);
+    localStorage.setItem('token', data.accessToken);
     localStorage.setItem('tokenType', data.tokenType || 'Bearer');
     localStorage.setItem('userId', String(data.userId));
     localStorage.setItem('name', data.name);
