@@ -6,6 +6,8 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.scss',
+  styleUrl: './app.scss'
 })
-export class App {}
+export class AppComponent { // <-- Asegúrate de que tenga 'export class AppComponent'
+  title = 'texerp-front';
+}
