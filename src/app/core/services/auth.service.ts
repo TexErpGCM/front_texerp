@@ -36,37 +36,14 @@ export class AuthService {
     );
   }
 
-  saveSession(response: any): void {
-    // Normaliza la respuesta sea directa (res.token) o anidada (res.data.token)
-    const data = response.data || response;
-
-    const token = data.token;
-    const user: UserSession = data.user || {
-      userId: data.userId || data.id,
-      name: data.name || 'Usuario',
-      email: data.email || '',
-      role: data.role || 'SIN_ROL'
-    };
-
-    // Guardar datos clave en localStorage
-    if (token) localStorage.setItem('token', token);
+  saveSession(data: LoginData): void {
+    localStorage.setItem('token', data.accessToken);
     localStorage.setItem('tokenType', data.tokenType || 'Bearer');
-    
-    // Guardar el objeto 'user' completo (usado por el Dashboard)
-    localStorage.setItem('user', JSON.stringify(user));
-
-    // Guardar propiedades individuales como respaldo
-    if (user.email) localStorage.setItem('email', user.email);
-    if (user.role) localStorage.setItem('role', user.role);
-    if (user.name) localStorage.setItem('name', user.name);
-    if (user.userId) localStorage.setItem('userId', String(user.userId));
+    localStorage.setItem('userId', String(data.userId));
+    localStorage.setItem('name', data.name);
+    localStorage.setItem('email', data.email);
+    localStorage.setItem('role', data.role);
   }
-
-  logout(): void {
-    localStorage.clear();
-    void this.router.navigate(['/login']);
-  }
-
   getToken(): string | null {
     return localStorage.getItem('token');
   }

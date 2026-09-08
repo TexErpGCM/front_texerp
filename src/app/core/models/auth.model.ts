@@ -4,7 +4,7 @@ export interface LoginRequest {
 }
 
 export interface LoginData {
-  token: string;
+  accessToken: string;
   tokenType?: string;
   userId: number;
   name: string;
