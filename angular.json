@@ -3,6 +3,7 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
+    "analytics": "c8c5fbc7-f95d-46f0-a76a-df8a0e5218bb"
     "analytics": "27fd9e40-f147-4ed7-839a-0800c593ee1f"
   },
   "newProjectRoot": "projects",
@@ -24,6 +25,9 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "polyfills": [
+              "zone.js"
+            ],
             "assets": [
               {
                 "glob": "**/*",

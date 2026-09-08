@@ -1,76 +1,147 @@
-:host { display: block; }
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+
+$navy-dark: #0f2b5c;
+$blue-accent: #2563eb;
+$gray-border: #e2e8f0;
+$text-main: #1e293b;
+$text-sub: #64748b;
 
 .dashboard-page {
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: var(--texerp-bg);
-}
-
-.dashboard-card {
-  width: min(100%, 620px);
-  padding: 38px;
-  border: 1px solid var(--texerp-border);
-  border-radius: 22px;
-  background: #fff;
-  box-shadow: 0 22px 55px rgba(15, 23, 42, .08);
-  text-align: center;
-}
-
-.brand-mark {
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 16px;
-  display: grid;
-  place-items: center;
-  border-radius: 15px;
-  background: var(--texerp-primary);
-  color: #fff;
-  font-size: 1.4rem;
-  font-weight: 900;
-}
-
-.status {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: #dcfce7;
-  color: #15803d;
-  font-size: .72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-}
-
-h1 { margin: 16px 0 8px; font-size: 1.65rem; }
-p { color: var(--texerp-text-muted); line-height: 1.6; }
-
-dl {
-  margin: 24px 0;
-  display: grid;
-  gap: 10px;
-  text-align: left;
-}
-
-dl div {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: var(--texerp-surface-soft);
-}
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: 'Montserrat', sans-serif;
+  padding: 1.5rem;
 
-dt { color: var(--texerp-text-muted); }
-dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+  .dashboard-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+    border: 1px solid $gray-border;
 
-button {
-  padding: 11px 18px;
-  border: 0;
-  border-radius: 10px;
-  background: var(--texerp-primary);
-  color: #fff;
-  font-weight: 800;
-  cursor: pointer;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+
+      .brand-badge {
+        background: $navy-dark;
+        color: #ffffff;
+        font-weight: 800;
+        padding: 0.4rem 0.9rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+      }
+
+      .status-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #ecfdf5;
+        color: #047857;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.35rem 0.8rem;
+        border-radius: 20px;
+
+        .status-dot {
+          width: 7px;
+          height: 7px;
+          background: #10b981;
+          border-radius: 50%;
+        }
+      }
+    }
+
+    .welcome-section {
+      margin-bottom: 2rem;
+
+      h1 {
+        color: $text-main;
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+
+        .user-name {
+          color: $navy-dark;
+        }
+      }
+
+      .subtitle {
+        color: $text-sub;
+        font-size: 0.88rem;
+        line-height: 1.5;
+        margin: 0;
+      }
+    }
+
+    .user-details-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: #f8fafc;
+      border: 1px solid $gray-border;
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 0 0 2rem 0;
+
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        dt {
+          color: $text-sub;
+          font-size: 0.82rem;
+          font-weight: 600;
+        }
+
+        dd {
+          color: $text-main;
+          font-size: 0.9rem;
+          font-weight: 600;
+          margin: 0;
+
+          &.role-tag {
+            background: #e0e7ff;
+            color: $navy-dark;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+        }
+      }
+    }
+
+    .btn-logout {
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid #ef4444;
+      color: #ef4444;
+      padding: 0.8rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #ef4444;
+        color: #ffffff;
+      }
+    }
+  }
 }

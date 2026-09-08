@@ -1,36 +1,39 @@
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponse } from '../models/api-response.model';
-import { LoginData, LoginRequest } from '../models/auth.model';
-import { clearStoredSession, isTokenExpired, roleFromToken } from '../utils/session.util';
 
-@Injectable({ providedIn: 'root' })
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface UserSession {
+  userId?: number | string;
+  name?: string;
+  email: string;
+  role: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  private readonly apiUrl = `${environment.apiUrl}/auth`;
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  
+  // Utiliza el archivo environment o cae a la URL local por defecto
+  private readonly apiUrl = `${environment?.apiUrl || 'http://localhost:8080/api/v1'}/auth`;
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly router: Router,
-  ) {}
-
-login(request: LoginRequest): Observable<ApiResponse<LoginData>> {
-  return this.http
-    .post<ApiResponse<LoginData>>(`${this.apiUrl}/login`, request)
-    .pipe(
-      tap((response) => {
-        console.log('1. Objeto data recibido:', response.data);
-        this.saveSession(response.data);
-        console.log('2. ¿Guardó token en localStorage?:', localStorage.getItem('token'));
-        console.log('3. ¿isLoggedIn evalúa a true?:', this.isLoggedIn());
+  login(credentials: LoginRequest): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
+      tap((res) => {
+        if (res) {
+          this.saveSession(res);
+        }
       })
     );
-}
-  logout(): void {
-    clearStoredSession();
-    void this.router.navigate(['/login']);
   }
 
   saveSession(data: LoginData): void {
@@ -41,34 +44,37 @@ login(request: LoginRequest): Observable<ApiResponse<LoginData>> {
     localStorage.setItem('email', data.email);
     localStorage.setItem('role', data.role);
   }
-
   getToken(): string | null {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
+    return localStorage.getItem('token');
+  }
 
-    if (isTokenExpired(token)) {
-      clearStoredSession();
+  getUser(): UserSession | null {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    try {
+      return JSON.parse(userStr);
+    } catch {
       return null;
     }
-
-    return token;
   }
 
   getRole(): string | null {
-    const token = this.getToken();
-    return token ? roleFromToken(token) || localStorage.getItem('role') : null;
+    const user = this.getUser();
+    return user?.role || localStorage.getItem('role') || null;
   }
 
   getName(): string {
-    return localStorage.getItem('name') || 'Usuario';
+    const user = this.getUser();
+    return user?.name || localStorage.getItem('name') || 'Usuario';
   }
 
   getEmail(): string {
-    return localStorage.getItem('email') || '';
+    const user = this.getUser();
+    return user?.email || localStorage.getItem('email') || '';
   }
 
   isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    return !!this.getToken();
   }
 
   hasRole(roles: string[]): boolean {
