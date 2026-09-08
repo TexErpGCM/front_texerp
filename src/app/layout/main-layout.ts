@@ -20,9 +20,7 @@ export class MainLayout {
 
 
     cerrarSesion(): void {
-
-    this.authService.logout();
-
+ this.authService.logout();
     void this.router.navigate(
       ['/login']
     );

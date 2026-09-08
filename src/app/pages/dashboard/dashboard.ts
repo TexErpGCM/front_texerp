@@ -19,7 +19,6 @@ export class DashboardComponent {
   readonly role = this.auth.getRole() || 'SIN_ROL';
 
   cerrarSesion(): void {
-    this.auth.logout();
     this.router.navigate(['/login']);
   }
 }

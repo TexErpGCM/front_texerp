@@ -19,17 +19,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const tokenType = localStorage.getItem('tokenType') || 'Bearer';
+  
   const request = token && !isLoginRequest
-    ? req.clone({ setHeaders: { Authorization: `${tokenType} ${token}` } })
+    ? req.clone({ setHeaders: { Authorization: `${tokenType.trim()} ${token}` } })
     : req;
 
   return next(request).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !isLoginRequest) {
+      // 401: Token inválido/expirado en backend | 403: Sin permisos de rol
+      if ((error.status === 401 || error.status === 403) && !isLoginRequest) {
         clearStoredSession();
         void router.navigate(['/login']);
       }
       return throwError(() => error);
-    }),
+    })
   );
 };

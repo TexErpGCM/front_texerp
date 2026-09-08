@@ -30,7 +30,7 @@
         <p>Ingresa a tu cuenta para continuar</p>
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-body">
+      <form [formGroup]="form" (ngSubmit)="ingresar()" class="form-body">
         <div class="input-group">
           <span class="input-icon">
             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
@@ -83,7 +83,7 @@
           <a href="javascript:void(0)" class="forgot-link">¿Olvidaste tu contraseña?</a>
         </div>
 
-        <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">
+        <button type="submit" class="btn-primary" [disabled]="form.invalid">
           Iniciar sesión &rarr;
         </button>
       </form>
@@ -92,7 +92,7 @@
         <span>o</span>
       </div>
 
-      <button type="button" class="btn-secondary" (click)="onSubmit()">
+      <button type="button" class="btn-secondary" (click)="ingresar()">
         <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
           <circle cx="9" cy="7" r="4"></circle>

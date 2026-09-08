@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { LoginData } from '../models/auth.model';
+import { clearStoredSession} from '../utils/session.util';
 
 export interface LoginRequest {
   email: string;
@@ -30,7 +32,7 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       tap((res) => {
         if (res) {
-          this.saveSession(res);
+          this.saveSession(res.data);
         }
       })
     );
@@ -44,6 +46,7 @@ export class AuthService {
     localStorage.setItem('email', data.email);
     localStorage.setItem('role', data.role);
   }
+
   getToken(): string | null {
     return localStorage.getItem('token');
   }
@@ -80,5 +83,10 @@ export class AuthService {
   hasRole(roles: string[]): boolean {
     const role = this.getRole();
     return !!role && roles.includes(role);
+  }
+
+    logout(): void {
+    clearStoredSession();
+    void this.router.navigate(['/login']);
   }
 }
