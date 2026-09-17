@@ -1,0 +1,533 @@
+<div class="proveedores-container">
+
+  <!-- ====================================== -->
+  <!-- HEADER -->
+  <!-- ====================================== -->
+
+  <div class="header">
+
+    <div>
+      <h2>Proveedores</h2>
+
+      <p>
+        Gestión de proveedores registrados
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="nuevoProveedor()"
+    >
+      <i class="fa-solid fa-plus"></i>
+      Nuevo proveedor
+    </button>
+
+  </div>
+
+
+  <!-- ====================================== -->
+  <!-- MENSAJE ÉXITO -->
+  <!-- ====================================== -->
+
+  @if (mensajeExito) {
+
+    <div class="alert success">
+
+      <i class="fa-solid fa-circle-check"></i>
+
+      <span>
+        {{ mensajeExito }}
+      </span>
+
+      <button
+        type="button"
+        (click)="mensajeExito = ''"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- ====================================== -->
+  <!-- FILTROS -->
+  <!-- ====================================== -->
+
+  <div class="filters">
+
+    <div class="filter-group">
+
+      <label for="taxId">
+        Identificación
+      </label>
+
+      <input
+        id="taxId"
+        type="text"
+        [(ngModel)]="filtroTaxId"
+        placeholder="Buscar por identificación"
+        (keyup.enter)="buscar()"
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="nombre">
+        Nombre
+      </label>
+
+      <input
+        id="nombre"
+        type="text"
+        [(ngModel)]="filtroNombre"
+        placeholder="Buscar por nombre"
+        (keyup.enter)="buscar()"
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="estado">
+        Estado
+      </label>
+
+      <select
+        id="estado"
+        [(ngModel)]="filtroActivo"
+      >
+
+        <option [ngValue]="undefined">
+          Todos
+        </option>
+
+        <option [ngValue]="true">
+          Activos
+        </option>
+
+        <option [ngValue]="false">
+          Inactivos
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="filter-actions">
+
+      <button
+        type="button"
+        class="btn-search"
+        (click)="buscar()"
+      >
+        <i class="fa-solid fa-magnifying-glass"></i>
+        Buscar
+      </button>
+
+      <button
+        type="button"
+        class="btn-clear"
+        (click)="limpiarFiltros()"
+      >
+        <i class="fa-solid fa-rotate-left"></i>
+        Limpiar
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================== -->
+  <!-- TABLA -->
+  <!-- ====================================== -->
+
+  <div class="table-card">
+
+    <div class="table-header">
+
+      <div>
+
+        <h3>
+          Lista de proveedores
+        </h3>
+
+        <span>
+          Total: {{ totalElementos }}
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+
+            <th>Identificación</th>
+
+            <th>Nombre</th>
+
+            <th>Estado</th>
+
+            <th>Acciones</th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @if (proveedores.length === 0) {
+
+            <tr>
+
+              <td
+                colspan="5"
+                class="empty"
+              >
+
+                <i class="fa-solid fa-box-open"></i>
+
+                <span>
+                  No se encontraron proveedores.
+                </span>
+
+              </td>
+
+            </tr>
+
+          }
+
+
+          @for (
+            proveedor of proveedores;
+            track proveedor.id
+          ) {
+
+            <tr>
+
+              <td>
+                {{ proveedor.id }}
+              </td>
+
+              <td>
+                {{ proveedor.taxId }}
+              </td>
+
+              <td>
+                <strong>
+                  {{ proveedor.name }}
+                </strong>
+              </td>
+
+              <td>
+
+                @if (proveedor.active) {
+
+                  <span class="status active">
+                    Activo
+                  </span>
+
+                } @else {
+
+                  <span class="status inactive">
+                    Inactivo
+                  </span>
+
+                }
+
+              </td>
+
+              <td>
+
+                <div class="actions">
+
+                  <button
+                    type="button"
+                    class="btn-edit"
+                    title="Editar"
+                    (click)="editar(proveedor)"
+                  >
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-status"
+                    [class.activate]="!proveedor.active"
+                    [class.deactivate]="proveedor.active"
+                    [title]="
+                      proveedor.active
+                        ? 'Inactivar'
+                        : 'Activar'
+                    "
+                    (click)="cambiarEstado(proveedor)"
+                  >
+
+                    @if (proveedor.active) {
+
+                      <i class="fa-solid fa-ban"></i>
+
+                    } @else {
+
+                      <i class="fa-solid fa-check"></i>
+
+                    }
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ==================================== -->
+    <!-- PAGINACIÓN -->
+    <!-- ==================================== -->
+
+    @if (totalPaginas > 0) {
+
+      <div class="pagination">
+
+        <button
+          type="button"
+          [disabled]="paginaActual === 0"
+          (click)="cambiarPagina(paginaActual - 1)"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+
+        <span>
+          Página
+          {{ paginaActual + 1 }}
+          de
+          {{ totalPaginas }}
+        </span>
+
+
+        <button
+          type="button"
+          [disabled]="
+            paginaActual >= totalPaginas - 1
+          "
+          (click)="cambiarPagina(paginaActual + 1)"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      </div>
+
+    }
+
+  </div>
+
+
+  <!-- ====================================== -->
+  <!-- FORMULARIO -->
+  <!-- ====================================== -->
+
+  @if (mostrarFormulario) {
+
+    <div
+      class="modal-backdrop"
+      (click)="cancelar()"
+    >
+
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()"
+      >
+
+        <div class="modal-header">
+
+          <div>
+
+            <h3>
+              {{
+                modoEdicion
+                  ? 'Editar proveedor'
+                  : 'Nuevo proveedor'
+              }}
+            </h3>
+
+            <p>
+              {{
+                modoEdicion
+                  ? 'Actualiza la información del proveedor'
+                  : 'Registra un nuevo proveedor'
+              }}
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="btn-close"
+            (click)="cancelar()"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+        </div>
+
+
+        <!-- ERROR -->
+
+        @if (errorFormulario) {
+
+          <div class="alert error">
+
+            <i class="fa-solid fa-circle-exclamation"></i>
+
+            <span>
+              {{ errorFormulario }}
+            </span>
+
+          </div>
+
+        }
+
+
+        <!-- FORM -->
+
+        <form
+          #proveedorForm="ngForm"
+          (ngSubmit)="guardar()"
+        >
+
+          <div class="form-group">
+
+            <label for="formTaxId">
+              Identificación tributaria
+              <span>*</span>
+            </label>
+
+            <input
+              id="formTaxId"
+              name="taxId"
+              type="text"
+              [(ngModel)]="formulario.taxId"
+              maxlength="50"
+              required
+              placeholder="Ej. 900123456-7"
+            />
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="formName">
+              Nombre del proveedor
+              <span>*</span>
+            </label>
+
+            <input
+              id="formName"
+              name="name"
+              type="text"
+              [(ngModel)]="formulario.name"
+              maxlength="150"
+              required
+              placeholder="Nombre del proveedor"
+            />
+
+          </div>
+
+
+          <div class="form-group checkbox-group">
+
+            <label>
+
+              <input
+                name="active"
+                type="checkbox"
+                [(ngModel)]="formulario.active"
+              />
+
+              <span>
+                Proveedor activo
+              </span>
+
+            </label>
+
+          </div>
+
+
+          <!-- BOTONES -->
+
+          <div class="modal-actions">
+
+            <button
+              type="button"
+              class="btn-cancel"
+              (click)="cancelar()"
+              [disabled]="guardando"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="guardando"
+            >
+
+              @if (guardando) {
+
+                <i class="fa-solid fa-spinner fa-spin"></i>
+
+                Guardando...
+
+              } @else {
+
+                <i class="fa-solid fa-save"></i>
+
+                {{
+                  modoEdicion
+                    ? 'Actualizar'
+                    : 'Guardar'
+                }}
+
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>
