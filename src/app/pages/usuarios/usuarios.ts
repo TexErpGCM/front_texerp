@@ -34,6 +34,8 @@ export class Usuarios implements OnInit {
   usuarios: Usuario[] = [];
   usuariosFiltrados: Usuario[] = [];
   busqueda = '';
+  filtroRol = '';
+  filtroEstado = '';
 
   cargando = false;
   mensajeError = '';
@@ -128,25 +130,30 @@ export class Usuarios implements OnInit {
   }
 
   filtrarUsuarios(): void {
-    const texto = this.busqueda
-      .trim()
-      .toLowerCase();
+    const texto = this.busqueda.trim().toLowerCase();
 
-    if (!texto) {
-      this.usuariosFiltrados = [...this.usuarios];
-      return;
-    }
+    this.usuariosFiltrados = this.usuarios.filter(usuario => {
 
-    this.usuariosFiltrados = this.usuarios.filter(usuario =>
-      usuario.name.toLowerCase().includes(texto) ||
-      usuario.username.toLowerCase().includes(texto) ||
-      usuario.email.toLowerCase().includes(texto) ||
-      usuario.role.toLowerCase().includes(texto)
-    );
+      const coincideTexto =
+        !texto ||
+        usuario.name.toLowerCase().includes(texto) ||
+        usuario.username.toLowerCase().includes(texto) ||
+        usuario.email.toLowerCase().includes(texto) ||
+        usuario.role.toLowerCase().includes(texto);
+
+      const coincideRol =
+        !this.filtroRol ||
+        usuario.role === this.filtroRol;
+
+      const coincideEstado =
+        !this.filtroEstado ||
+        usuario.active.toString() === this.filtroEstado;
+
+      return coincideTexto && coincideRol && coincideEstado;
+    });
 
     this.cdr.detectChanges();
   }
-
   irPagina(pagina: number): void {
     if (
       pagina < 0 ||
@@ -549,5 +556,8 @@ export class Usuarios implements OnInit {
 
     return expresion.test(email.trim());
   }
+  limpiarFiltros() {
+throw new Error('Method not implemented.');
+}
 }
 
