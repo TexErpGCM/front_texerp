@@ -1,0 +1,592 @@
+@if (cargandoVariantes) {
+<app-loading mensaje="Cargando variantes..."></app-loading>
+
+} @else {
+<main class="page">
+
+  <section class="card">
+
+    <header class="card__header">
+
+      <div>
+        <h1 class="card__title">
+          Variantes Productos
+        </h1>
+
+      </div>
+
+      <button type="button" class="button button--primary" (click)="nuevaVariante()">
+        <i class="fi fi-sr-plus"></i>
+        <span>Nueva variante</span>
+      </button>
+
+    </header>
+
+
+    <!-- MENSAJE DE ÉXITO -->
+
+    @if (mensajeExito) {
+
+    <div class="alert alert--success">
+
+      <i class="fi fi-sr-check-circle"></i>
+
+      <span>
+        {{ mensajeExito }}
+      </span>
+
+    </div>
+
+    }
+
+
+    <!-- FILTROS -->
+    <section class="filters">
+
+      <div class="field">
+
+        <label for="filtroProducto">
+          Producto
+        </label>
+
+        <div class="input-wrapper">
+
+          <i class="fi fi-sr-box"></i>
+
+          <select id="filtroProducto" [(ngModel)]="filtroProductoId">
+
+            <option [ngValue]="undefined">
+              Todos los productos
+            </option>
+
+            @for (producto of productos; track producto.id) {
+
+            <option [ngValue]="producto.id">
+              {{ producto.name }}
+            </option>
+
+            }
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="filtroSku">
+          SKU
+        </label>
+
+        <div class="input-wrapper">
+
+          <i class="fi fi-sr-barcode"></i>
+
+          <input id="filtroSku" type="text" [(ngModel)]="filtroSku" placeholder="Buscar por SKU">
+
+        </div>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="filtroColor">
+          Color
+        </label>
+
+        <div class="input-wrapper">
+
+          <i class="fi fi-sr-palette"></i>
+
+          <input id="filtroColor" type="text" [(ngModel)]="filtroColor" placeholder="Buscar por color">
+
+        </div>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="filtroActivo">
+          Estado
+        </label>
+
+        <div class="input-wrapper">
+
+          <i class="fi fi-sr-toggle-on"></i>
+
+          <select id="filtroActivo" [(ngModel)]="filtroActivo">
+
+            <option [ngValue]="undefined">
+              Todos
+            </option>
+
+            <option [ngValue]="true">
+              Activos
+            </option>
+
+            <option [ngValue]="false">
+              Inactivos
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="filter-actions">
+
+        <button type="button" class="button button--primary" title="Buscar" (click)="buscar()">
+          <i class="fi fi-sr-search"></i>
+          <span>Buscar</span>
+        </button>
+
+
+        <button type="button" class="button button--secondary" title="Limpiar filtros" (click)="limpiarFiltros()">
+          <i class="fi fi-sr-rotate-right"></i>
+          <span>Limpiar</span>
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- TABLA -->
+
+    <section class="table-container">
+
+      <div class="table-wrapper">
+
+        <table class="data-table">
+
+          <thead>
+
+            <tr>
+
+              <th>Color</th>
+              <th>Unidad</th>
+              <th>Costo</th>
+              <th>Estado</th>
+              <th class="actions-column">
+                Acciones
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (variante of variantes; track variante.id) {
+
+            <tr>
+
+              <td>
+                {{ variante.color }}
+              </td>
+
+              <td>
+                {{ variante.unitName || variante.unitCode }}
+              </td>
+
+
+              <td>
+                $ {{ variante.cost}}
+              </td>
+
+
+              <td>
+
+                @if (variante.active) {
+
+                <span class="status status--active">
+                  Activa
+                </span>
+
+                } @else {
+
+                <span class="status status--inactive">
+                  Inactiva
+                </span>
+
+                }
+
+              </td>
+
+
+              <td>
+
+                <div class="actions">
+
+                  <button type="button" class="icon-button" title="Editar variante" (click)="editar(variante)">
+                    <i class="fi fi-sr-pencil"></i>
+                  </button>
+
+                  <button type="button" class="icon-button" [class.icon-button--danger]="variante.active"
+                    [class.icon-button--success]="!variante.active" [title]="variante.active ? 'Inactivar' : 'Activar'"
+                    (click)="cambiarEstado(variante)">
+
+                    @if (variante.active) {
+
+                    <i class="fi fi-sr-ban"></i>
+
+                    } @else {
+
+                    <i class="fi fi-sr-check"></i>
+
+                    }
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+            } @empty {
+
+            <tr>
+
+              <td colspan="9" class="empty-state">
+
+                <i class="fi fi-sr-box-open"></i>
+
+                <strong>
+                  No hay variantes registradas
+                </strong>
+
+                <span>
+                  Las variantes del producto aparecerán aquí.
+                </span>
+
+              </td>
+
+            </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- PAGINACIÓN -->
+
+      @if (totalPaginas > 0) {
+
+      <footer class="pagination">
+
+        <div class="pagination__info">
+
+          Total:
+          <strong>
+            {{ totalElementos }}
+          </strong>
+
+        </div>
+
+
+        <div class="pagination__controls">
+
+          <button type="button" class="pagination__button" [disabled]="paginaActual === 0"
+            (click)="cambiarPagina(paginaActual - 1)">
+            <i class="fi fi-sr-angle-left"></i>
+            <span>Anterior</span>
+          </button>
+
+
+          <span class="pagination__current">
+
+            Página
+            <strong>
+              {{ paginaActual + 1 }}
+            </strong>
+            de
+            <strong>
+              {{ totalPaginas }}
+            </strong>
+
+          </span>
+
+
+          <button type="button" class="pagination__button" [disabled]="paginaActual >= totalPaginas - 1"
+            (click)="cambiarPagina(paginaActual + 1)">
+
+            <span>Siguiente</span>
+
+            <i class="fi fi-sr-angle-right"></i>
+
+          </button>
+
+        </div>
+
+      </footer>
+
+      }
+
+    </section>
+
+  </section>
+
+</main>
+}
+
+<!-- MODAL CREAR / EDITAR -->
+
+@if (mostrarFormulario) {
+
+<div class="modal-overlay" (click)="cancelar()">
+
+  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
+    (click)="$event.stopPropagation()">
+
+    <header class="modal__header">
+
+      <div>
+
+        <span class="modal__eyebrow">
+          Variantes
+        </span>
+
+        <h2 id="modalTitle">
+          @if (modoEdicion) {
+          Editar variante
+          } @else {
+          Nueva variante
+          }
+        </h2>
+
+        <p>
+          @if (modoEdicion) {
+          Actualiza la información de la variante.
+          } @else {
+          Registra una nueva variante para el producto.
+          }
+        </p>
+
+      </div>
+
+      <button type="button" class="modal__close" title="Cerrar" [disabled]="guardando" (click)="cancelar()">
+        <i class="fi fi-sr-cross-small"></i>
+      </button>
+
+    </header>
+
+
+    <div class="modal__body">
+
+      @if (errorFormulario) {
+
+      <div class="alert alert--error">
+
+        <i class="fi fi-sr-circle-exclamation"></i>
+
+        <span>
+          {{ errorFormulario }}
+        </span>
+
+      </div>
+
+      }
+
+
+      <div class="form-grid">
+
+        <!-- PRODUCTO -->
+
+        <div class="field field--full"> <label for="producto"> Producto <span>*</span> </label>
+          <div class="input-wrapper"> <i class="fi fi-sr-box"></i> <select id="producto" [(ngModel)]="productId"
+              [disabled]="guardando">
+              <option [ngValue]="undefined"> Seleccione un producto </option> @for (producto of productos; track
+              producto.id) { <option [ngValue]="producto.id"> {{ producto.name }} </option> }
+            </select> </div>
+        </div>
+
+        <!-- SKU -->
+
+        <div class="field">
+
+          <label for="sku">
+            SKU
+            <span>*</span>
+          </label>
+
+          <input id="sku" type="text" [(ngModel)]="formulario.sku" maxlength="60" placeholder="Ej: TELA-001-AZ">
+
+        </div>
+
+
+        <!-- COLOR -->
+
+        <div class="field">
+
+          <label for="color">
+            Color
+            <span>*</span>
+          </label>
+
+          <input id="color" type="text" [(ngModel)]="formulario.color" maxlength="80" placeholder="Ej: Azul">
+
+        </div>
+
+
+        <!-- ESTAMPADO -->
+
+        <div class="field">
+
+          <label for="pattern">
+            Estampado
+          </label>
+
+          <input id="pattern" type="text" [(ngModel)]="formulario.pattern" maxlength="120" placeholder="Ej: Rayas">
+
+        </div>
+
+
+        <!-- ANCHO -->
+
+        <div class="field">
+
+          <label for="width">
+            Ancho
+            <span>*</span>
+          </label>
+
+          <input id="width" type="number" min="0" step="0.01" [(ngModel)]="formulario.width" placeholder="0.00">
+
+        </div>
+
+
+        <!-- UNIDAD -->
+
+        <div class="field">
+
+          <label for="unitCode">
+            Unidad
+            <span>*</span>
+          </label>
+
+          <input id="unitCode" type="text" [(ngModel)]="formulario.unitCode" maxlength="20" placeholder="Ej: M, KG">
+
+        </div>
+
+
+        <!-- COSTO -->
+
+        <div class="field">
+
+          <label for="cost">
+            Costo
+            <span>*</span>
+          </label>
+
+          <div class="input-wrapper">
+
+            <span class="input-prefix">
+              $
+            </span>
+
+            <input id="cost" type="number" min="0" step="0.01" [(ngModel)]="formulario.cost" placeholder="0.00">
+
+          </div>
+
+        </div>
+
+
+        <!-- PRECIO -->
+
+        <div class="field">
+
+          <label for="salePrice">
+            Precio de venta
+            <span>*</span>
+          </label>
+
+          <div class="input-wrapper">
+
+            <span class="input-prefix">
+              $
+            </span>
+
+            <input id="salePrice" type="number" min="0" step="0.01" [(ngModel)]="formulario.salePrice"
+              placeholder="0.00">
+
+          </div>
+
+        </div>
+
+
+        <!-- ESTADO -->
+
+        <div class="field">
+
+          <label for="active">
+            Estado
+          </label>
+
+          <select id="active" [(ngModel)]="formulario.active">
+
+            <option [ngValue]="true">
+              Activa
+            </option>
+
+            <option [ngValue]="false">
+              Inactiva
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <footer class="modal__footer">
+
+      <button type="button" class="button button--secondary" [disabled]="guardando" (click)="cancelar()">
+        <span>Cancelar</span>
+      </button>
+
+
+      <button type="button" class="button button--primary" [disabled]="guardando" (click)="guardar()">
+
+        @if (guardando) {
+
+        <i class="fi fi-sr-spinner"></i>
+
+        <span>Guardando...</span>
+
+        } @else {
+
+        <i class="fi fi-sr-disk"></i>
+
+        <span>
+          @if (modoEdicion) {
+          Actualizar
+          } @else {
+          Guardar
+          }
+        </span>
+
+        }
+
+      </button>
+
+    </footer>
+
+  </section>
+
+</div>
+
+}
