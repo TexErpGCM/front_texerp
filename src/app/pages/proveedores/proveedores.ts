@@ -1,205 +1,142 @@
-import {
-  Component,
-  OnInit,
-  inject
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
-import {
-  CommonModule
-} from '@angular/common';
+export interface Proveedor {
+  id: number;
+  taxId: string;
+  name: string;
+  active: boolean;
+}
 
-import {
-  FormsModule
-} from '@angular/forms';
-
-import {
-  finalize
-} from 'rxjs';
-
-import { SupplierService } from '../../core/services/supplier.service';
-
-import { Proveedor } from '../../core/models/proveedor/proveedor.model';
-
-import { CrearProveedorRequest } from '../../core/models/proveedor/crear.proveedor.request.model';
+export interface CrearProveedorRequest {
+  taxId: string;
+  name: string;
+  active: boolean;
+}
 
 @Component({
   selector: 'app-proveedores',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './proveedores.html',
   styleUrl: './proveedores.scss'
 })
 export class ProveedoresComponent implements OnInit {
 
-  private supplierService = inject(SupplierService);
-
+  // ==========================================
+  // DATOS LOCALES (MOCK)
+  // ==========================================
+  private baseProveedores: Proveedor[] = [
+    { id: 1, taxId: '900123456-1', name: 'Textiles del Norte S.A.S.', active: true },
+    { id: 2, taxId: '800987654-2', name: 'Hilados y Telas Colombia', active: true },
+    { id: 3, taxId: '901234567-3', name: 'Insumos Industriales Ltda.', active: false },
+    { id: 4, taxId: '811000111-4', name: 'Distribuidora Textil Global', active: true }
+  ];
 
   proveedores: Proveedor[] = [];
-
   proveedorSeleccionado: Proveedor | null = null;
 
-
-
+  // ==========================================
+  // PAGINACIÓN
+  // ==========================================
   paginaActual = 0;
-
-  tamanioPagina = 20;
-
+  tamanioPagina = 5;
   totalElementos = 0;
-
   totalPaginas = 0;
 
   // ==========================================
   // FILTROS
   // ==========================================
-
   filtroTaxId = '';
-
   filtroNombre = '';
-
   filtroActivo: boolean | undefined = undefined;
 
   // ==========================================
-  // FORMULARIO
+  // ESTADOS DEL FORMULARIO Y ALERTAS
   // ==========================================
-
   mostrarFormulario = false;
-
   modoEdicion = false;
-
   guardando = false;
-
+  cargando = false;
   errorFormulario = '';
-
   mensajeExito = '';
 
   // ==========================================
-  // MODELO
+  // MODELO DE FORMULARIO
   // ==========================================
-
   formulario: CrearProveedorRequest = {
     taxId: '',
     name: '',
     active: true
   };
 
-  // ==========================================
-  // INIT
-  // ==========================================
-
   ngOnInit(): void {
-
     this.cargarProveedores();
-
   }
 
   // ==========================================
-  // CARGAR PROVEEDORES
+  // CARGA Y CONSULTAS (MOCK LOCAL)
   // ==========================================
-
   cargarProveedores(): void {
-
-    this.supplierService
-      .obtenerProveedores({
-        taxId: this.filtroTaxId,
-        name: this.filtroNombre,
-        active: this.filtroActivo,
-        page: this.paginaActual,
-        size: this.tamanioPagina
-      })
-      .subscribe({
-
-        next: (response) => {
-
-          this.proveedores =
-            response.data.content;
-
-          this.totalElementos =
-            response.data.totalElements;
-
-          this.totalPaginas =
-            response.data.totalPages;
-
-        },
-
-        error: (error) => {
-
-          console.error(
-            'Error cargando proveedores',
-            error
-          );
-
-          this.manejarError(error);
-
-        }
-
-      });
-  }
-
-  // ==========================================
-  // BUSCAR
-  // ==========================================
-
-  buscar(): void {
-
-    this.paginaActual = 0;
-
-    this.cargarProveedores();
-
-  }
-
-  // ==========================================
-  // LIMPIAR FILTROS
-  // ==========================================
-
-  limpiarFiltros(): void {
-
-    this.filtroTaxId = '';
-
-    this.filtroNombre = '';
-
-    this.filtroActivo = undefined;
-
-    this.paginaActual = 0;
-
-    this.cargarProveedores();
-
-  }
-
-  // ==========================================
-  // PAGINACIÓN
-  // ==========================================
-
-  cambiarPagina(pagina: number): void {
-
-    if (
-      pagina < 0 ||
-      pagina >= this.totalPaginas
-    ) {
-      return;
-    }
-
-    this.paginaActual = pagina;
-
-    this.cargarProveedores();
-
-  }
-
-  // ==========================================
-  // NUEVO PROVEEDOR
-  // ==========================================
-
-  nuevoProveedor(): void {
-
-    this.modoEdicion = false;
-
-    this.proveedorSeleccionado = null;
-
+    this.cargando = true;
     this.errorFormulario = '';
 
-    this.mensajeExito = '';
+    let filtrados = [...this.baseProveedores];
+
+    if (this.filtroTaxId.trim()) {
+      filtrados = filtrados.filter(p =>
+        p.taxId.toLowerCase().includes(this.filtroTaxId.toLowerCase().trim())
+      );
+    }
+
+    if (this.filtroNombre.trim()) {
+      filtrados = filtrados.filter(p =>
+        p.name.toLowerCase().includes(this.filtroNombre.toLowerCase().trim())
+      );
+    }
+
+    if (this.filtroActivo !== undefined && this.filtroActivo !== null && (this.filtroActivo as any) !== '') {
+      const isActivo = String(this.filtroActivo) === 'true';
+      filtrados = filtrados.filter(p => p.active === isActivo);
+    }
+
+    this.totalElementos = filtrados.length;
+    this.totalPaginas = Math.ceil(this.totalElementos / this.tamanioPagina) || 1;
+
+    const inicio = this.paginaActual * this.tamanioPagina;
+    this.proveedores = filtrados.slice(inicio, inicio + this.tamanioPagina);
+    this.cargando = false;
+  }
+
+  buscar(): void {
+    this.paginaActual = 0;
+    this.cargarProveedores();
+  }
+
+  limpiarFiltros(): void {
+    this.filtroTaxId = '';
+    this.filtroNombre = '';
+    this.filtroActivo = undefined;
+    this.paginaActual = 0;
+    this.cargarProveedores();
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina < 0 || pagina >= this.totalPaginas) {
+      return;
+    }
+    this.paginaActual = pagina;
+    this.cargarProveedores();
+  }
+
+  // ==========================================
+  // ACCIONES DE CREACIÓN / EDICIÓN
+  // ==========================================
+  nuevoProveedor(): void {
+    this.modoEdicion = false;
+    this.proveedorSeleccionado = null;
+    this.limpiarAlertas();
 
     this.formulario = {
       taxId: '',
@@ -208,22 +145,12 @@ export class ProveedoresComponent implements OnInit {
     };
 
     this.mostrarFormulario = true;
-
   }
 
-  // ==========================================
-  // EDITAR
-  // ==========================================
-
   editar(proveedor: Proveedor): void {
-
     this.modoEdicion = true;
-
     this.proveedorSeleccionado = proveedor;
-
-    this.errorFormulario = '';
-
-    this.mensajeExito = '';
+    this.limpiarAlertas();
 
     this.formulario = {
       taxId: proveedor.taxId,
@@ -232,237 +159,82 @@ export class ProveedoresComponent implements OnInit {
     };
 
     this.mostrarFormulario = true;
-
   }
 
-  // ==========================================
-  // GUARDAR
-  // ==========================================
-
   guardar(): void {
-
-    this.errorFormulario = '';
-
-    this.mensajeExito = '';
+    this.limpiarAlertas();
 
     if (!this.validarFormulario()) {
       return;
     }
 
-    this.guardando = true;
+    const existeDuplicado = this.baseProveedores.some(
+      p => p.taxId.trim() === this.formulario.taxId.trim() &&
+           (!this.modoEdicion || (this.proveedorSeleccionado && p.id !== this.proveedorSeleccionado.id))
+    );
 
-    // ========================================
-    // ACTUALIZAR
-    // ========================================
-
-    if (
-      this.modoEdicion &&
-      this.proveedorSeleccionado
-    ) {
-
-      this.supplierService
-        .actualizarProveedor(
-          this.proveedorSeleccionado.id,
-          this.formulario
-        )
-        .pipe(
-          finalize(() => {
-            this.guardando = false;
-          })
-        )
-        .subscribe({
-
-          next: (response) => {
-
-            this.mensajeExito =
-              response.message ||
-              'Proveedor actualizado correctamente';
-
-            this.mostrarFormulario = false;
-
-            this.cargarProveedores();
-
-          },
-
-          error: (error) => {
-
-            this.manejarError(error);
-
-          }
-
-        });
-
+    if (existeDuplicado) {
+      this.errorFormulario = 'El documento o NIT ya pertenece a otro proveedor.';
       return;
     }
 
-    // ========================================
-    // CREAR
-    // ========================================
+    if (this.modoEdicion && this.proveedorSeleccionado) {
+      const idx = this.baseProveedores.findIndex(p => p.id === this.proveedorSeleccionado!.id);
+      if (idx !== -1) {
+        this.baseProveedores[idx] = {
+          id: this.proveedorSeleccionado.id,
+          ...this.formulario
+        };
+      }
+      this.mensajeExito = 'Proveedor actualizado correctamente.';
+    } else {
+      const nuevo: Proveedor = {
+        id: Date.now(),
+        ...this.formulario
+      };
+      this.baseProveedores.unshift(nuevo);
+      this.mensajeExito = 'Proveedor creado correctamente.';
+    }
 
-    this.supplierService
-      .crearProveedor(
-        this.formulario
-      )
-      .pipe(
-        finalize(() => {
-          this.guardando = false;
-        })
-      )
-      .subscribe({
+    this.mostrarFormulario = false;
+    this.cargarProveedores();
+  }
 
-        next: (response) => {
+  cambiarEstado(proveedor: Proveedor): void {
+    this.limpiarAlertas();
+    proveedor.active = !proveedor.active;
+    const target = this.baseProveedores.find(p => p.id === proveedor.id);
+    if (target) {
+      target.active = proveedor.active;
+    }
+    this.mensajeExito = `El proveedor ${proveedor.name} ahora está ${proveedor.active ? 'Activo' : 'Inactivo'}.`;
+    this.cargarProveedores();
+  }
 
-          this.mensajeExito =
-            response.message ||
-            'Proveedor creado correctamente';
-
-          this.mostrarFormulario = false;
-
-          this.cargarProveedores();
-
-        },
-
-        error: (error) => {
-
-          this.manejarError(error);
-
-        }
-
-      });
-
+  cancelar(): void {
+    this.mostrarFormulario = false;
+    this.errorFormulario = '';
   }
 
   // ==========================================
-  // VALIDACIÓN
+  // HELPERS Y VALIDACIONES
   // ==========================================
-
   validarFormulario(): boolean {
-
     if (!this.formulario.taxId.trim()) {
-
-      this.errorFormulario =
-        'La identificación tributaria es obligatoria.';
-
+      this.errorFormulario = 'La identificación tributaria es obligatoria.';
       return false;
-
     }
 
     if (!this.formulario.name.trim()) {
-
-      this.errorFormulario =
-        'El nombre del proveedor es obligatorio.';
-
+      this.errorFormulario = 'El nombre del proveedor es obligatorio.';
       return false;
-
     }
 
     return true;
-
   }
 
-  // ==========================================
-  // CAMBIAR ESTADO
-  // ==========================================
-
-  cambiarEstado(proveedor: Proveedor): void {
-
-    const nuevoEstado =
-      !proveedor.active;
-
-    this.supplierService
-      .actualizarEstado(
-        proveedor.id,
-        nuevoEstado
-      )
-      .subscribe({
-
-        next: (response) => {
-
-          proveedor.active =
-            response.data.active;
-
-          this.mensajeExito =
-            response.message ||
-            'Estado del proveedor actualizado correctamente';
-
-        },
-
-        error: (error) => {
-
-          this.manejarError(error);
-
-        }
-
-      });
-
-  }
-
-  // ==========================================
-  // CERRAR FORMULARIO
-  // ==========================================
-
-  cancelar(): void {
-
-    this.mostrarFormulario = false;
-
+  private limpiarAlertas(): void {
     this.errorFormulario = '';
-
+    this.mensajeExito = '';
   }
-
-  // ==========================================
-  // ERRORES
-  // ==========================================
-
-  private manejarError(error: any): void {
-
-    console.error(
-      'Error en proveedores:',
-      error
-    );
-
-    if (error.status === 400) {
-
-      this.errorFormulario =
-        error.error?.message ||
-        'Los datos enviados no son válidos.';
-
-      return;
-
-    }
-
-    if (error.status === 403) {
-
-      this.errorFormulario =
-        'No tiene permisos para realizar esta operación.';
-
-      return;
-
-    }
-
-    if (error.status === 404) {
-
-      this.errorFormulario =
-        error.error?.message ||
-        'El proveedor no fue encontrado.';
-
-      return;
-
-    }
-
-    if (error.status === 409) {
-
-      this.errorFormulario =
-        error.error?.message ||
-        'El proveedor ya se encuentra registrado.';
-
-      return;
-
-    }
-
-    this.errorFormulario =
-      error.error?.message ||
-      'Ocurrió un error al procesar la solicitud.';
-
-  }
-
 }

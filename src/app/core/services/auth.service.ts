@@ -2,9 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { LoginData } from '../models/auth.model';
-import { clearStoredSession} from '../utils/session.util';
 
 export interface LoginRequest {
   email: string;
@@ -13,7 +10,7 @@ export interface LoginRequest {
 
 export interface UserSession {
   userId?: number | string;
-  name?: string;
+  name: string;
   email: string;
   role: string;
 }
@@ -25,55 +22,117 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   
-  // Utiliza el archivo environment o cae a la URL local por defecto
-  private readonly apiUrl = `${environment?.apiUrl || 'http://localhost:8080/api/v1'}/auth`;
+  private readonly apiUrl = 'http://localhost:8080/api/v1/auth';
 
   login(credentials: LoginRequest): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       tap((res) => {
         if (res) {
-          this.saveSession(res.data);
+          this.saveSession(res);
         }
       })
     );
   }
 
-  saveSession(data: LoginData): void {
-    localStorage.setItem('token', data.accessToken);
-    localStorage.setItem('tokenType', data.tokenType || 'Bearer');
-    localStorage.setItem('userId', String(data.userId));
-    localStorage.setItem('name', data.name);
-    localStorage.setItem('email', data.email);
-    localStorage.setItem('role', data.role);
+  saveSession(data: any): void {
+    if (!data) return;
+
+    // Normaliza el objeto si viene envuelto en una propiedad 'data'
+    const payload = data.data || data;
+
+    // 1. Extrae el token de autenticación
+    const token = 
+      payload.token || 
+      payload.accessToken || 
+      payload.jwt || 
+      payload.bearerToken || 
+      data.token || 
+      '';
+
+    if (!token) {
+      console.error('El backend no retornó un token válido:', data);
+      return;
+    }
+
+    // 2. Extrae la información del usuario (soporta inglés y español)
+    const userObj = payload.user || payload.usuario || payload;
+
+    const userId = userObj.userId ?? userObj.id ?? userObj.idUsuario;
+    const name = userObj.name || userObj.nombre || userObj.username || 'Usuario';
+    const email = userObj.email || userObj.correo || userObj.username || '';
+    
+    let rawRole = userObj.role || userObj.rol || userObj.roles?.[0] || userObj.authorities?.[0]?.authority || 'ADMINISTRADOR';
+    if (typeof rawRole === 'object' && rawRole?.name) {
+      rawRole = rawRole.name;
+    }
+    const cleanRole = String(rawRole).replace(/^ROLE_/, '').toUpperCase();
+
+    // 3. Persistencia en localStorage
+    localStorage.setItem('token', token);
+    localStorage.setItem('tokenType', payload.tokenType || 'Bearer');
+    if (userId !== undefined && userId !== null) localStorage.setItem('userId', String(userId));
+    localStorage.setItem('name', name);
+    localStorage.setItem('email', email);
+    localStorage.setItem('role', cleanRole);
+
+    // 4. Guarda el objeto JSON estructurado para el Dashboard
+    const userSession: UserSession = {
+      userId: userId ?? undefined,
+      name,
+      email,
+      role: cleanRole
+    };
+    
+    localStorage.setItem('user', JSON.stringify(userSession));
+  }
+
+  logout(): void {
+    this.clearStoredSession();
+    void this.router.navigate(['/login']);
+  }
+
+  private clearStoredSession(): void {
+    localStorage.clear();
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    return token && token !== 'undefined' && token !== 'null' && token.trim() !== '' ? token : null;
   }
 
   getUser(): UserSession | null {
     const userStr = localStorage.getItem('user');
-    if (!userStr) return null;
-    try {
-      return JSON.parse(userStr);
-    } catch {
-      return null;
+    if (userStr) {
+      try {
+        const parsed = JSON.parse(userStr);
+        if (parsed && typeof parsed === 'object') return parsed as UserSession;
+      } catch {
+        // En caso de error al deserializar, pasa al fallback
+      }
     }
+
+    // Fallback con claves individuales
+    const token = this.getToken();
+    if (!token) return null;
+
+    return {
+      userId: localStorage.getItem('userId') || undefined,
+      name: localStorage.getItem('name') || 'Usuario',
+      email: localStorage.getItem('email') || '',
+      role: localStorage.getItem('role') || 'ADMINISTRADOR'
+    };
   }
 
   getRole(): string | null {
-    const user = this.getUser();
-    return user?.role || localStorage.getItem('role') || null;
+    return this.getUser()?.role || localStorage.getItem('role') || null;
   }
 
   getName(): string {
-    const user = this.getUser();
-    return user?.name || localStorage.getItem('name') || 'Usuario';
+    return this.getUser()?.name || localStorage.getItem('name') || 'Usuario';
   }
 
   getEmail(): string {
-    const user = this.getUser();
-    return user?.email || localStorage.getItem('email') || '';
+    return this.getUser()?.email || localStorage.getItem('email') || '';
   }
 
   isLoggedIn(): boolean {
@@ -81,12 +140,9 @@ export class AuthService {
   }
 
   hasRole(roles: string[]): boolean {
-    const role = this.getRole();
-    return !!role && roles.includes(role);
-  }
-
-    logout(): void {
-    clearStoredSession();
-    void this.router.navigate(['/login']);
+    const currentRole = this.getRole();
+    if (!currentRole) return false;
+    const normalizedRoles = roles.map(r => r.toUpperCase().replace(/^ROLE_/, ''));
+    return normalizedRoles.includes(currentRole.toUpperCase());
   }
 }

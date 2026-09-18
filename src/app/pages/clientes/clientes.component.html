@@ -1,0 +1,181 @@
+<p>clientes works!</p>
+<div class="clientes-container">
+
+  <div class="header">
+    <div class="header-title">
+      <h2>Clientes</h2>
+      <p>Gestión y centralización de clientes para cotizaciones y ventas</p>
+    </div>
+
+    <button type="button" class="btn-primary" (click)="nuevoCliente()">
+      <span>+ Nuevo cliente</span>
+    </button>
+  </div>
+
+  @if (mensajeExito) {
+    <div class="alert alert-success">
+      <span>{{ mensajeExito }}</span>
+      <button type="button" class="btn-close-alert" (click)="mensajeExito = ''">✕</button>
+    </div>
+  }
+
+  @if (errorFormulario && !mostrarFormulario) {
+    <div class="alert alert-error">
+      <span>{{ errorFormulario }}</span>
+      <button type="button" class="btn-close-alert" (click)="errorFormulario = ''">✕</button>
+    </div>
+  }
+
+  <form [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" class="filters-card">
+    <div class="filter-item">
+      <label for="fTaxId">Documento</label>
+      <input id="fTaxId" type="text" formControlName="taxId" placeholder="Buscar por documento" />
+    </div>
+
+    <div class="filter-item">
+      <label for="fName">Nombre</label>
+      <input id="fName" type="text" formControlName="name" placeholder="Buscar por nombre" />
+    </div>
+
+    <div class="filter-item">
+      <label for="fType">Tipo de cliente</label>
+      <select id="fType" formControlName="type">
+        <option value="">Todos</option>
+        <option value="NATURAL">Persona Natural</option>
+        <option value="JURIDICO">Persona Jurídica</option>
+      </select>
+    </div>
+
+    <div class="filter-item">
+      <label for="fActive">Estado</label>
+      <select id="fActive" formControlName="active">
+        <option [ngValue]="null">Todos</option>
+        <option [value]="true">Activo</option>
+        <option [value]="false">Inactivo</option>
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button type="submit" class="btn-search">Buscar</button>
+      <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
+    </div>
+  </form>
+
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3>Lista de clientes</h3>
+      <span class="total-badge">Total: {{ totalElementos }}</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Documento</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (clientesFiltrados.length === 0) {
+            <tr>
+              <td colspan="6" class="empty-state">
+                No se encontraron clientes registrados.
+              </td>
+            </tr>
+          } @else {
+            @for (cliente of clientesFiltrados; track cliente.id) {
+              <tr>
+                <td>#{{ cliente.id }}</td>
+                <td>{{ cliente.taxId }}</td>
+                <td>{{ cliente.name }}</td>
+                <td>
+                  <span class="type-pill">
+                    {{ cliente.type === 'NATURAL' ? 'Natural' : 'Jurídica' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge" [class.active]="cliente.active" [class.inactive]="!cliente.active">
+                    {{ cliente.active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button type="button" class="btn-action" (click)="editarCliente(cliente)">Editar</button>
+                    <button type="button" class="btn-action" (click)="cambiarEstado(cliente)">
+                      {{ cliente.active ? 'Inactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPaginas > 0) {
+      <div class="pagination">
+        <span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span>
+        <div class="pagination-controls">
+          <button type="button" [disabled]="paginaActual === 0" (click)="cambiarPagina(paginaActual - 1)">Anterior</button>
+          <button type="button" [disabled]="paginaActual >= totalPaginas - 1" (click)="cambiarPagina(paginaActual + 1)">Siguiente</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (mostrarFormulario) {
+    <div class="modal-backdrop" (click)="cancelar()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ modoEdicion ? 'Editar cliente' : 'Nuevo cliente' }}</h3>
+          <button type="button" class="btn-close" (click)="cancelar()">✕</button>
+        </div>
+
+        @if (errorFormulario) {
+          <div class="alert alert-error">
+            <span>{{ errorFormulario }}</span>
+          </div>
+        }
+
+        <form [formGroup]="clienteForm" (ngSubmit)="guardar()" class="modal-body">
+          <div class="form-group">
+            <label for="taxId">Documento / NIT *</label>
+            <input id="taxId" type="text" formControlName="taxId" placeholder="Ej. 1012345678" />
+          </div>
+
+          <div class="form-group">
+            <label for="name">Nombre completo / Razón social *</label>
+            <input id="name" type="text" formControlName="name" placeholder="Ej. Carlos Mendoza" />
+          </div>
+
+          <div class="form-group">
+            <label for="type">Tipo de cliente *</label>
+            <select id="type" formControlName="type">
+              <option value="NATURAL">Persona Natural</option>
+              <option value="JURIDICO">Persona Jurídica</option>
+            </select>
+          </div>
+
+          <div class="form-group checkbox-container">
+            <label>
+              <input type="checkbox" formControlName="active" />
+              <span>Cliente activo</span>
+            </label>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" (click)="cancelar()">Cancelar</button>
+            <button type="submit" class="btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+</div>
