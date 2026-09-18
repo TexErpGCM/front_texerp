@@ -1,131 +1,104 @@
 <div class="app-layout">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR LATERAL IZQUIERDO -->
   <aside class="sidebar">
 
-    <!-- LOGO -->
+    <!-- LOGO Y MARCA -->
     <div class="sidebar-brand">
-
-      <div class="logo">
-        T
+      <div class="brand-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
       </div>
-
-      <div class="brand-info">
-
-        <strong>
-          TexERP
-        </strong>
-
-        <span>
-          Integrations
-        </span>
-
+      <div class="brand-text">
+        <span class="brand-title">Creaciones Vanessa</span>
+        <span class="brand-subtitle">Textil & Moda Dynamics</span>
       </div>
-
     </div>
 
-
-    <!-- MENÚ -->
+    <!-- MENÚ DE NAVEGACIÓN -->
     <nav class="sidebar-menu">
 
       <!-- DASHBOARD -->
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="active"
-      >
-
-        <span class="menu-icon">
-          📊
-        </span>
-
-        <span>
-          Dashboard
-        </span>
-
+      <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
+        <span class="menu-icon"></span>
+        <span class="menu-label">Dashboard</span>
       </a>
-
 
       <!-- USUARIOS -->
-      <a
-        routerLink="/usuario"
-        routerLinkActive="active"
-      >
-
-        <span class="menu-icon">
-          👥
-        </span>
-
-        <span>
-          Usuarios
-        </span>
-
+      <a routerLink="/usuario" routerLinkActive="active" class="menu-item">
+        <span class="menu-icon"></span>
+        <span class="menu-label">Usuarios</span>
       </a>
 
-      
-      <!-- Variantes producto -->
-      <a
-        routerLink="/variante"
-        routerLinkActive="active"
-      >
-
-        <span class="menu-icon">
-          👥
-        </span>
-
-        <span>
-          Variante producto
-        </span>
-
+      <!-- CLIENTES -->
+      <a routerLink="/clientes" routerLinkActive="active" class="menu-item">
+        <span class="menu-icon"></span>
+        <span class="menu-label">Clientes</span>
       </a>
 
-       <!--  Provedor -->
-      <a
-        routerLink="/Proveedor"
-        routerLinkActive="active"
-      >
+      <!-- BODEGAS -->
+      <a routerLink="/bodegas" routerLinkActive="active" class="menu-item">
+        <span class="menu-icon"></span>
+        <span class="menu-label">Bodegas</span>
+      </a>
 
-        <span class="menu-icon">
-          👥
-        </span>
+      <!-- VARIANTE PRODUCTO -->
+      <a routerLink="/variante" routerLinkActive="active" class="menu-item">
+        <span class="menu-icon"></span>
+        <span class="menu-label">Variante producto</span>
+      </a>
 
-        <span>
-         Proveedores
-        </span>
-
+      <!-- PROVEEDORES -->
+      <a routerLink="/Proveedor" routerLinkActive="active" class="menu-item">
+        <span class="menu-icon"></span>
+        <span class="menu-label">Proveedores</span>
       </a>
 
     </nav>
 
+    <!-- TARJETA INFORMATIVA INFERIOR DE LA SIDEBAR -->
+    <div class="sidebar-promo-card">
+      <div class="promo-content">
+        <span class="promo-icon">🧵</span>
+        <p>Tejemos un futuro más sostenible</p>
+      </div>
+    </div>
 
-    <!-- FOOTER -->
+    <!-- BOTÓN DE CERRAR SESIÓN -->
     <div class="sidebar-footer">
-
-      <button
-        type="button"
-        class="logout-button"
-        (click)="cerrarSesion()"
-      >
-
-        <span class="logout-icon">
-          🚪
-        </span>
-
-        <span>
-          Cerrar sesión
-        </span>
-
+      <button type="button" class="logout-button" (click)="cerrarSesion()">
+        <span class="logout-icon">🚪</span>
+        <span>Cerrar sesión</span>
       </button>
-
     </div>
 
   </aside>
 
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="main-wrapper">
 
-  <!-- CONTENIDO -->
-  <main class="main-content">
+    <!-- BARRA SUPERIOR AZUL OSCURO -->
+    <header class="top-header">
+      <div class="header-info">
+        <h1>Sistema de Gestión Textil</h1>
+        <p>Análisis integral y control operacional</p>
+      </div>
 
-    <router-outlet></router-outlet>
+      <div class="header-user-panel">
+        <div class="user-avatar">CV</div>
+        <div class="user-info">
+          <span class="user-name">Administrador</span>
+          <span class="user-role">Creaciones Vanessa</span>
+        </div>
+      </div>
+    </header>
 
-  </main>
+    <!-- ÁREA DE RUTAS HIJAS -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
 
 </div>

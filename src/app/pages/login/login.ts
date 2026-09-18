@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -13,16 +14,14 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './login.scss',
 })
 export class Login {
-togglePasswordVisibility() {
-throw new Error('Method not implemented.');
-}
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(4)]],
+    rememberMe: [false], // Solución al error 'Cannot find control with name: rememberMe'
   });
 
   cargando = false;
@@ -40,8 +39,14 @@ throw new Error('Method not implemented.');
     return control.invalid && (control.dirty || control.touched);
   }
 
+  // Solución al error 'Method not implemented'
+  togglePasswordVisibility(): void {
+    this.alternarContrasena();
+  }
+
   alternarContrasena(): void {
     this.mostrarContrasena = !this.mostrarContrasena;
+    this.showPassword = this.mostrarContrasena;
   }
 
   ingresar(): void {
@@ -80,3 +85,5 @@ throw new Error('Method not implemented.');
     }
   }
 }
+
+export { Login as LoginComponent };

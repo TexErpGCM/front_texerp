@@ -1,434 +1,263 @@
 <div class="proveedores-container">
 
   <!-- ====================================== -->
-  <!-- HEADER -->
+  <!-- HEADER DE PÁGINA -->
   <!-- ====================================== -->
-
   <div class="header">
-
-    <div>
+    <div class="header-title">
       <h2>Proveedores</h2>
-
-      <p>
-        Gestión de proveedores registrados
-      </p>
+      <p>Gestión de proveedores registrados</p>
     </div>
 
-    <button
-      type="button"
-      class="btn-primary"
-      (click)="nuevoProveedor()"
-    >
+    <button type="button" class="btn-primary" (click)="nuevoProveedor()">
       <i class="fa-solid fa-plus"></i>
-      Nuevo proveedor
+      <span>Nuevo proveedor</span>
     </button>
-
   </div>
 
-
   <!-- ====================================== -->
-  <!-- MENSAJE ÉXITO -->
+  <!-- NOTIFICACIONES Y ALERTAS -->
   <!-- ====================================== -->
-
   @if (mensajeExito) {
-
-    <div class="alert success">
-
-      <i class="fa-solid fa-circle-check"></i>
-
-      <span>
-        {{ mensajeExito }}
-      </span>
-
-      <button
-        type="button"
-        (click)="mensajeExito = ''"
-      >
+    <div class="alert alert-success">
+      <i class="fa-solid fa-circle-check alert-icon"></i>
+      <span class="alert-text">{{ mensajeExito }}</span>
+      <button type="button" class="btn-close-alert" (click)="mensajeExito = ''">
         <i class="fa-solid fa-xmark"></i>
       </button>
-
     </div>
-
   }
 
+  @if (errorFormulario && !mostrarFormulario) {
+    <div class="alert alert-error">
+      <i class="fa-solid fa-circle-exclamation alert-icon"></i>
+      <span class="alert-text">{{ errorFormulario }}</span>
+      <button type="button" class="btn-close-alert" (click)="errorFormulario = ''">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  }
 
   <!-- ====================================== -->
-  <!-- FILTROS -->
+  <!-- BARRA DE FILTROS ALINEADA -->
   <!-- ====================================== -->
-
-  <div class="filters">
-
-    <div class="filter-group">
-
-      <label for="taxId">
-        Identificación
-      </label>
-
-      <input
-        id="taxId"
-        type="text"
-        [(ngModel)]="filtroTaxId"
-        placeholder="Buscar por identificación"
-        (keyup.enter)="buscar()"
-      />
-
+  <div class="filters-card">
+    <div class="filter-item">
+      <label for="taxId">Identificación</label>
+      <div class="input-icon-wrapper">
+        <input
+          id="taxId"
+          type="text"
+          [(ngModel)]="filtroTaxId"
+          placeholder="Buscar por identificación"
+          (keyup.enter)="buscar()"
+        />
+      </div>
     </div>
 
-
-    <div class="filter-group">
-
-      <label for="nombre">
-        Nombre
-      </label>
-
-      <input
-        id="nombre"
-        type="text"
-        [(ngModel)]="filtroNombre"
-        placeholder="Buscar por nombre"
-        (keyup.enter)="buscar()"
-      />
-
+    <div class="filter-item">
+      <label for="nombre">Nombre</label>
+      <div class="input-icon-wrapper">
+        <input
+          id="nombre"
+          type="text"
+          [(ngModel)]="filtroNombre"
+          placeholder="Buscar por nombre"
+          (keyup.enter)="buscar()"
+        />
+      </div>
     </div>
 
+    <div class="filter-item">
+      <label for="estado">Estado</label>
 
-    <div class="filter-group">
-
-      <label for="estado">
-        Estado
-      </label>
-
-      <select
-        id="estado"
-        [(ngModel)]="filtroActivo"
-      >
-
-        <option [ngValue]="undefined">
-          Todos
-        </option>
-
-        <option [ngValue]="true">
-          Activos
-        </option>
-
-        <option [ngValue]="false">
-          Inactivos
-        </option>
-
+      <select id="estado" [(ngModel)]="filtroActivo">
+        <option [ngValue]="undefined">Todos</option>
+        <option [ngValue]="true">Activos</option>
+        <option [ngValue]="false">Inactivos</option>
       </select>
-
     </div>
-
 
     <div class="filter-actions">
-
-      <button
-        type="button"
-        class="btn-search"
-        (click)="buscar()"
-      >
+      <button type="button" class="btn-search" (click)="buscar()">
         <i class="fa-solid fa-magnifying-glass"></i>
-        Buscar
+        <span>Buscar</span>
       </button>
 
-      <button
-        type="button"
-        class="btn-clear"
-        (click)="limpiarFiltros()"
-      >
+      <button type="button" class="btn-clear" (click)="limpiarFiltros()">
         <i class="fa-solid fa-rotate-left"></i>
-        Limpiar
+        <span>Limpiar</span>
       </button>
-
     </div>
-
   </div>
 
-
   <!-- ====================================== -->
-  <!-- TABLA -->
+  <!-- CARD DE TABLA Y RESULTADOS -->
   <!-- ====================================== -->
-
   <div class="table-card">
-
-    <div class="table-header">
-
+    <div class="table-card-header">
       <div>
-
-        <h3>
-          Lista de proveedores
-        </h3>
-
-        <span>
-          Total: {{ totalElementos }}
-        </span>
-
+        <h3>Lista de proveedores</h3>
+        <span class="total-badge">Total: {{ totalElementos }}</span>
       </div>
-
     </div>
-
 
     <div class="table-wrapper">
-
       <table>
-
         <thead>
-
           <tr>
-
-            <th>ID</th>
-
+            <th class="col-id">ID</th>
             <th>Identificación</th>
-
             <th>Nombre</th>
-
             <th>Estado</th>
-
-            <th>Acciones</th>
-
+            <th class="col-actions">Acciones</th>
           </tr>
-
         </thead>
 
-
         <tbody>
-
-          @if (proveedores.length === 0) {
-
+          @if (cargando) {
             <tr>
-
-              <td
-                colspan="5"
-                class="empty"
-              >
-
-                <i class="fa-solid fa-box-open"></i>
-
-                <span>
-                  No se encontraron proveedores.
-                </span>
-
-              </td>
-
-            </tr>
-
-          }
-
-
-          @for (
-            proveedor of proveedores;
-            track proveedor.id
-          ) {
-
-            <tr>
-
-              <td>
-                {{ proveedor.id }}
-              </td>
-
-              <td>
-                {{ proveedor.taxId }}
-              </td>
-
-              <td>
-                <strong>
-                  {{ proveedor.name }}
-                </strong>
-              </td>
-
-              <td>
-
-                @if (proveedor.active) {
-
-                  <span class="status active">
-                    Activo
-                  </span>
-
-                } @else {
-
-                  <span class="status inactive">
-                    Inactivo
-                  </span>
-
-                }
-
-              </td>
-
-              <td>
-
-                <div class="actions">
-
-                  <button
-                    type="button"
-                    class="btn-edit"
-                    title="Editar"
-                    (click)="editar(proveedor)"
-                  >
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    class="btn-status"
-                    [class.activate]="!proveedor.active"
-                    [class.deactivate]="proveedor.active"
-                    [title]="
-                      proveedor.active
-                        ? 'Inactivar'
-                        : 'Activar'
-                    "
-                    (click)="cambiarEstado(proveedor)"
-                  >
-
-                    @if (proveedor.active) {
-
-                      <i class="fa-solid fa-ban"></i>
-
-                    } @else {
-
-                      <i class="fa-solid fa-check"></i>
-
-                    }
-
-                  </button>
-
+              <td colspan="5" class="empty-state">
+                <div class="spinner-container">
+                  <i class="fa-solid fa-spinner fa-spin spinner-icon"></i>
+                  <span>Cargando proveedores...</span>
                 </div>
-
               </td>
-
             </tr>
+          } @else if (proveedores.length === 0) {
+            <tr>
+              <td colspan="5" class="empty-state">
+                <div class="empty-container">
+                  <i class="fa-solid fa-box-open empty-icon"></i>
+                  <p class="empty-title">No se encontraron proveedores</p>
+                  <p class="empty-subtitle">Intenta ajustando los filtros de búsqueda</p>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (proveedor of proveedores; track proveedor.id) {
+              <tr>
+                <td class="col-id font-mono">#{{ proveedor.id }}</td>
+                <td class="font-medium">{{ proveedor.taxId }}</td>
+                <td>
+                  <span class="supplier-name">{{ proveedor.name }}</span>
+                </td>
+                <td>
+                  @if (proveedor.active) {
+                    <span class="status-badge active">
+                      <span class="status-dot"></span>
+                      Activo
+                    </span>
+                  } @else {
+                    <span class="status-badge inactive">
+                      <span class="status-dot"></span>
+                      Inactivo
+                    </span>
+                  }
+                </td>
+                <td class="col-actions">
+                  <div class="action-buttons">
+                    <button
+                      type="button"
+                      class="btn-action edit"
+                      title="Editar proveedor"
+                      (click)="editar(proveedor)"
+                    >
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
 
+                    <button
+                      type="button"
+                      class="btn-action status"
+                      [class.activate]="!proveedor.active"
+                      [class.deactivate]="proveedor.active"
+                      [title]="proveedor.active ? 'Inactivar' : 'Activar'"
+                      (click)="cambiarEstado(proveedor)"
+                    >
+                      @if (proveedor.active) {
+                        <i class="fa-solid fa-ban"></i>
+                      } @else {
+                        <i class="fa-solid fa-check"></i>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
           }
-
         </tbody>
-
       </table>
-
     </div>
-
 
     <!-- ==================================== -->
     <!-- PAGINACIÓN -->
     <!-- ==================================== -->
-
-    @if (totalPaginas > 0) {
-
+    @if (totalPaginas > 0 && !cargando) {
       <div class="pagination">
-
-        <button
-          type="button"
-          [disabled]="paginaActual === 0"
-          (click)="cambiarPagina(paginaActual - 1)"
-        >
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-
-
-        <span>
-          Página
-          {{ paginaActual + 1 }}
-          de
-          {{ totalPaginas }}
+        <span class="pagination-info">
+          Página <strong>{{ paginaActual + 1 }}</strong> de <strong>{{ totalPaginas }}</strong>
         </span>
 
-
-        <button
-          type="button"
-          [disabled]="
-            paginaActual >= totalPaginas - 1
-          "
-          (click)="cambiarPagina(paginaActual + 1)"
-        >
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-
-      </div>
-
-    }
-
-  </div>
-
-
-  <!-- ====================================== -->
-  <!-- FORMULARIO -->
-  <!-- ====================================== -->
-
-  @if (mostrarFormulario) {
-
-    <div
-      class="modal-backdrop"
-      (click)="cancelar()"
-    >
-
-      <div
-        class="modal"
-        (click)="$event.stopPropagation()"
-      >
-
-        <div class="modal-header">
-
-          <div>
-
-            <h3>
-              {{
-                modoEdicion
-                  ? 'Editar proveedor'
-                  : 'Nuevo proveedor'
-              }}
-            </h3>
-
-            <p>
-              {{
-                modoEdicion
-                  ? 'Actualiza la información del proveedor'
-                  : 'Registra un nuevo proveedor'
-              }}
-            </p>
-
-          </div>
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="btn-page"
+            [disabled]="paginaActual === 0"
+            (click)="cambiarPagina(paginaActual - 1)"
+            title="Página anterior"
+          >
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
 
           <button
             type="button"
-            class="btn-close"
-            (click)="cancelar()"
+            class="btn-page"
+            [disabled]="paginaActual >= totalPaginas - 1"
+            (click)="cambiarPagina(paginaActual + 1)"
+            title="Página siguiente"
           >
-            <i class="fa-solid fa-xmark"></i>
+            <i class="fa-solid fa-chevron-right"></i>
           </button>
-
         </div>
+      </div>
+    }
+  </div>
 
-
-        <!-- ERROR -->
-
-        @if (errorFormulario) {
-
-          <div class="alert error">
-
-            <i class="fa-solid fa-circle-exclamation"></i>
-
-            <span>
-              {{ errorFormulario }}
-            </span>
-
+  <!-- ====================================== -->
+  <!-- MODAL DE CREACIÓN / EDICIÓN -->
+  <!-- ====================================== -->
+  @if (mostrarFormulario) {
+    <div class="modal-backdrop" (click)="cancelar()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h3>{{ modoEdicion ? 'Editar proveedor' : 'Nuevo proveedor' }}</h3>
+            <p>
+              {{
+                modoEdicion
+                  ? 'Actualiza los datos del proveedor seleccionado'
+                  : 'Completa la información para registrar un proveedor'
+              }}
+            </p>
           </div>
 
+          <button type="button" class="btn-close" (click)="cancelar()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        @if (errorFormulario) {
+          <div class="alert alert-error modal-alert">
+            <i class="fa-solid fa-circle-exclamation alert-icon"></i>
+            <span class="alert-text">{{ errorFormulario }}</span>
+          </div>
         }
 
-
-        <!-- FORM -->
-
-        <form
-          #proveedorForm="ngForm"
-          (ngSubmit)="guardar()"
-        >
-
+        <form #proveedorForm="ngForm" (ngSubmit)="guardar()" class="modal-body">
           <div class="form-group">
-
             <label for="formTaxId">
-              Identificación tributaria
-              <span>*</span>
+              Identificación tributaria <span class="required">*</span>
             </label>
-
             <input
               id="formTaxId"
               name="taxId"
@@ -438,17 +267,12 @@
               required
               placeholder="Ej. 900123456-7"
             />
-
           </div>
 
-
           <div class="form-group">
-
             <label for="formName">
-              Nombre del proveedor
-              <span>*</span>
+              Nombre del proveedor <span class="required">*</span>
             </label>
-
             <input
               id="formName"
               name="name"
@@ -456,38 +280,26 @@
               [(ngModel)]="formulario.name"
               maxlength="150"
               required
-              placeholder="Nombre del proveedor"
+              placeholder="Ej. Comercializadora ABC S.A.S."
             />
-
           </div>
 
-
-          <div class="form-group checkbox-group">
-
-            <label>
-
+          <div class="form-group checkbox-container">
+            <label class="custom-checkbox">
               <input
                 name="active"
                 type="checkbox"
                 [(ngModel)]="formulario.active"
               />
-
-              <span>
-                Proveedor activo
-              </span>
-
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Proveedor activo en el sistema</span>
             </label>
-
           </div>
 
-
-          <!-- BOTONES -->
-
-          <div class="modal-actions">
-
+          <div class="modal-footer">
             <button
               type="button"
-              class="btn-cancel"
+              class="btn-secondary"
               (click)="cancelar()"
               [disabled]="guardando"
             >
@@ -499,35 +311,18 @@
               class="btn-primary"
               [disabled]="guardando"
             >
-
               @if (guardando) {
-
                 <i class="fa-solid fa-spinner fa-spin"></i>
-
-                Guardando...
-
+                <span>Guardando...</span>
               } @else {
-
-                <i class="fa-solid fa-save"></i>
-
-                {{
-                  modoEdicion
-                    ? 'Actualizar'
-                    : 'Guardar'
-                }}
-
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</span>
               }
-
             </button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
-
   }
 
 </div>
