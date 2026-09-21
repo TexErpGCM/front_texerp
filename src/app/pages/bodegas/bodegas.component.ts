@@ -1,190 +1,357 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject
+} from '@angular/core';
 
-export interface Bodega {
-  id: number;
-  code: string;
-  name: string;
-  location: string;
-  active: boolean;
-  hasMovements: boolean;
-}
+import {
+  CommonModule
+} from '@angular/common';
+
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
+
+import {
+  finalize
+} from 'rxjs';
+
+import {
+  BodegaService,
+  Bodega,
+  CrearBodegaRequest
+} from '../../core/services/bodega.service';
 
 @Component({
   selector: 'app-bodegas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule
+  ],
   templateUrl: './bodegas.component.html',
   styleUrl: './bodegas.component.scss'
 })
 export class BodegasComponent implements OnInit {
+
   private fb = inject(FormBuilder);
+  private bodegaService = inject(BodegaService);
+  private cdr = inject(ChangeDetectorRef);
 
-  baseBodegas: Bodega[] = [
-    { id: 1, code: 'BOD-01', name: 'Bodega Principal Central', location: 'Planta Principal - Zona Norte', active: true, hasMovements: true },
-    { id: 2, code: 'BOD-02', name: 'Almacén Mitería y Telas', location: 'Edificio B - Nivel 2', active: true, hasMovements: false },
-    { id: 3, code: 'BOD-03', name: 'Depósito Producto Terminado', location: 'Zona Franca - Bodega 12', active: false, hasMovements: true }
-  ];
-
+  bodegas: Bodega[] = [];
   bodegasFiltradas: Bodega[] = [];
+
   cargando = false;
+  guardando = false;
+
   mostrarFormulario = false;
   modoEdicion = false;
   bodegaEditandoId: number | null = null;
 
   mensajeExito = '';
-  errorFormulario = '';
+  mensajeError = '';
 
   filtroForm!: FormGroup;
   bodegaForm!: FormGroup;
 
   paginaActual = 0;
-  tamanoPagina = 5;
+  tamanioPagina = 20;
+
   totalPaginas = 0;
   totalElementos = 0;
 
   ngOnInit(): void {
     this.inicializarFormularios();
-    this.aplicarFiltros();
+    this.cargarBodegas();
   }
 
   private inicializarFormularios(): void {
+
     this.filtroForm = this.fb.group({
       code: [''],
       name: [''],
+      location: [''],
       active: [null]
     });
 
     this.bodegaForm = this.fb.group({
-      code: ['', [Validators.required, Validators.maxLength(20)]],
-      name: ['', [Validators.required, Validators.maxLength(100)]],
-      location: ['', [Validators.required, Validators.maxLength(150)]],
-      active: [true]
+      code: [
+        '',
+        [
+          Validators.required,
+          Validators.maxLength(50)
+        ]
+      ],
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.maxLength(150)
+        ]
+      ],
+      location: [
+        '',
+        [
+          Validators.required,
+          Validators.maxLength(200)
+        ]
+      ]
+    });
+  }
+
+  cargarBodegas(): void {
+
+    this.cargando = true;
+    this.mensajeError = '';
+
+    const filtros = this.filtroForm.value;
+
+    this.bodegaService.listar(
+      {
+        code: filtros.code,
+        name: filtros.name,
+        location: filtros.location,
+        active: filtros.active
+      },
+      this.paginaActual,
+      this.tamanioPagina
+    )
+    .pipe(
+      finalize(() => {
+        this.cargando = false;
+        this.cdr.detectChanges();
+      })
+    )
+    .subscribe({
+      next: (respuesta) => {
+
+        if (!respuesta.success) {
+          this.mensajeError =
+            respuesta.message || 'No fue posible cargar las bodegas.';
+          return;
+        }
+
+        const pagina = respuesta.data;
+
+        this.bodegas = pagina.content;
+        this.bodegasFiltradas = pagina.content;
+
+        this.paginaActual = pagina.page;
+        this.tamanioPagina = pagina.size;
+        this.totalElementos = pagina.totalElements;
+        this.totalPaginas = pagina.totalPages;
+      },
+
+      error: (error) => {
+        this.mensajeError = this.obtenerMensajeError(
+          error,
+          'No fue posible cargar las bodegas.'
+        );
+      }
     });
   }
 
   aplicarFiltros(): void {
-    const { code, name, active } = this.filtroForm.value;
-    let resultado = [...this.baseBodegas];
-
-    if (code) {
-      resultado = resultado.filter(b => b.code.toLowerCase().includes(code.toLowerCase().trim()));
-    }
-    if (name) {
-      resultado = resultado.filter(b => b.name.toLowerCase().includes(name.toLowerCase().trim()));
-    }
-    if (active !== null && active !== '' && active !== undefined) {
-      const isActivo = active === 'true' || active === true;
-      resultado = resultado.filter(b => b.active === isActivo);
-    }
-
-    this.totalElementos = resultado.length;
-    this.totalPaginas = Math.ceil(this.totalElementos / this.tamanoPagina) || 1;
     this.paginaActual = 0;
-
-    const inicio = this.paginaActual * this.tamanoPagina;
-    this.bodegasFiltradas = resultado.slice(inicio, inicio + this.tamanoPagina);
+    this.cargarBodegas();
   }
 
   limpiarFiltros(): void {
-    this.filtroForm.reset({ code: '', name: '', active: null });
-    this.aplicarFiltros();
+
+    this.filtroForm.reset({
+      code: '',
+      name: '',
+      location: '',
+      active: null
+    });
+
+    this.paginaActual = 0;
+    this.cargarBodegas();
+  }
+
+  cambiarPagina(pagina: number): void {
+
+    if (
+      pagina < 0 ||
+      pagina >= this.totalPaginas ||
+      pagina === this.paginaActual
+    ) {
+      return;
+    }
+
+    this.paginaActual = pagina;
+    this.cargarBodegas();
   }
 
   nuevaBodega(): void {
+
     this.modoEdicion = false;
     this.bodegaEditandoId = null;
-    this.errorFormulario = '';
-    this.bodegaForm.reset({ code: '', name: '', location: '', active: true });
+
+    this.mensajeError = '';
+
+    this.bodegaForm.reset({
+      code: '',
+      name: '',
+      location: ''
+    });
+
     this.bodegaForm.get('code')?.enable();
+
     this.mostrarFormulario = true;
   }
 
   editarBodega(bodega: Bodega): void {
+
     this.modoEdicion = true;
     this.bodegaEditandoId = bodega.id;
-    this.errorFormulario = '';
+
+    this.mensajeError = '';
+
     this.bodegaForm.patchValue({
       code: bodega.code,
       name: bodega.name,
-      location: bodega.location,
-      active: bodega.active
+      location: bodega.location
     });
+
+    /*
+     * El código no se modifica en edición.
+     * Esto también evita cambiar la clave única
+     * definida en el backend.
+     */
     this.bodegaForm.get('code')?.disable();
+
     this.mostrarFormulario = true;
   }
 
   guardar(): void {
+
     if (this.bodegaForm.invalid) {
       this.bodegaForm.markAllAsTouched();
       return;
     }
 
-    const rawValues = this.bodegaForm.getRawValue();
+    this.guardando = true;
+    this.mensajeError = '';
 
-    const existeCodigo = this.baseBodegas.some(
-      b => b.code.trim().toUpperCase() === rawValues.code.trim().toUpperCase() && b.id !== this.bodegaEditandoId
-    );
+    const valores = this.bodegaForm.getRawValue();
 
-    if (existeCodigo) {
-      this.errorFormulario = 'HTTP 409 - El código de bodega ya se encuentra registrado.';
-      return;
-    }
+    const request: CrearBodegaRequest = {
+      code: valores.code.trim(),
+      name: valores.name.trim(),
+      location: valores.location.trim()
+    };
 
-    if (this.modoEdicion && this.bodegaEditandoId) {
-      const index = this.baseBodegas.findIndex(b => b.id === this.bodegaEditandoId);
-      if (index !== -1) {
-        this.baseBodegas[index] = {
-          ...this.baseBodegas[index],
-          name: rawValues.name,
-          location: rawValues.location,
-          active: rawValues.active
-        };
-      }
-      this.mensajeExito = 'Bodega actualizada correctamente.';
-    } else {
-      const nueva: Bodega = {
-        id: Date.now(),
-        code: rawValues.code.trim().toUpperCase(),
-        name: rawValues.name,
-        location: rawValues.location,
-        active: rawValues.active,
-        hasMovements: false
-      };
-      this.baseBodegas.unshift(nueva);
-      this.mensajeExito = 'HTTP 201 - Bodega registrada con éxito.';
-    }
+    const peticion = this.modoEdicion && this.bodegaEditandoId
+      ? this.bodegaService.actualizar(
+          this.bodegaEditandoId,
+          request
+        )
+      : this.bodegaService.crear(request);
 
-    this.mostrarFormulario = false;
-    this.aplicarFiltros();
+    peticion
+      .pipe(
+        finalize(() => {
+          this.guardando = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (respuesta) => {
+
+          if (!respuesta.success) {
+            this.mensajeError =
+              respuesta.message || 'No fue posible guardar la bodega.';
+            return;
+          }
+
+          this.mostrarFormulario = false;
+
+          this.mensajeExito = respuesta.message ||
+            (
+              this.modoEdicion
+                ? 'Bodega actualizada correctamente.'
+                : 'Bodega creada correctamente.'
+            );
+
+          this.cargarBodegas();
+        },
+
+        error: (error) => {
+          this.mensajeError = this.obtenerMensajeError(
+            error,
+            'No fue posible guardar la bodega.'
+          );
+        }
+      });
   }
 
   cambiarEstado(bodega: Bodega): void {
-    bodega.active = !bodega.active;
-    const target = this.baseBodegas.find(b => b.id === bodega.id);
-    if (target) {
-      target.active = bodega.active;
-    }
 
-    if (!bodega.active && bodega.hasMovements) {
-      this.mensajeExito = `Bodega ${bodega.code} inactivada. Se conserva su trazabilidad e historial de movimientos (CA-3).`;
-    } else {
-      this.mensajeExito = `Estado de la bodega ${bodega.code} cambiado a ${bodega.active ? 'Activo' : 'Inactivo'}.`;
-    }
-    this.aplicarFiltros();
-  }
+    const nuevoEstado = !bodega.active;
 
-  cambiarPagina(pagina: number): void {
-    if (pagina >= 0 && pagina < this.totalPaginas) {
-      this.paginaActual = pagina;
-      const inicio = this.paginaActual * this.tamanoPagina;
-      this.bodegasFiltradas = this.baseBodegas.slice(inicio, inicio + this.tamanoPagina);
-    }
+    this.mensajeError = '';
+
+    this.bodegaService
+      .cambiarEstado(bodega.id, nuevoEstado)
+      .pipe(
+        finalize(() => {
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (respuesta) => {
+
+          if (!respuesta.success) {
+            this.mensajeError =
+              respuesta.message ||
+              'No fue posible actualizar el estado de la bodega.';
+            return;
+          }
+
+          this.mensajeExito = respuesta.message ||
+            'Estado de la bodega actualizado correctamente.';
+
+          this.cargarBodegas();
+        },
+
+        error: (error) => {
+          this.mensajeError = this.obtenerMensajeError(
+            error,
+            'No fue posible actualizar el estado de la bodega.'
+          );
+        }
+      });
   }
 
   cancelar(): void {
+
     this.mostrarFormulario = false;
-    this.errorFormulario = '';
+    this.mensajeError = '';
+
+    this.bodegaForm.reset({
+      code: '',
+      name: '',
+      location: ''
+    });
+
+    this.bodegaForm.get('code')?.enable();
+  }
+
+  private obtenerMensajeError(
+    error: any,
+    mensajeDefault: string
+  ): string {
+
+    return (
+      error?.error?.message ||
+      error?.error?.data?.message ||
+      error?.message ||
+      mensajeDefault
+    );
   }
 }

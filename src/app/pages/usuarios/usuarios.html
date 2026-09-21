@@ -31,11 +31,6 @@
       </button>
 
     </header>
-
-
-    <!-- =====================================================
-         ERROR GENERAL
-         ===================================================== -->
     @if (mensajeError && !mostrarFormulario && !usuarioSeleccionado) {
 
       <div
@@ -51,10 +46,6 @@
 
     }
 
-
-    <!-- =====================================================
-         FILTROS
-         ===================================================== -->
     <section class="filters">
 
       <!-- BUSCAR -->
@@ -178,19 +169,6 @@
 
       </div>
 
-
-      <!-- TOTAL -->
-      <div class="total">
-
-        <span>
-          Total:
-        </span>
-
-        <strong>
-          {{ usuariosFiltrados.length }}
-        </strong>
-
-      </div>
 
     </section>
 

@@ -1,181 +1,793 @@
-<p>clientes works!</p>
-<div class="clientes-container">
+<main class="page">
 
-  <div class="header">
-    <div class="header-title">
-      <h2>Clientes</h2>
-      <p>Gestión y centralización de clientes para cotizaciones y ventas</p>
-    </div>
+  <section class="clientes">
 
-    <button type="button" class="btn-primary" (click)="nuevoCliente()">
-      <span>+ Nuevo cliente</span>
-    </button>
-  </div>
+    <header class="page__header">
 
-  @if (mensajeExito) {
-    <div class="alert alert-success">
-      <span>{{ mensajeExito }}</span>
-      <button type="button" class="btn-close-alert" (click)="mensajeExito = ''">✕</button>
-    </div>
-  }
+      <div>
 
-  @if (errorFormulario && !mostrarFormulario) {
-    <div class="alert alert-error">
-      <span>{{ errorFormulario }}</span>
-      <button type="button" class="btn-close-alert" (click)="errorFormulario = ''">✕</button>
-    </div>
-  }
+        <span class="page__eyebrow">
+          TexERP
+        </span>
 
-  <form [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" class="filters-card">
-    <div class="filter-item">
-      <label for="fTaxId">Documento</label>
-      <input id="fTaxId" type="text" formControlName="taxId" placeholder="Buscar por documento" />
-    </div>
+        <h1 class="page__title">
+          Clientes
+        </h1>
 
-    <div class="filter-item">
-      <label for="fName">Nombre</label>
-      <input id="fName" type="text" formControlName="name" placeholder="Buscar por nombre" />
-    </div>
+        <p class="page__description">
+          Gestión y centralización de clientes para cotizaciones y ventas.
+        </p>
 
-    <div class="filter-item">
-      <label for="fType">Tipo de cliente</label>
-      <select id="fType" formControlName="type">
-        <option value="">Todos</option>
-        <option value="NATURAL">Persona Natural</option>
-        <option value="JURIDICO">Persona Jurídica</option>
-      </select>
-    </div>
-
-    <div class="filter-item">
-      <label for="fActive">Estado</label>
-      <select id="fActive" formControlName="active">
-        <option [ngValue]="null">Todos</option>
-        <option [value]="true">Activo</option>
-        <option [value]="false">Inactivo</option>
-      </select>
-    </div>
-
-    <div class="filter-actions">
-      <button type="submit" class="btn-search">Buscar</button>
-      <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
-    </div>
-  </form>
-
-  <div class="table-card">
-    <div class="table-card-header">
-      <h3>Lista de clientes</h3>
-      <span class="total-badge">Total: {{ totalElementos }}</span>
-    </div>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Documento</th>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          @if (clientesFiltrados.length === 0) {
-            <tr>
-              <td colspan="6" class="empty-state">
-                No se encontraron clientes registrados.
-              </td>
-            </tr>
-          } @else {
-            @for (cliente of clientesFiltrados; track cliente.id) {
-              <tr>
-                <td>#{{ cliente.id }}</td>
-                <td>{{ cliente.taxId }}</td>
-                <td>{{ cliente.name }}</td>
-                <td>
-                  <span class="type-pill">
-                    {{ cliente.type === 'NATURAL' ? 'Natural' : 'Jurídica' }}
-                  </span>
-                </td>
-                <td>
-                  <span class="status-badge" [class.active]="cliente.active" [class.inactive]="!cliente.active">
-                    {{ cliente.active ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button type="button" class="btn-action" (click)="editarCliente(cliente)">Editar</button>
-                    <button type="button" class="btn-action" (click)="cambiarEstado(cliente)">
-                      {{ cliente.active ? 'Inactivar' : 'Activar' }}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          }
-        </tbody>
-      </table>
-    </div>
-
-    @if (totalPaginas > 0) {
-      <div class="pagination">
-        <span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span>
-        <div class="pagination-controls">
-          <button type="button" [disabled]="paginaActual === 0" (click)="cambiarPagina(paginaActual - 1)">Anterior</button>
-          <button type="button" [disabled]="paginaActual >= totalPaginas - 1" (click)="cambiarPagina(paginaActual + 1)">Siguiente</button>
-        </div>
       </div>
-    }
-  </div>
 
-  @if (mostrarFormulario) {
-    <div class="modal-backdrop" (click)="cancelar()">
-      <div class="modal-card" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>{{ modoEdicion ? 'Editar cliente' : 'Nuevo cliente' }}</h3>
-          <button type="button" class="btn-close" (click)="cancelar()">✕</button>
+      <button
+        type="button"
+        class="button button--primary"
+        (click)="nuevoCliente()"
+      >
+        <i class="fi fi-sr-plus"></i>
+        <span>Nuevo cliente</span>
+      </button>
+
+    </header>
+
+    @if (mensajeExito) {
+
+      <div
+        class="alert alert--success"
+        role="status"
+      >
+
+        <i class="fi fi-sr-check-circle"></i>
+
+        <span>
+          {{ mensajeExito }}
+        </span>
+
+        <button
+          type="button"
+          class="icon-button"
+          title="Cerrar mensaje"
+          (click)="mensajeExito = ''"
+        >
+          <i class="fi fi-sr-cross-small"></i>
+        </button>
+
+      </div>
+
+    }
+
+    @if (mensajeError && !mostrarFormulario) {
+
+      <div
+        class="alert alert--error"
+        role="alert"
+      >
+
+        <i class="fi fi-sr-circle-exclamation"></i>
+
+        <span>
+          {{ mensajeError }}
+        </span>
+
+        <button
+          type="button"
+          class="icon-button"
+          title="Cerrar mensaje"
+          (click)="mensajeError = ''"
+        >
+          <i class="fi fi-sr-cross-small"></i>
+        </button>
+
+      </div>
+
+    }
+
+    <section class="filters">
+
+      <form
+        [formGroup]="filtroForm"
+        (ngSubmit)="aplicarFiltros()"
+        class="filters__form"
+      >
+
+        <div class="field">
+
+          <label for="fDocument">
+            Documento
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-search"></i>
+
+            <input
+              id="fDocument"
+              type="search"
+              formControlName="document"
+              placeholder="Documento..."
+            >
+
+          </div>
+
         </div>
 
-        @if (errorFormulario) {
-          <div class="alert alert-error">
-            <span>{{ errorFormulario }}</span>
+        <div class="field">
+
+          <label for="fName">
+            Buscar cliente
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-user"></i>
+
+            <input
+              id="fName"
+              type="search"
+              formControlName="name"
+              placeholder="Nombre del cliente..."
+            >
+
           </div>
+
+        </div>
+
+        <div class="field">
+
+          <label for="fType">
+            Tipo
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-users"></i>
+
+            <select
+              id="fType"
+              formControlName="type"
+            >
+
+              <option value="">
+                Todos los tipos
+              </option>
+
+              <option value="NATURAL">
+                Persona Natural
+              </option>
+
+              <option value="JURIDICO">
+                Persona Jurídica
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+        <div class="field">
+
+          <label for="fActive">
+            Estado
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-toggle-on"></i>
+
+            <select
+              id="fActive"
+              formControlName="active"
+            >
+
+              <option [ngValue]="null">
+                Todos los estados
+              </option>
+
+              <option [ngValue]="true">
+                Activos
+              </option>
+
+              <option [ngValue]="false">
+                Inactivos
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+        <div class="filter-actions">
+
+          <button
+            type="submit"
+            class="button button--primary"
+            title="Buscar"
+          >
+            <i class="fi fi-sr-search"></i>
+            <span>Buscar</span>
+          </button>
+
+          <button
+            type="button"
+            class="button button--secondary"
+            title="Limpiar filtros"
+            (click)="limpiarFiltros()"
+          >
+            <i class="fi fi-sr-rotate-right"></i>
+            <span>Limpiar</span>
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    @if (cargando) {
+
+      <section
+        class="state state--loading"
+        aria-live="polite"
+      >
+
+        <i class="fi fi-sr-refresh state__icon"></i>
+
+        <span>
+          Cargando clientes...
+        </span>
+
+      </section>
+
+    }
+
+    @if (!cargando) {
+
+      <section class="card">
+
+        <div class="table-container">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>ID</th>
+
+                <th>Cliente</th>
+
+                <th>Documento</th>
+
+                <th>Tipo</th>
+
+                <th>Estado</th>
+
+                <th class="actions-column">
+                  Acciones
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              @for (
+                cliente of clientesFiltrados;
+                track cliente.id
+              ) {
+
+                <tr>
+
+                  <td>
+
+                    <span class="client-id">
+                      #{{ cliente.id }}
+                    </span>
+
+                  </td>
+
+                  <td>
+
+                    <div class="client-info">
+
+                      <div
+                        class="avatar"
+                        aria-hidden="true"
+                      >
+                        {{ cliente.name.charAt(0).toUpperCase() }}
+                      </div>
+
+                      <strong>
+                        {{ cliente.name }}
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+                  <td>
+
+                    <span class="document">
+                      {{ cliente.document }}
+                    </span>
+
+                  </td>
+
+                  <td>
+
+                    <span class="status status--role">
+
+                      @if (cliente.type === 'NATURAL') {
+                        Persona Natural
+                      } @else {
+                        Persona Jurídica
+                      }
+
+                    </span>
+
+                  </td>
+
+                  <td>
+
+                    <button
+                      type="button"
+                      class="status"
+                      [class.status--active]="cliente.active"
+                      [class.status--inactive]="!cliente.active"
+                      [title]="
+                        cliente.active
+                          ? 'Desactivar cliente'
+                          : 'Activar cliente'
+                      "
+                      (click)="cambiarEstado(cliente)"
+                    >
+
+                      <span class="status__dot"></span>
+
+                      <span>
+                        {{
+                          cliente.active
+                            ? 'Activo'
+                            : 'Inactivo'
+                        }}
+                      </span>
+
+                    </button>
+
+                  </td>
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button
+                        type="button"
+                        class="icon-button"
+                        title="Editar cliente"
+                        (click)="editarCliente(cliente)"
+                      >
+                        <i class="fi fi-sr-pencil"></i>
+                      </button>
+
+                      <button
+                        type="button"
+                        class="icon-button"
+                        [title]="
+                          cliente.active
+                            ? 'Inactivar cliente'
+                            : 'Activar cliente'
+                        "
+                        (click)="cambiarEstado(cliente)"
+                      >
+
+                        @if (cliente.active) {
+
+                          <i class="fi fi-sr-lock"></i>
+
+                        } @else {
+
+                          <i class="fi fi-sr-unlock"></i>
+
+                        }
+
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              }
+
+              @if (clientesFiltrados.length === 0) {
+
+                <tr>
+
+                  <td colspan="6">
+
+                    <div class="state state--empty">
+
+                      <i class="fi fi-sr-users state__icon"></i>
+
+                      <h2>
+                        No hay clientes
+                      </h2>
+
+                      <p>
+                        No se encontraron clientes para mostrar.
+                      </p>
+
+                      <button
+                        type="button"
+                        class="button button--primary"
+                        (click)="nuevoCliente()"
+                      >
+                        <i class="fi fi-sr-plus"></i>
+                        <span>Crear cliente</span>
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        @if (totalPaginas > 0) {
+
+          <footer class="pagination">
+
+            <span>
+              Página {{ paginaActual + 1 }} de {{ totalPaginas }}
+            </span>
+
+            <div class="pagination__controls">
+
+              <button
+                type="button"
+                class="button button--secondary"
+                [disabled]="paginaActual === 0"
+                (click)="cambiarPagina(paginaActual - 1)"
+              >
+                <i class="fi fi-sr-angle-left"></i>
+                <span>Anterior</span>
+              </button>
+
+              <button
+                type="button"
+                class="button button--secondary"
+                [disabled]="paginaActual >= totalPaginas - 1"
+                (click)="cambiarPagina(paginaActual + 1)"
+              >
+                <span>Siguiente</span>
+                <i class="fi fi-sr-angle-right"></i>
+              </button>
+
+            </div>
+
+          </footer>
+
         }
 
-        <form [formGroup]="clienteForm" (ngSubmit)="guardar()" class="modal-body">
-          <div class="form-group">
-            <label for="taxId">Documento / NIT *</label>
-            <input id="taxId" type="text" formControlName="taxId" placeholder="Ej. 1012345678" />
+      </section>
+
+    }
+
+  </section>
+
+</main>
+
+@if (mostrarFormulario) {
+
+  <div
+    class="modal-overlay"
+    (click)="cancelar()"
+  >
+
+    <section
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="clienteModalTitle"
+      (click)="$event.stopPropagation()"
+    >
+
+      <header class="modal__header">
+
+        <div>
+
+          <span class="modal__eyebrow">
+            Clientes
+          </span>
+
+          <h2 id="clienteModalTitle">
+
+            @if (modoEdicion) {
+              Editar cliente
+            } @else {
+              Nuevo cliente
+            }
+
+          </h2>
+
+          <p>
+
+            @if (modoEdicion) {
+              Modifica la información del cliente.
+            } @else {
+              Registra un nuevo cliente en el sistema.
+            }
+
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="icon-button"
+          title="Cerrar"
+          [disabled]="guardando"
+          (click)="cancelar()"
+        >
+          <i class="fi fi-sr-cross-small"></i>
+        </button>
+
+      </header>
+
+      <div class="modal__body">
+
+        @if (mensajeError) {
+
+          <div
+            class="alert alert--error"
+            role="alert"
+          >
+
+            <i class="fi fi-sr-circle-exclamation"></i>
+
+            <span>
+              {{ mensajeError }}
+            </span>
+
+            <button
+              type="button"
+              class="icon-button"
+              title="Cerrar mensaje"
+              (click)="mensajeError = ''"
+            >
+              <i class="fi fi-sr-cross-small"></i>
+            </button>
+
           </div>
 
-          <div class="form-group">
-            <label for="name">Nombre completo / Razón social *</label>
-            <input id="name" type="text" formControlName="name" placeholder="Ej. Carlos Mendoza" />
-          </div>
+        }
 
-          <div class="form-group">
-            <label for="type">Tipo de cliente *</label>
-            <select id="type" formControlName="type">
-              <option value="NATURAL">Persona Natural</option>
-              <option value="JURIDICO">Persona Jurídica</option>
-            </select>
-          </div>
+        <form
+          [formGroup]="clienteForm"
+          (ngSubmit)="guardar()"
+          class="form-grid"
+        >
 
-          <div class="form-group checkbox-container">
-            <label>
-              <input type="checkbox" formControlName="active" />
-              <span>Cliente activo</span>
+          <div class="field">
+
+            <label for="document">
+              Documento / NIT
+              <span>*</span>
             </label>
+
+            <input
+              id="document"
+              type="text"
+              formControlName="document"
+              placeholder="Ej. 1012345678"
+            >
+
+            @if (
+              clienteForm.get('document')?.invalid &&
+              clienteForm.get('document')?.touched
+            ) {
+
+              <small class="field-error">
+                El documento es obligatorio.
+              </small>
+
+            }
+
           </div>
 
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" (click)="cancelar()">Cancelar</button>
-            <button type="submit" class="btn-primary">Guardar</button>
+          <div class="field">
+
+            <label for="type">
+              Tipo de cliente
+              <span>*</span>
+            </label>
+
+            <select
+              id="type"
+              formControlName="type"
+            >
+
+              <option value="NATURAL">
+                Persona Natural
+              </option>
+
+              <option value="JURIDICO">
+                Persona Jurídica
+              </option>
+
+            </select>
+
           </div>
+
+          <div class="field field--full">
+
+            <label for="name">
+              Nombre completo / Razón social
+              <span>*</span>
+            </label>
+
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              placeholder="Ej. Carlos Mendoza"
+            >
+
+            @if (
+              clienteForm.get('name')?.invalid &&
+              clienteForm.get('name')?.touched
+            ) {
+
+              <small class="field-error">
+                El nombre es obligatorio.
+              </small>
+
+            }
+
+          </div>
+
+          <div class="field">
+
+            <label for="email">
+              Correo electrónico
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="cliente@correo.com"
+            >
+
+            @if (
+              clienteForm.get('email')?.invalid &&
+              clienteForm.get('email')?.touched
+            ) {
+
+              <small class="field-error">
+                El correo electrónico no tiene un formato válido.
+              </small>
+
+            }
+
+          </div>
+
+          <div class="field">
+
+            <label for="phone">
+              Teléfono
+            </label>
+
+            <input
+              id="phone"
+              type="text"
+              formControlName="phone"
+              placeholder="Ej. 3001234567"
+            >
+
+          </div>
+
+          <div class="field">
+
+            <label for="classification">
+              Clasificación
+            </label>
+
+            <input
+              id="classification"
+              type="text"
+              formControlName="classification"
+              placeholder="Ej. Mayorista"
+            >
+
+          </div>
+
+          <div class="field field--checkbox">
+
+            <label for="clienteActivo">
+
+              <input
+                id="clienteActivo"
+                type="checkbox"
+                formControlName="active"
+                [disabled]="guardando"
+              >
+
+              <span>
+                {{
+                  clienteForm.get('active')?.value
+                    ? 'Cliente activo'
+                    : 'Cliente inactivo'
+                }}
+              </span>
+
+            </label>
+
+          </div>
+
+          <footer class="modal__footer">
+
+            <button
+              type="button"
+              class="button button--secondary"
+              [disabled]="guardando"
+              (click)="cancelar()"
+            >
+              <span>Cancelar</span>
+            </button>
+
+            <button
+              type="submit"
+              class="button button--primary"
+              [disabled]="guardando"
+            >
+
+              @if (guardando) {
+
+                <i class="fi fi-sr-refresh"></i>
+
+                <span>
+                  Guardando...
+                </span>
+
+              } @else {
+
+                <i class="fi fi-sr-disk"></i>
+
+                <span>
+
+                  @if (modoEdicion) {
+                    Guardar cambios
+                  } @else {
+                    Crear cliente
+                  }
+
+                </span>
+
+              }
+
+            </button>
+
+          </footer>
+
         </form>
-      </div>
-    </div>
-  }
 
-</div>
+      </div>
+
+    </section>
+
+  </div>
+
+}
