@@ -1,159 +1,601 @@
-<div class="bodegas-container">
+<main class="page">
 
-  <div class="header">
-    <div class="header-title">
-      <h2>Gestión de Bodegas</h2>
-      <p>Control de ubicaciones físicas e inventarios por depósito</p>
-    </div>
+  <section class="bodegas">
 
-    <button type="button" class="btn-primary" (click)="nuevaBodega()">
-      <span>+ Nueva Bodega</span>
-    </button>
-  </div>
+    <header class="page-header">
 
-  @if (mensajeExito) {
-    <div class="alert alert-success">
-      <span>{{ mensajeExito }}</span>
-      <button type="button" class="btn-close-alert" (click)="mensajeExito = ''">✕</button>
-    </div>
-  }
+      <div>
+        <span class="page-eyebrow">TexERP</span>
 
-  <form [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" class="filters-card">
-    <div class="filter-item">
-      <label for="fCode">Código</label>
-      <input id="fCode" type="text" formControlName="code" placeholder="Ej. BOD-01" />
-    </div>
+        <h1>Gestión de Bodegas</h1>
 
-    <div class="filter-item">
-      <label for="fName">Nombre</label>
-      <input id="fName" type="text" formControlName="name" placeholder="Buscar por nombre" />
-    </div>
-
-    <div class="filter-item">
-      <label for="fActive">Estado</label>
-      <select id="fActive" formControlName="active">
-        <option [ngValue]="null">Todos</option>
-        <option [value]="true">Activa</option>
-        <option [value]="false">Inactiva</option>
-      </select>
-    </div>
-
-    <div class="filter-actions">
-      <button type="submit" class="btn-search">Buscar</button>
-      <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
-    </div>
-  </form>
-
-  <div class="table-card">
-    <div class="table-card-header">
-      <h3>Ubicaciones y Depósitos</h3>
-      <span class="total-badge">Total: {{ totalElementos }}</span>
-    </div>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Ubicación Física</th>
-            <th>Trazabilidad</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          @if (bodegasFiltradas.length === 0) {
-            <tr>
-              <td colspan="6" class="empty-state">No se encontraron bodegas registradas.</td>
-            </tr>
-          } @else {
-            @for (bodega of bodegasFiltradas; track bodega.id) {
-              <tr>
-                <td><strong>{{ bodega.code }}</strong></td>
-                <td>{{ bodega.name }}</td>
-                <td>{{ bodega.location }}</td>
-                <td>
-                  <span class="trace-badge" [class.has-history]="bodega.hasMovements">
-                    {{ bodega.hasMovements ? 'Con Histórico' : 'Sin Movimientos' }}
-                  </span>
-                </td>
-                <td>
-                  <span class="status-badge" [class.active]="bodega.active" [class.inactive]="!bodega.active">
-                    {{ bodega.active ? 'Activa' : 'Inactiva' }}
-                  </span>
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button type="button" class="btn-action" (click)="editarBodega(bodega)">Editar</button>
-                    <button type="button" class="btn-action" (click)="cambiarEstado(bodega)">
-                      {{ bodega.active ? 'Inactivar' : 'Activar' }}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          }
-        </tbody>
-      </table>
-    </div>
-
-    @if (totalPaginas > 0) {
-      <div class="pagination">
-        <span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span>
-        <div class="pagination-controls">
-          <button type="button" [disabled]="paginaActual === 0" (click)="cambiarPagina(paginaActual - 1)">Anterior</button>
-          <button type="button" [disabled]="paginaActual >= totalPaginas - 1" (click)="cambiarPagina(paginaActual + 1)">Siguiente</button>
-        </div>
+        <p>
+          Administra las bodegas y sus ubicaciones físicas.
+        </p>
       </div>
-    }
-  </div>
 
-  @if (mostrarFormulario) {
-    <div class="modal-backdrop" (click)="cancelar()">
-      <div class="modal-card" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>{{ modoEdicion ? 'Editar Bodega' : 'Registrar Nueva Bodega' }}</h3>
-          <button type="button" class="btn-close" (click)="cancelar()">✕</button>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="nuevaBodega()">
+
+        <i class="fi fi-sr-plus"></i>
+
+        <span>Nueva Bodega</span>
+      </button>
+
+    </header>
+
+
+    @if (mensajeExito) {
+
+      <div class="alert alert-success">
+
+        <i class="fi fi-sr-check-circle"></i>
+
+        <span>{{ mensajeExito }}</span>
+
+        <button
+          type="button"
+          class="btn-close-alert"
+          (click)="mensajeExito = ''"
+          aria-label="Cerrar mensaje">
+
+          <i class="fi fi-sr-cross-small"></i>
+
+        </button>
+
+      </div>
+
+    }
+
+
+    @if (mensajeError && !mostrarFormulario) {
+
+      <div class="alert alert-error">
+
+        <i class="fi fi-sr-cross-circle"></i>
+
+        <span>{{ mensajeError }}</span>
+
+        <button
+          type="button"
+          class="btn-close-alert"
+          (click)="mensajeError = ''"
+          aria-label="Cerrar mensaje">
+
+          <i class="fi fi-sr-cross-small"></i>
+
+        </button>
+
+      </div>
+
+    }
+
+
+    <section class="filters">
+
+      <form
+        [formGroup]="filtroForm"
+        (ngSubmit)="aplicarFiltros()"
+        class="filters__form">
+
+        <div class="filter-item">
+
+          <label for="fCode">Código</label>
+
+          <input
+            id="fCode"
+            type="text"
+            formControlName="code"
+            placeholder="Ej. BOD-01">
+
         </div>
 
-        @if (errorFormulario) {
-          <div class="alert alert-error">
-            <span>{{ errorFormulario }}</span>
+
+        <div class="filter-item">
+
+          <label for="fName">Nombre</label>
+
+          <input
+            id="fName"
+            type="text"
+            formControlName="name"
+            placeholder="Buscar por nombre">
+
+        </div>
+
+
+        <div class="filter-item">
+
+          <label for="fLocation">Ubicación</label>
+
+          <input
+            id="fLocation"
+            type="text"
+            formControlName="location"
+            placeholder="Buscar ubicación">
+
+        </div>
+
+
+        <div class="filter-item">
+
+          <label for="fActive">Estado</label>
+
+          <select
+            id="fActive"
+            formControlName="active">
+
+            <option [ngValue]="null">
+              Todos
+            </option>
+
+            <option [ngValue]="true">
+              Activa
+            </option>
+
+            <option [ngValue]="false">
+              Inactiva
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="filter-actions">
+
+          <button
+            type="submit"
+            class="btn-search">
+
+            <i class="fi fi-sr-search"></i>
+
+            <span>Buscar</span>
+
+          </button>
+
+          <button
+            type="button"
+            class="btn-clear"
+            (click)="limpiarFiltros()">
+
+            Limpiar
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <section class="table-card">
+
+      <div class="table-card-header">
+
+        <div>
+
+          <span class="page-eyebrow">
+            Administración
+          </span>
+
+          <h2>Bodegas registradas</h2>
+
+        </div>
+
+        <span class="total-badge">
+          Total: {{ totalElementos }}
+        </span>
+
+      </div>
+
+
+      @if (cargando) {
+
+        <div class="loading-state">
+
+          <span>Cargando bodegas...</span>
+
+        </div>
+
+      } @else {
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>ID</th>
+                <th>Bodega</th>
+                <th>Código</th>
+                <th>Ubicación</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @if (bodegasFiltradas.length === 0) {
+
+                <tr>
+
+                  <td
+                    colspan="6"
+                    class="empty-state">
+
+                    No se encontraron bodegas registradas.
+
+                  </td>
+
+                </tr>
+
+              } @else {
+
+                @for (
+                  bodega of bodegasFiltradas;
+                  track bodega.id
+                ) {
+
+                  <tr>
+
+                    <td>
+                      <span class="warehouse-id">
+                        #{{ bodega.id }}
+                      </span>
+                    </td>
+
+
+                    <td>
+
+                      <div class="warehouse-info">
+
+                        <div class="avatar">
+                          <i class="fi fi-sr-box"></i>
+                        </div>
+
+                        <div>
+
+                          <strong>
+                            {{ bodega.name }}
+                          </strong>
+
+                          <span>
+                            {{ bodega.code }}
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                    </td>
+
+
+                    <td>
+                      <span class="code">
+                        {{ bodega.code }}
+                      </span>
+                    </td>
+
+
+                    <td>
+                      {{ bodega.location }}
+                    </td>
+
+
+                    <td>
+
+                      <span
+                        class="status"
+                        [class.status--active]="bodega.active"
+                        [class.status--inactive]="!bodega.active">
+
+                        {{ bodega.active ? 'Activa' : 'Inactiva' }}
+
+                      </span>
+
+                    </td>
+
+
+                    <td>
+
+                      <div class="action-buttons">
+
+                        <button
+                          type="button"
+                          class="btn-action"
+                          (click)="editarBodega(bodega)"
+                          title="Editar bodega">
+
+                          <i class="fi fi-sr-pencil"></i>
+
+                        </button>
+
+
+                        <button
+                          type="button"
+                          class="btn-action"
+                          (click)="cambiarEstado(bodega)"
+                          [title]="bodega.active ? 'Inactivar bodega' : 'Activar bodega'">
+
+                          <i
+                            [class]="bodega.active
+                              ? 'fi fi-sr-toggle-on'
+                              : 'fi fi-sr-toggle-off'">
+                          </i>
+
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                }
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        @if (totalPaginas > 0) {
+
+          <div class="pagination">
+
+            <span>
+              Página {{ paginaActual + 1 }}
+              de {{ totalPaginas }}
+            </span>
+
+
+            <div class="pagination-controls">
+
+              <button
+                type="button"
+                [disabled]="paginaActual === 0"
+                (click)="cambiarPagina(paginaActual - 1)">
+
+                Anterior
+
+              </button>
+
+
+              <button
+                type="button"
+                [disabled]="paginaActual >= totalPaginas - 1"
+                (click)="cambiarPagina(paginaActual + 1)">
+
+                Siguiente
+
+              </button>
+
+            </div>
+
           </div>
+
         }
 
-        <form [formGroup]="bodegaForm" (ngSubmit)="guardar()" class="modal-body">
-          <div class="form-group">
-            <label for="code">Código Único *</label>
-            <input id="code" type="text" formControlName="code" placeholder="Ej. BOD-01" />
+      }
+
+    </section>
+
+
+    @if (mostrarFormulario) {
+
+      <div
+        class="modal-backdrop"
+        (click)="cancelar()">
+
+
+        <div
+          class="modal-card"
+          (click)="$event.stopPropagation()">
+
+
+          <div class="modal-header">
+
+            <div>
+
+              <span class="page-eyebrow">
+                Bodegas
+              </span>
+
+              <h2>
+                {{ modoEdicion
+                  ? 'Editar Bodega'
+                  : 'Registrar Nueva Bodega' }}
+              </h2>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="btn-close"
+              (click)="cancelar()"
+              aria-label="Cerrar formulario">
+
+              <i class="fi fi-sr-cross-small"></i>
+
+            </button>
+
           </div>
 
-          <div class="form-group">
-            <label for="name">Nombre de la Bodega *</label>
-            <input id="name" type="text" formControlName="name" placeholder="Ej. Bodega Principal Central" />
-          </div>
 
-          <div class="form-group">
-            <label for="location">Ubicación Física *</label>
-            <input id="location" type="text" formControlName="location" placeholder="Ej. Planta Principal - Zona Norte" />
-          </div>
+          @if (mensajeError) {
 
-          <div class="form-group checkbox-container">
-            <label>
-              <input type="checkbox" formControlName="active" />
-              <span>Bodega Activa (Disponible para movimientos)</span>
-            </label>
-          </div>
+            <div class="alert alert-error">
 
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" (click)="cancelar()">Cancelar</button>
-            <button type="submit" class="btn-primary">Guardar</button>
-          </div>
-        </form>
+              <i class="fi fi-sr-cross-circle"></i>
+
+              <span>{{ mensajeError }}</span>
+
+            </div>
+
+          }
+
+
+          <form
+            [formGroup]="bodegaForm"
+            (ngSubmit)="guardar()"
+            class="modal-body">
+
+
+            <div class="form-group">
+
+              <label for="code">
+                Código único *
+              </label>
+
+              <input
+                id="code"
+                type="text"
+                formControlName="code"
+                placeholder="Ej. BOD-01">
+
+              @if (
+                bodegaForm.get('code')?.touched &&
+                bodegaForm.get('code')?.hasError('required')
+              ) {
+
+                <small class="field-error">
+                  El código es obligatorio.
+                </small>
+
+              }
+
+              @if (
+                bodegaForm.get('code')?.hasError('maxlength')
+              ) {
+
+                <small class="field-error">
+                  El código debe tener máximo 50 caracteres.
+                </small>
+
+              }
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="name">
+                Nombre de la Bodega *
+              </label>
+
+              <input
+                id="name"
+                type="text"
+                formControlName="name"
+                placeholder="Ej. Bodega Principal Central">
+
+              @if (
+                bodegaForm.get('name')?.touched &&
+                bodegaForm.get('name')?.hasError('required')
+              ) {
+
+                <small class="field-error">
+                  El nombre es obligatorio.
+                </small>
+
+              }
+
+              @if (
+                bodegaForm.get('name')?.hasError('maxlength')
+              ) {
+
+                <small class="field-error">
+                  El nombre debe tener máximo 150 caracteres.
+                </small>
+
+              }
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="location">
+                Ubicación Física *
+              </label>
+
+              <input
+                id="location"
+                type="text"
+                formControlName="location"
+                placeholder="Ej. Planta Principal - Zona Norte">
+
+              @if (
+                bodegaForm.get('location')?.touched &&
+                bodegaForm.get('location')?.hasError('required')
+              ) {
+
+                <small class="field-error">
+                  La ubicación es obligatoria.
+                </small>
+
+              }
+
+              @if (
+                bodegaForm.get('location')?.hasError('maxlength')
+              ) {
+
+                <small class="field-error">
+                  La ubicación debe tener máximo 200 caracteres.
+                </small>
+
+              }
+
+            </div>
+
+
+            <div class="modal-footer">
+
+              <button
+                type="button"
+                class="btn-secondary"
+                (click)="cancelar()">
+
+                Cancelar
+
+              </button>
+
+
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="guardando">
+
+                @if (guardando) {
+                  Guardando...
+                } @else {
+                  {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+                }
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
       </div>
-    </div>
-  }
 
-</div>
+    }
+
+  </section>
+
+</main>
