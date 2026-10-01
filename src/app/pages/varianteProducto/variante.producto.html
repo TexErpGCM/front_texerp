@@ -167,7 +167,7 @@
           <thead>
 
             <tr>
-
+              <th>sku</th>
               <th>Color</th>
               <th>Unidad</th>
               <th>Costo</th>
@@ -186,6 +186,11 @@
             @for (variante of variantes; track variante.id) {
 
             <tr>
+
+              <td>
+                {{ variante.sku }}
+              </td>
+
 
               <td>
                 {{ variante.color }}

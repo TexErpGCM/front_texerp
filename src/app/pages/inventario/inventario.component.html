@@ -1,0 +1,637 @@
+<main class="page">
+
+  <section class="inventario">
+
+    <!-- =====================================================
+         ENCABEZADO
+    ====================================================== -->
+
+    <header class="page__header">
+
+      <div class="page__heading">
+
+        <span class="page__eyebrow">
+          TexERP
+        </span>
+
+        <h1 class="page__title">
+          Inventario
+        </h1>
+
+        <p class="page__description">
+          Consulta las existencias y registra ajustes de inventario.
+        </p>
+
+      </div>
+
+      <button type="button" class="button button--primary" (click)="nuevoAjuste()">
+        <i class="fi fi-sr-plus"></i>
+        <span>Registrar ajuste</span>
+      </button>
+
+    </header>
+
+
+    <!-- =====================================================
+         MENSAJES
+    ====================================================== -->
+
+    @if (mensajeExito) {
+
+    <div class="alert alert--success">
+
+      <i class="fi fi-sr-check-circle"></i>
+
+      <span>
+        {{ mensajeExito }}
+      </span>
+
+    </div>
+
+    }
+
+    @if (mensajeError) {
+
+    <div class="alert alert--error">
+
+      <i class="fi fi-sr-cross-circle"></i>
+
+      <span>
+        {{ mensajeError }}
+      </span>
+
+    </div>
+
+    }
+
+
+    <!-- =====================================================
+         FILTROS - HU-12
+    ====================================================== -->
+
+    <section class="filters">
+
+      <div class="filters__header">
+
+        <div>
+
+          <h2 class="filters__title">
+            Filtros de inventario
+          </h2>
+
+          <p class="filters__description">
+            Consulta existencias por SKU, producto o bodega.
+          </p>
+
+        </div>
+
+        @if (mostrarSoloBajo) {
+
+        <span class="filters__status">
+
+          <i class="fi fi-sr-triangle-warning"></i>
+
+          Inventario bajo
+
+        </span>
+
+        }
+
+      </div>
+
+
+      <form class="filters__form" (ngSubmit)="aplicarFiltros()">
+
+        <!-- SKU -->
+
+        <div class="form-field">
+
+          <label for="sku">
+            SKU
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-search"></i>
+
+            <input id="sku" type="text" name="sku" [(ngModel)]="sku" placeholder="Buscar por SKU" />
+
+          </div>
+
+        </div>
+
+
+        <!-- PRODUCTO -->
+
+        <div class="form-field">
+
+          <label for="producto">
+            Producto
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-box"></i>
+
+            <input id="producto" type="text" name="producto" [(ngModel)]="producto" placeholder="Buscar producto" />
+
+          </div>
+
+        </div>
+
+
+        <!-- BODEGA -->
+
+        <div class="form-field">
+
+          <label for="bodega">
+            Bodega
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-home"></i>
+
+            <input id="bodega" type="text" name="bodega" [(ngModel)]="bodega" placeholder="Buscar bodega" />
+
+          </div>
+
+        </div>
+
+
+        <!-- SOLO BAJO -->
+
+        <div class="form-field form-field--checkbox">
+
+          <label class="checkbox">
+
+            <input type="checkbox" name="mostrarSoloBajo" [(ngModel)]="mostrarSoloBajo"
+              (change)="cambiarFiltroBajo()" />
+
+            <span class="checkbox__box"></span>
+
+            <span class="checkbox__label">
+              Mostrar solo inventario bajo
+            </span>
+
+          </label>
+
+        </div>
+
+
+        <!-- BOTONES -->
+
+        <div class="filters__actions">
+
+          <button type="submit" class="button button--primary">
+            <i class="fi fi-sr-search"></i>
+            <span>Buscar</span>
+          </button>
+
+          <button type="button" class="button button--secondary" (click)="limpiarFiltros()">
+            <i class="fi fi-sr-cross"></i>
+            <span>Limpiar</span>
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <!-- =====================================================
+         TABLA - HU-12
+    ====================================================== -->
+
+    <section class="table-card">
+
+      @if (cargando) {
+
+      <div class="table-card__loading">
+
+        <app-loading mensaje="Cargando inventario..."></app-loading>
+
+      </div>
+
+      } @else if (inventario.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-state__icon">
+
+          <i class="fi fi-sr-box"></i>
+
+        </div>
+
+        <h2 class="empty-state__title">
+          No hay inventario disponible
+        </h2>
+
+        <p class="empty-state__description">
+          No se encontraron registros con los filtros seleccionados.
+        </p>
+
+      </div>
+
+      } @else {
+
+      <div class="table-wrapper">
+
+        <table class="inventory-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                SKU
+              </th>
+
+              <th>
+                Producto
+              </th>
+
+              <th>
+                Bodega
+              </th>
+
+              <th class="table__number">
+                Disponible
+              </th>
+
+              <th class="table__number">
+                Reservado
+              </th>
+
+              <th class="table__number">
+                Mínimo
+              </th>
+
+              <th>
+                Estado
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (
+            item of inventario;
+            track item.id
+            ) {
+
+            <tr>
+
+              <td>
+
+                <span class="sku">
+                  {{ item.sku }}
+                </span>
+
+              </td>
+
+              <td>
+
+                <div class="product">
+
+                  <span class="product__name">
+                    {{ item.productName }}
+                  </span>
+
+                  <span class="product__code">
+                    {{ item.productCode }}
+                  </span>
+
+                </div>
+
+              </td>
+
+              <td>
+
+                <div class="warehouse">
+
+                  <span class="warehouse__name">
+                    {{ item.warehouseName }}
+                  </span>
+
+                  <span class="warehouse__code">
+                    {{ item.warehouseCode }}
+                  </span>
+
+                </div>
+
+              </td>
+
+              <td class="table__number">
+
+                {{ item.available }}
+
+              </td>
+
+              <td class="table__number">
+
+                {{ item.reserved }}
+
+              </td>
+
+              <td class="table__number">
+
+                {{ item.minimum }}
+
+              </td>
+
+              <td>
+
+                @if (esInventarioBajo(item)) {
+
+                <span class="status status--low">
+
+                  <i class="fi fi-sr-triangle-warning"></i>
+
+                  Bajo
+
+                </span>
+
+                } @else {
+
+                <span class="status status--normal">
+
+                  <i class="fi fi-sr-check-circle"></i>
+
+                  Normal
+
+                </span>
+
+                }
+
+              </td>
+
+            </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- PAGINACIÓN -->
+
+      <footer class="pagination">
+
+        <div class="pagination__info">
+
+          Mostrando
+          <strong>{{ inventario.length }}</strong>
+          de
+          <strong>{{ totalElementos }}</strong>
+          registros
+
+        </div>
+
+
+        <div class="pagination__controls">
+
+          <button type="button" class="pagination__button" [disabled]="paginaActual === 0" (click)="paginaAnterior()"
+            aria-label="Página anterior">
+
+            <i class="fi fi-sr-angle-left"></i>
+
+          </button>
+
+
+          <span class="pagination__current">
+
+            Página
+            <strong>{{ paginaActual + 1 }}</strong>
+            de
+            <strong>{{ totalPaginas || 1 }}</strong>
+
+          </span>
+
+
+          <button type="button" class="pagination__button" [disabled]="paginaActual + 1 >= totalPaginas"
+            (click)="paginaSiguiente()" aria-label="Página siguiente">
+
+            <i class="fi fi-sr-angle-right"></i>
+
+          </button>
+
+        </div>
+
+      </footer>
+
+      }
+
+    </section>
+
+  </section>
+
+
+  <!-- =====================================================
+       MODAL - HU-11
+  ====================================================== -->
+
+  @if (mostrarFormulario) {
+
+  <div class="modal-overlay" (click)="cerrarFormularioAjuste()">
+
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"
+      (click)="$event.stopPropagation()">
+
+      <header class="modal__header">
+
+        <div>
+
+          <span class="modal__eyebrow">
+            Inventario
+          </span>
+
+          <h2 id="modal-title" class="modal__title">
+            Registrar ajuste
+          </h2>
+
+          <p class="modal__description">
+            Registra un ajuste positivo o negativo sobre el inventario.
+          </p>
+
+        </div>
+
+        <button type="button" class="modal__close" (click)="cerrarFormularioAjuste()" [disabled]="guardando"
+          aria-label="Cerrar">
+
+          <i class="fi fi-sr-cross"></i>
+
+        </button>
+
+      </header>
+
+
+      <form class="modal__form" (ngSubmit)="guardarAjuste()">
+
+        <!-- VARIANTE -->
+
+        <!-- VARIANTE -->
+
+        <div class="form-field">
+
+          <label for="ajusteVariante">
+            Variante
+          </label>
+
+          <input id="ajusteVariante" type="text" name="ajusteVariante" [(ngModel)]="ajusteVariante"
+            placeholder="Ejemplo: SKU-001" />
+
+          <small>
+            Ingrese el SKU de la variante que será ajustada.
+          </small>
+
+        </div>
+
+
+        <!-- BODEGA -->
+
+        <div class="form-field">
+
+          <label for="ajusteBodega">
+            Bodega
+          </label>
+
+          <div class="form-field">
+
+            <select id="ajusteBodega" name="ajusteBodega" [(ngModel)]="ajusteBodega">
+
+              <option [ngValue]="null">
+                Seleccione una bodega
+              </option>
+
+              @for (bodega of bodegas; track bodega.id) {
+
+              <option [ngValue]="bodega.id">
+                {{ bodega.code }} - {{ bodega.name }}
+              </option>
+
+              }
+
+            </select>
+
+            @if (cargandoBodegas) {
+
+            <small>
+              Cargando bodegas...
+            </small>
+
+            } @else if (bodegas.length === 0) {
+
+            <small>
+              No hay bodegas activas disponibles.
+            </small>
+
+            }
+
+          </div>
+
+          <small>
+            Identificador de la bodega donde se realiza el ajuste.
+          </small>
+
+        </div>
+
+
+        <!-- CANTIDAD -->
+
+        <div class="form-field">
+
+          <label for="ajusteCantidad">
+            Cantidad
+          </label>
+
+          <input id="ajusteCantidad" type="number" name="ajusteCantidad" [(ngModel)]="ajusteCantidad" step="0.001"
+            placeholder="Ejemplo: 5 o -5" />
+
+          <small>
+            Use un valor positivo para aumentar o negativo para disminuir.
+          </small>
+
+        </div>
+
+
+        <!-- MOTIVO -->
+
+        <div class="form-field">
+
+          <label for="ajusteMotivo">
+            Motivo
+          </label>
+
+          <textarea id="ajusteMotivo" name="ajusteMotivo" [(ngModel)]="ajusteMotivo" rows="4" maxlength="500"
+            placeholder="Indique el motivo del ajuste"></textarea>
+
+          <small>
+            El motivo es obligatorio.
+          </small>
+
+        </div>
+
+
+        <!-- DOCUMENTO -->
+
+        <div class="form-field">
+
+          <label for="ajusteDocumento">
+            Documento origen
+            <span class="optional">
+              Opcional
+            </span>
+          </label>
+
+          <input id="ajusteDocumento" type="text" name="ajusteDocumento" [(ngModel)]="ajusteDocumento" maxlength="255"
+            placeholder="Número o referencia del documento" />
+
+        </div>
+
+
+        <!-- ACCIONES -->
+
+        <footer class="modal__actions">
+
+          <button type="button" class="button button--secondary" (click)="cancelar()" [disabled]="guardando">
+            Cancelar
+          </button>
+
+          <button type="submit" class="button button--primary" [disabled]="guardando">
+
+            @if (guardando) {
+
+            <span>
+              Guardando...
+            </span>
+
+            } @else {
+
+            <i class="fi fi-sr-check"></i>
+
+            <span>
+              Registrar ajuste
+            </span>
+
+            }
+
+          </button>
+
+        </footer>
+
+      </form>
+
+    </section>
+
+  </div>
+
+  }
+
+</main>
