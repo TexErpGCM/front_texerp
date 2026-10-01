@@ -2,10 +2,6 @@
 
   <section class="inventario">
 
-    <!-- =====================================================
-         ENCABEZADO
-    ====================================================== -->
-
     <header class="page__header">
 
       <div class="page__heading">
@@ -24,50 +20,44 @@
 
       </div>
 
-      <button type="button" class="button button--primary" (click)="nuevoAjuste()">
+      <button
+        type="button"
+        class="button button--primary"
+        (click)="nuevoAjuste()"
+      >
         <i class="fi fi-sr-plus"></i>
         <span>Registrar ajuste</span>
       </button>
 
     </header>
 
-
-    <!-- =====================================================
-         MENSAJES
-    ====================================================== -->
-
     @if (mensajeExito) {
 
-    <div class="alert alert--success">
+      <div class="alert alert--success">
 
-      <i class="fi fi-sr-check-circle"></i>
+        <i class="fi fi-sr-check-circle"></i>
 
-      <span>
-        {{ mensajeExito }}
-      </span>
+        <span>
+          {{ mensajeExito }}
+        </span>
 
-    </div>
+      </div>
 
     }
 
     @if (mensajeError) {
 
-    <div class="alert alert--error">
+      <div class="alert alert--error">
 
-      <i class="fi fi-sr-cross-circle"></i>
+        <i class="fi fi-sr-cross-circle"></i>
 
-      <span>
-        {{ mensajeError }}
-      </span>
+        <span>
+          {{ mensajeError }}
+        </span>
 
-    </div>
+      </div>
 
     }
-
-
-    <!-- =====================================================
-         FILTROS - HU-12
-    ====================================================== -->
 
     <section class="filters">
 
@@ -87,22 +77,22 @@
 
         @if (mostrarSoloBajo) {
 
-        <span class="filters__status">
+          <span class="filters__status">
 
-          <i class="fi fi-sr-triangle-warning"></i>
+            <i class="fi fi-sr-triangle-warning"></i>
 
-          Inventario bajo
+            Inventario bajo
 
-        </span>
+          </span>
 
         }
 
       </div>
 
-
-      <form class="filters__form" (ngSubmit)="aplicarFiltros()">
-
-        <!-- SKU -->
+      <form
+        class="filters__form"
+        (ngSubmit)="aplicarFiltros()"
+      >
 
         <div class="form-field">
 
@@ -114,14 +104,17 @@
 
             <i class="fi fi-sr-search"></i>
 
-            <input id="sku" type="text" name="sku" [(ngModel)]="sku" placeholder="Buscar por SKU" />
+            <input
+              id="sku"
+              type="text"
+              name="sku"
+              [(ngModel)]="sku"
+              placeholder="Buscar por SKU"
+            />
 
           </div>
 
         </div>
-
-
-        <!-- PRODUCTO -->
 
         <div class="form-field">
 
@@ -133,14 +126,17 @@
 
             <i class="fi fi-sr-box"></i>
 
-            <input id="producto" type="text" name="producto" [(ngModel)]="producto" placeholder="Buscar producto" />
+            <input
+              id="producto"
+              type="text"
+              name="producto"
+              [(ngModel)]="producto"
+              placeholder="Buscar producto"
+            />
 
           </div>
 
         </div>
-
-
-        <!-- BODEGA -->
 
         <div class="form-field">
 
@@ -152,21 +148,28 @@
 
             <i class="fi fi-sr-home"></i>
 
-            <input id="bodega" type="text" name="bodega" [(ngModel)]="bodega" placeholder="Buscar bodega" />
+            <input
+              id="bodega"
+              type="text"
+              name="bodega"
+              [(ngModel)]="bodega"
+              placeholder="Buscar bodega"
+            />
 
           </div>
 
         </div>
 
-
-        <!-- SOLO BAJO -->
-
         <div class="form-field form-field--checkbox">
 
           <label class="checkbox">
 
-            <input type="checkbox" name="mostrarSoloBajo" [(ngModel)]="mostrarSoloBajo"
-              (change)="cambiarFiltroBajo()" />
+            <input
+              type="checkbox"
+              name="mostrarSoloBajo"
+              [(ngModel)]="mostrarSoloBajo"
+              (change)="cambiarFiltroBajo()"
+            />
 
             <span class="checkbox__box"></span>
 
@@ -178,17 +181,21 @@
 
         </div>
 
-
-        <!-- BOTONES -->
-
         <div class="filters__actions">
 
-          <button type="submit" class="button button--primary">
+          <button
+            type="submit"
+            class="button button--primary"
+          >
             <i class="fi fi-sr-search"></i>
             <span>Buscar</span>
           </button>
 
-          <button type="button" class="button button--secondary" (click)="limpiarFiltros()">
+          <button
+            type="button"
+            class="button button--secondary"
+            (click)="limpiarFiltros()"
+          >
             <i class="fi fi-sr-cross"></i>
             <span>Limpiar</span>
           </button>
@@ -199,232 +206,220 @@
 
     </section>
 
-
-    <!-- =====================================================
-         TABLA - HU-12
-    ====================================================== -->
-
     <section class="table-card">
 
       @if (cargando) {
 
-      <div class="table-card__loading">
+        <div class="table-card__loading">
 
-        <app-loading mensaje="Cargando inventario..."></app-loading>
+          <app-loading
+            mensaje="Cargando inventario..."
+          ></app-loading>
 
-      </div>
+        </div>
 
       } @else if (inventario.length === 0) {
 
-      <div class="empty-state">
+        <div class="empty-state">
 
-        <div class="empty-state__icon">
+          <div class="empty-state__icon">
 
-          <i class="fi fi-sr-box"></i>
+            <i class="fi fi-sr-box"></i>
+
+          </div>
+
+          <h2 class="empty-state__title">
+            No hay inventario disponible
+          </h2>
+
+          <p class="empty-state__description">
+            No se encontraron registros con los filtros seleccionados.
+          </p>
 
         </div>
-
-        <h2 class="empty-state__title">
-          No hay inventario disponible
-        </h2>
-
-        <p class="empty-state__description">
-          No se encontraron registros con los filtros seleccionados.
-        </p>
-
-      </div>
 
       } @else {
 
-      <div class="table-wrapper">
+        <div class="table-wrapper">
 
-        <table class="inventory-table">
+          <table class="inventory-table">
 
-          <thead>
+            <thead>
 
-            <tr>
+              <tr>
 
-              <th>
-                SKU
-              </th>
+                <th>
+                  SKU
+                </th>
 
-              <th>
-                Producto
-              </th>
+                <th>
+                  Producto
+                </th>
 
-              <th>
-                Bodega
-              </th>
+                <th>
+                  Bodega
+                </th>
 
-              <th class="table__number">
-                Disponible
-              </th>
+                <th class="table__number">
+                  Disponible
+                </th>
 
-              <th class="table__number">
-                Reservado
-              </th>
+                <th class="table__number">
+                  Reservado
+                </th>
 
-              <th class="table__number">
-                Mínimo
-              </th>
+                <th class="table__number">
+                  Mínimo
+                </th>
 
-              <th>
-                Estado
-              </th>
+                <th>
+                  Estado
+                </th>
 
-            </tr>
+              </tr>
 
-          </thead>
+            </thead>
 
-          <tbody>
+            <tbody>
 
-            @for (
-            item of inventario;
-            track item.id
-            ) {
+              @for (item of inventario; track item.id) {
 
-            <tr>
+                <tr>
 
-              <td>
+                  <td>
 
-                <span class="sku">
-                  {{ item.sku }}
-                </span>
+                    <span class="sku">
+                      {{ item.sku }}
+                    </span>
 
-              </td>
+                  </td>
 
-              <td>
+                  <td>
 
-                <div class="product">
+                    <div class="product">
 
-                  <span class="product__name">
-                    {{ item.productName }}
-                  </span>
+                      <span class="product__name">
+                        {{ item.productName }}
+                      </span>
 
-                  <span class="product__code">
-                    {{ item.productCode }}
-                  </span>
+                      <span class="product__code">
+                        {{ item.productCode }}
+                      </span>
 
-                </div>
+                    </div>
 
-              </td>
+                  </td>
 
-              <td>
+                  <td>
 
-                <div class="warehouse">
+                    <div class="warehouse">
 
-                  <span class="warehouse__name">
-                    {{ item.warehouseName }}
-                  </span>
+                      <span class="warehouse__name">
+                        {{ item.warehouseName }}
+                      </span>
 
-                  <span class="warehouse__code">
-                    {{ item.warehouseCode }}
-                  </span>
+                      <span class="warehouse__code">
+                        {{ item.warehouseCode }}
+                      </span>
 
-                </div>
+                    </div>
 
-              </td>
+                  </td>
 
-              <td class="table__number">
+                  <td class="table__number">
+                    {{ item.available }}
+                  </td>
 
-                {{ item.available }}
+                  <td class="table__number">
+                    {{ item.reserved }}
+                  </td>
 
-              </td>
+                  <td class="table__number">
+                    {{ item.minimum }}
+                  </td>
 
-              <td class="table__number">
+                  <td>
 
-                {{ item.reserved }}
+                    @if (esInventarioBajo(item)) {
 
-              </td>
+                      <span class="status status--low">
 
-              <td class="table__number">
+                        <i class="fi fi-sr-triangle-warning"></i>
 
-                {{ item.minimum }}
+                        Bajo
 
-              </td>
+                      </span>
 
-              <td>
+                    } @else {
 
-                @if (esInventarioBajo(item)) {
+                      <span class="status status--normal">
 
-                <span class="status status--low">
+                        <i class="fi fi-sr-check-circle"></i>
 
-                  <i class="fi fi-sr-triangle-warning"></i>
+                        Normal
 
-                  Bajo
+                      </span>
 
-                </span>
+                    }
 
-                } @else {
+                  </td>
 
-                <span class="status status--normal">
+                </tr>
 
-                  <i class="fi fi-sr-check-circle"></i>
+              }
 
-                  Normal
+            </tbody>
 
-                </span>
-
-                }
-
-              </td>
-
-            </tr>
-
-            }
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-
-      <!-- PAGINACIÓN -->
-
-      <footer class="pagination">
-
-        <div class="pagination__info">
-
-          Mostrando
-          <strong>{{ inventario.length }}</strong>
-          de
-          <strong>{{ totalElementos }}</strong>
-          registros
+          </table>
 
         </div>
 
+        <footer class="pagination">
 
-        <div class="pagination__controls">
+          <div class="pagination__info">
 
-          <button type="button" class="pagination__button" [disabled]="paginaActual === 0" (click)="paginaAnterior()"
-            aria-label="Página anterior">
-
-            <i class="fi fi-sr-angle-left"></i>
-
-          </button>
-
-
-          <span class="pagination__current">
-
-            Página
-            <strong>{{ paginaActual + 1 }}</strong>
+            Mostrando
+            <strong>{{ inventario.length }}</strong>
             de
-            <strong>{{ totalPaginas || 1 }}</strong>
+            <strong>{{ totalElementos }}</strong>
+            registros
 
-          </span>
+          </div>
 
+          <div class="pagination__controls">
 
-          <button type="button" class="pagination__button" [disabled]="paginaActual + 1 >= totalPaginas"
-            (click)="paginaSiguiente()" aria-label="Página siguiente">
+            <button
+              type="button"
+              class="pagination__button"
+              [disabled]="paginaActual === 0"
+              (click)="paginaAnterior()"
+              aria-label="Página anterior"
+            >
+              <i class="fi fi-sr-angle-left"></i>
+            </button>
 
-            <i class="fi fi-sr-angle-right"></i>
+            <span class="pagination__current">
 
-          </button>
+              Página
+              <strong>{{ paginaActual + 1 }}</strong>
+              de
+              <strong>{{ totalPaginas || 1 }}</strong>
 
-        </div>
+            </span>
 
-      </footer>
+            <button
+              type="button"
+              class="pagination__button"
+              [disabled]="paginaActual + 1 >= totalPaginas"
+              (click)="paginaSiguiente()"
+              aria-label="Página siguiente"
+            >
+              <i class="fi fi-sr-angle-right"></i>
+            </button>
+
+          </div>
+
+        </footer>
 
       }
 
@@ -432,79 +427,91 @@
 
   </section>
 
-
-  <!-- =====================================================
-       MODAL - HU-11
-  ====================================================== -->
-
   @if (mostrarFormulario) {
 
-  <div class="modal-overlay" (click)="cerrarFormularioAjuste()">
+    <div
+      class="modal-overlay"
+      (click)="cerrarFormularioAjuste()"
+    >
 
-    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"
-      (click)="$event.stopPropagation()">
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        (click)="$event.stopPropagation()"
+      >
 
-      <header class="modal__header">
+        <header class="modal__header">
 
-        <div>
+          <div>
 
-          <span class="modal__eyebrow">
-            Inventario
-          </span>
+            <span class="modal__eyebrow">
+              Inventario
+            </span>
 
-          <h2 id="modal-title" class="modal__title">
-            Registrar ajuste
-          </h2>
+            <h2
+              id="modal-title"
+              class="modal__title"
+            >
+              Registrar ajuste
+            </h2>
 
-          <p class="modal__description">
-            Registra un ajuste positivo o negativo sobre el inventario.
-          </p>
+            <p class="modal__description">
+              Registra un ajuste positivo o negativo sobre el inventario.
+            </p>
 
-        </div>
+          </div>
 
-        <button type="button" class="modal__close" (click)="cerrarFormularioAjuste()" [disabled]="guardando"
-          aria-label="Cerrar">
+          <button
+            type="button"
+            class="modal__close"
+            (click)="cerrarFormularioAjuste()"
+            [disabled]="guardando"
+            aria-label="Cerrar"
+          >
+            <i class="fi fi-sr-cross"></i>
+          </button>
 
-          <i class="fi fi-sr-cross"></i>
+        </header>
 
-        </button>
-
-      </header>
-
-
-      <form class="modal__form" (ngSubmit)="guardarAjuste()">
-
-        <!-- VARIANTE -->
-
-        <!-- VARIANTE -->
-
-        <div class="form-field">
-
-          <label for="ajusteVariante">
-            Variante
-          </label>
-
-          <input id="ajusteVariante" type="text" name="ajusteVariante" [(ngModel)]="ajusteVariante"
-            placeholder="Ejemplo: SKU-001" />
-
-          <small>
-            Ingrese el SKU de la variante que será ajustada.
-          </small>
-
-        </div>
-
-
-        <!-- BODEGA -->
-
-        <div class="form-field">
-
-          <label for="ajusteBodega">
-            Bodega
-          </label>
+        <form
+          class="modal__form"
+          (ngSubmit)="guardarAjuste()"
+        >
 
           <div class="form-field">
 
-            <select id="ajusteBodega" name="ajusteBodega" [(ngModel)]="ajusteBodega">
+            <label for="ajusteVariante">
+              Variante
+            </label>
+
+            <input
+              id="ajusteVariante"
+              type="number"
+              name="ajusteVariante"
+              [(ngModel)]="ajusteVariante"
+              placeholder="ID de la variante"
+              min="1"
+            />
+
+            <small>
+              Ingrese el identificador de la variante.
+            </small>
+
+          </div>
+
+          <div class="form-field">
+
+            <label for="ajusteBodega">
+              Bodega
+            </label>
+
+            <select
+              id="ajusteBodega"
+              name="ajusteBodega"
+              [(ngModel)]="ajusteBodega"
+            >
 
               <option [ngValue]="null">
                 Seleccione una bodega
@@ -512,9 +519,9 @@
 
               @for (bodega of bodegas; track bodega.id) {
 
-              <option [ngValue]="bodega.id">
-                {{ bodega.code }} - {{ bodega.name }}
-              </option>
+                <option [ngValue]="bodega.id">
+                  {{ bodega.code }} - {{ bodega.name }}
+                </option>
 
               }
 
@@ -522,115 +529,127 @@
 
             @if (cargandoBodegas) {
 
-            <small>
-              Cargando bodegas...
-            </small>
+              <small>
+                Cargando bodegas...
+              </small>
 
             } @else if (bodegas.length === 0) {
 
-            <small>
-              No hay bodegas activas disponibles.
-            </small>
+              <small>
+                No hay bodegas activas disponibles.
+              </small>
 
             }
 
           </div>
 
-          <small>
-            Identificador de la bodega donde se realiza el ajuste.
-          </small>
+          <div class="form-field">
 
-        </div>
+            <label for="ajusteCantidad">
+              Cantidad
+            </label>
 
+            <input
+              id="ajusteCantidad"
+              type="number"
+              name="ajusteCantidad"
+              [(ngModel)]="ajusteCantidad"
+              step="0.001"
+              placeholder="Ejemplo: 5 o -5"
+            />
 
-        <!-- CANTIDAD -->
+            <small>
+              Use un valor positivo para aumentar o negativo para disminuir.
+            </small>
 
-        <div class="form-field">
+          </div>
 
-          <label for="ajusteCantidad">
-            Cantidad
-          </label>
+          <div class="form-field">
 
-          <input id="ajusteCantidad" type="number" name="ajusteCantidad" [(ngModel)]="ajusteCantidad" step="0.001"
-            placeholder="Ejemplo: 5 o -5" />
+            <label for="ajusteMotivo">
+              Motivo
+            </label>
 
-          <small>
-            Use un valor positivo para aumentar o negativo para disminuir.
-          </small>
+            <textarea
+              id="ajusteMotivo"
+              name="ajusteMotivo"
+              [(ngModel)]="ajusteMotivo"
+              rows="4"
+              maxlength="500"
+              placeholder="Indique el motivo del ajuste"
+            ></textarea>
 
-        </div>
+            <small>
+              El motivo es obligatorio.
+            </small>
 
+          </div>
 
-        <!-- MOTIVO -->
+          <div class="form-field">
 
-        <div class="form-field">
+            <label for="ajusteDocumento">
 
-          <label for="ajusteMotivo">
-            Motivo
-          </label>
+              Documento origen
 
-          <textarea id="ajusteMotivo" name="ajusteMotivo" [(ngModel)]="ajusteMotivo" rows="4" maxlength="500"
-            placeholder="Indique el motivo del ajuste"></textarea>
+              <span class="optional">
+                Opcional
+              </span>
 
-          <small>
-            El motivo es obligatorio.
-          </small>
+            </label>
 
-        </div>
+            <input
+              id="ajusteDocumento"
+              type="text"
+              name="ajusteDocumento"
+              [(ngModel)]="ajusteDocumento"
+              maxlength="255"
+              placeholder="Número o referencia del documento"
+            />
 
+          </div>
 
-        <!-- DOCUMENTO -->
+          <footer class="modal__actions">
 
-        <div class="form-field">
+            <button
+              type="button"
+              class="button button--secondary"
+              (click)="cancelar()"
+              [disabled]="guardando"
+            >
+              Cancelar
+            </button>
 
-          <label for="ajusteDocumento">
-            Documento origen
-            <span class="optional">
-              Opcional
-            </span>
-          </label>
+            <button
+              type="submit"
+              class="button button--primary"
+              [disabled]="guardando"
+            >
 
-          <input id="ajusteDocumento" type="text" name="ajusteDocumento" [(ngModel)]="ajusteDocumento" maxlength="255"
-            placeholder="Número o referencia del documento" />
+              @if (guardando) {
 
-        </div>
+                <span>
+                  Guardando...
+                </span>
 
+              } @else {
 
-        <!-- ACCIONES -->
+                <i class="fi fi-sr-check"></i>
 
-        <footer class="modal__actions">
+                <span>
+                  Registrar ajuste
+                </span>
 
-          <button type="button" class="button button--secondary" (click)="cancelar()" [disabled]="guardando">
-            Cancelar
-          </button>
+              }
 
-          <button type="submit" class="button button--primary" [disabled]="guardando">
+            </button>
 
-            @if (guardando) {
+          </footer>
 
-            <span>
-              Guardando...
-            </span>
+        </form>
 
-            } @else {
+      </section>
 
-            <i class="fi fi-sr-check"></i>
-
-            <span>
-              Registrar ajuste
-            </span>
-
-            }
-
-          </button>
-
-        </footer>
-
-      </form>
-
-    </section>
-
-  </div>
+    </div>
 
   }
 

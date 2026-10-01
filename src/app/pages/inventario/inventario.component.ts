@@ -36,19 +36,12 @@ import {
 })
 export class ListarInventarioComponent implements OnInit {
 
-
-
   inventario: InventoryBalance[] = [];
 
   cargando = false;
 
-
   mensajeExito = '';
   mensajeError = '';
-
-  // =========================================================
-  // FILTROS - HU-12
-  // =========================================================
 
   sku = '';
   producto = '';
@@ -56,32 +49,16 @@ export class ListarInventarioComponent implements OnInit {
 
   mostrarSoloBajo = false;
 
-  // =========================================================
-  // PAGINACIÓN
-  // =========================================================
-
   paginaActual = 0;
   pageSize = 20;
 
   totalElementos = 0;
   totalPaginas = 0;
 
-  // =========================================================
-  // FORMULARIO DE AJUSTE - HU-11
-  // =========================================================
-
   mostrarFormulario = false;
 
   ajusteVariante: number | null = null;
   ajusteBodega: number | null = null;
-
-  /*
-   * Positivo:
-   *  5  = aumenta 5 unidades
-   *
-   * Negativo:
-   * -5  = disminuye 5 unidades
-   */
   ajusteCantidad: number | null = null;
 
   ajusteMotivo = '';
@@ -90,84 +67,59 @@ export class ListarInventarioComponent implements OnInit {
   guardando = false;
 
   bodegas: Bodega[] = [];
-cargandoBodegas = false;
-
-  // =========================================================
-  // CONSTRUCTOR
-  // =========================================================
+  cargandoBodegas = false;
 
   constructor(
     private inventarioService: InventarioService,
-      private bodegaService: BodegaService,
+    private bodegaService: BodegaService,
     private cdr: ChangeDetectorRef
   ) {}
 
-  // =========================================================
-  // INICIALIZACIÓN
-  // =========================================================
-
   ngOnInit(): void {
     this.cargarInventario();
-      this.cargarBodegas();
+    this.cargarBodegas();
   }
 
-  // =========================================================
-// CARGAR BODEGAS
-// =========================================================
+  cargarBodegas(): void {
 
-cargarBodegas(): void {
+    this.cargandoBodegas = true;
 
-  this.cargandoBodegas = true;
+    this.bodegaService
+      .listar(
+        {
+          active: true
+        },
+        0,
+        100
+      )
+      .pipe(
+        finalize(() => {
+          this.cargandoBodegas = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
 
-  this.bodegaService
-    .listar(
-      {
-        active: true
-      },
-      0,
-      100
-    )
-    .pipe(
-      finalize(() => {
-        this.cargandoBodegas = false;
-        this.cdr.detectChanges();
-      })
-    )
-    .subscribe({
+        next: (response) => {
+          this.bodegas = response.data?.content ?? [];
+        },
 
-      next: (response) => {
+        error: () => {
+          this.bodegas = [];
+          this.mensajeError =
+            'No fue posible cargar las bodegas.';
+        }
 
-        this.bodegas =
-          response.data?.content ?? [];
-
-      },
-
-      error: () => {
-
-        this.bodegas = [];
-
-        this.mensajeError =
-          'No fue posible cargar las bodegas.';
-
-      }
-
-    });
-}
-  // =========================================================
-  // CONSULTAR INVENTARIO
-  // HU-12
-  // =========================================================
+      });
+  }
 
   cargarInventario(): void {
 
     this.cargando = true;
-
     this.mensajeError = '';
 
     if (this.mostrarSoloBajo) {
-
       this.cargarInventarioBajo();
-
       return;
     }
 
@@ -183,42 +135,28 @@ cargarBodegas(): void {
       )
       .pipe(
         finalize(() => {
-
           this.cargando = false;
-
           this.cdr.detectChanges();
-
         })
       )
       .subscribe({
 
         next: (response) => {
-
-          this.procesarRespuesta(
-            response.data
-          );
-
+          this.procesarRespuesta(response.data);
         },
 
         error: () => {
 
           this.inventario = [];
-
           this.totalElementos = 0;
           this.totalPaginas = 0;
 
           this.mensajeError =
             'No fue posible consultar el inventario.';
-
         }
 
       });
   }
-
-  // =========================================================
-  // INVENTARIO BAJO
-  // HU-12
-  // =========================================================
 
   private cargarInventarioBajo(): void {
 
@@ -231,59 +169,35 @@ cargarBodegas(): void {
       )
       .pipe(
         finalize(() => {
-
           this.cargando = false;
-
           this.cdr.detectChanges();
-
         })
       )
       .subscribe({
 
         next: (response) => {
-
-          this.procesarRespuesta(
-            response.data
-          );
-
+          this.procesarRespuesta(response.data);
         },
 
         error: () => {
 
           this.inventario = [];
-
           this.totalElementos = 0;
           this.totalPaginas = 0;
 
           this.mensajeError =
             'No fue posible consultar el inventario bajo.';
-
         }
 
       });
   }
 
-  // =========================================================
-  // PROCESAR RESPUESTA
-  // =========================================================
+  private procesarRespuesta(data: any): void {
 
-  private procesarRespuesta(
-    data: any
-  ): void {
-
-    this.inventario =
-      data?.content ?? [];
-
-    this.totalElementos =
-      data?.totalElements ?? 0;
-
-    this.totalPaginas =
-      data?.totalPages ?? 0;
+    this.inventario = data?.content ?? [];
+    this.totalElementos = data?.totalElements ?? 0;
+    this.totalPaginas = data?.totalPages ?? 0;
   }
-
-  // =========================================================
-  // FILTROS
-  // =========================================================
 
   aplicarFiltros(): void {
 
@@ -296,7 +210,6 @@ cargarBodegas(): void {
   }
 
   buscar(): void {
-
     this.aplicarFiltros();
   }
 
@@ -326,21 +239,13 @@ cargarBodegas(): void {
     this.cargarInventario();
   }
 
-  // =========================================================
-  // PAGINACIÓN
-  // =========================================================
-
-  cambiarPagina(
-    pagina: number
-  ): void {
+  cambiarPagina(pagina: number): void {
 
     if (pagina < 0) {
       return;
     }
 
-    if (
-      pagina >= this.totalPaginas
-    ) {
+    if (pagina >= this.totalPaginas) {
       return;
     }
 
@@ -350,46 +255,26 @@ cargarBodegas(): void {
   }
 
   paginaAnterior(): void {
-
-    this.cambiarPagina(
-      this.paginaActual - 1
-    );
+    this.cambiarPagina(this.paginaActual - 1);
   }
 
   paginaSiguiente(): void {
-
-    this.cambiarPagina(
-      this.paginaActual + 1
-    );
+    this.cambiarPagina(this.paginaActual + 1);
   }
 
-  // =========================================================
-  // ESTADO - HU-12
-  // =========================================================
-
-  obtenerEstado(
-    item: InventoryBalance
-  ): string {
+  obtenerEstado(item: InventoryBalance): string {
 
     return item.lowStock
       ? 'Bajo'
       : 'Normal';
   }
 
-  esInventarioBajo(
-    item: InventoryBalance
-  ): boolean {
+  esInventarioBajo(item: InventoryBalance): boolean {
 
     return item.lowStock;
   }
 
-  // =========================================================
-  // AJUSTES
-  // HU-11
-  // =========================================================
-
   nuevoAjuste(): void {
-
     this.abrirFormularioAjuste();
   }
 
@@ -413,7 +298,6 @@ cargarBodegas(): void {
   }
 
   cancelar(): void {
-
     this.cerrarFormularioAjuste();
   }
 
@@ -421,7 +305,6 @@ cargarBodegas(): void {
 
     this.ajusteVariante = null;
     this.ajusteBodega = null;
-
     this.ajusteCantidad = null;
 
     this.ajusteMotivo = '';
@@ -429,10 +312,6 @@ cargarBodegas(): void {
 
     this.guardando = false;
   }
-
-  // =========================================================
-  // VALIDAR AJUSTE
-  // =========================================================
 
   private validarAjuste(): boolean {
 
@@ -471,9 +350,7 @@ cargarBodegas(): void {
       return false;
     }
 
-    if (
-      !this.ajusteMotivo.trim()
-    ) {
+    if (!this.ajusteMotivo.trim()) {
 
       this.mensajeError =
         'El motivo del ajuste es obligatorio.';
@@ -504,31 +381,19 @@ cargarBodegas(): void {
     return true;
   }
 
-  // =========================================================
-  // GUARDAR AJUSTE
-  // HU-11
-  // =========================================================
-
   guardarAjuste(): void {
 
     if (!this.validarAjuste()) {
+      this.mostrarFormulario = false;
+      this.cdr.detectChanges();
       return;
     }
 
     const request: InventoryAdjustmentRequest = {
-
-      variantId:
-        this.ajusteVariante!,
-
-      warehouseId:
-        this.ajusteBodega!,
-
-      quantity:
-        this.ajusteCantidad!,
-
-      reason:
-        this.ajusteMotivo.trim(),
-
+      variantId: this.ajusteVariante!,
+      warehouseId: this.ajusteBodega!,
+      quantity: this.ajusteCantidad!,
+      reason: this.ajusteMotivo.trim(),
       sourceDocument:
         this.ajusteDocumento.trim() || undefined
     };
@@ -559,29 +424,12 @@ cargarBodegas(): void {
             response.message ||
             'El ajuste de inventario fue registrado correctamente.';
 
-          /*
-           * Recargamos el inventario para que HU-12
-           * refleje inmediatamente el nuevo balance.
-           *
-           * Esto también permite que una alerta de
-           * inventario bajo desaparezca cuando el nuevo
-           * disponible supera el mínimo.
-           */
-
           this.cargarInventario();
-
         },
 
         error: (error) => {
 
-          /*
-           * 400:
-           * datos inválidos / motivo faltante
-           *
-           * 409:
-           * el ajuste produciría inventario negativo
-           * o alguna regla de negocio impide la operación.
-           */
+          this.mostrarFormulario = false;
 
           if (error?.status === 400) {
 
@@ -600,9 +448,9 @@ cargarBodegas(): void {
             this.mensajeError =
               error?.error?.message ||
               'No fue posible registrar el ajuste.';
-
           }
 
+          this.cdr.detectChanges();
         }
 
       });
