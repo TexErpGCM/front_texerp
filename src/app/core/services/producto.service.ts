@@ -1,21 +1,20 @@
-import { Injectable, inject } from '@angular/core';
-import {
-  HttpClient,
-  HttpParams
-} from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 
-import {
-  Observable,
-  map
-} from 'rxjs';
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  timestamp: string;
+}
 
-import { ApiResponse } from './user.services';
+export interface ProductoSelector {
+  id: number;
+  name: string;
+}
 
-
-/**
- * Producto completo retornado por el backend.
- */
-export interface Producto {
+export interface Product {
   id: number;
   code: string;
   name: string;
@@ -26,114 +25,109 @@ export interface Producto {
   updatedAt: string;
 }
 
-
-/**
- * Producto utilizado únicamente en selectores y filtros.
- *
- * Se mantiene reducido para no llevar información
- * innecesaria al componente.
- */
-export interface ProductoSelector {
-  id: number;
-  name: string;
-}
-
-
-/**
- * Respuesta paginada del catálogo de productos.
- */
-export interface ProductoPage {
-  content: Producto[];
+export interface ProductPage {
+  content: Product[];
   page: number;
   size: number;
   totalElements: number;
   totalPages: number;
 }
 
-
-/**
- * Filtros disponibles para consultar productos.
- */
-export interface ProductoFiltros {
-  code?: string;
-  name?: string;
-  fabricType?: string;
-  active?: boolean;
-  page?: number;
-  size?: number;
+export interface ProductRequest {
+  code: string;
+  name: string;
+  fabricType: string;
+  composition: string;
+  active: boolean;
 }
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
 
-  private readonly http = inject(HttpClient);
-
   private readonly apiUrl = '/api/v1/products';
 
+  constructor(
+    private http: HttpClient
+  ) {}
 
-  /**
-   * Consulta productos utilizando los filtros disponibles.
-   */
-  obtenerProductos(
-    filtros: ProductoFiltros = {}
-  ): Observable<ApiResponse<ProductoPage>> {
+  listar(
+    code = '',
+    name = '',
+    fabricType = '',
+    active: boolean | null = null,
+    page = 0,
+    size = 20
+  ): Observable<ApiResponse<ProductPage>> {
 
     let params = new HttpParams()
-      .set('page', filtros.page ?? 0)
-      .set('size', filtros.size ?? 20);
+      .set('page', page)
+      .set('size', size);
 
-    if (filtros.code?.trim()) {
-      params = params.set('code', filtros.code.trim());
+    if (code.trim()) {
+      params = params.set('code', code.trim());
     }
 
-    if (filtros.name?.trim()) {
-      params = params.set('name', filtros.name.trim());
+    if (name.trim()) {
+      params = params.set('name', name.trim());
     }
 
-    if (filtros.fabricType?.trim()) {
-      params = params.set(
-        'fabricType',
-        filtros.fabricType.trim()
-      );
+    if (fabricType.trim()) {
+      params = params.set('fabricType', fabricType.trim());
     }
 
-    if (filtros.active !== undefined) {
-      params = params.set('active', filtros.active);
+    if (active !== null) {
+      params = params.set('active', active);
     }
 
-    return this.http.get<ApiResponse<ProductoPage>>(
+    return this.http.get<ApiResponse<ProductPage>>(
       this.apiUrl,
       { params }
     );
   }
 
-
-  /**
-   * Consulta un producto por su identificador.
-   */
-  obtenerProducto(
+  obtenerPorId(
     id: number
-  ): Observable<ApiResponse<Producto>> {
+  ): Observable<ApiResponse<Product>> {
 
-    return this.http.get<ApiResponse<Producto>>(
+    return this.http.get<ApiResponse<Product>>(
       `${this.apiUrl}/${id}`
     );
   }
 
+  crear(
+    request: ProductRequest
+  ): Observable<ApiResponse<Product>> {
 
-  /**
-   * Obtiene únicamente los datos necesarios
-   * para un selector de productos.
-   *
-   * Solo retorna:
-   * - id
-   * - name
-   *
-   * Los productos inactivos no se incluyen.
-   */
+    return this.http.post<ApiResponse<Product>>(
+      this.apiUrl,
+      request
+    );
+  }
+
+  actualizar(
+    id: number,
+    request: ProductRequest
+  ): Observable<ApiResponse<Product>> {
+
+    return this.http.put<ApiResponse<Product>>(
+      `${this.apiUrl}/${id}`,
+      request
+    );
+  }
+
+  cambiarEstado(
+    id: number,
+    active: boolean
+  ): Observable<ApiResponse<Product>> {
+
+    return this.http.patch<ApiResponse<Product>>(
+      `${this.apiUrl}/${id}/status`,
+      { active }
+    );
+  }
+
   obtenerProductosParaSelector(): Observable<ProductoSelector[]> {
 
     const params = new HttpParams()
@@ -142,7 +136,7 @@ export class ProductService {
       .set('active', true);
 
     return this.http
-      .get<ApiResponse<ProductoPage>>(
+      .get<ApiResponse<ProductPage>>(
         this.apiUrl,
         { params }
       )

@@ -13,6 +13,7 @@ import { ProveedoresComponent } from './pages/proveedores/proveedores';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { BodegasComponent } from './pages/bodegas/bodegas.component';
 import { ListarInventarioComponent } from './pages/inventario/inventario.component';
+import { ListarProductoComponent } from './pages/producto/producto.component';
 
 export const routes: Routes = [
   {
@@ -61,6 +62,10 @@ export const routes: Routes = [
       {
         path: 'inventario',
         component: ListarInventarioComponent
+      },
+      {
+        path: 'producto',
+        component: ListarProductoComponent
       }
     ]
   },
