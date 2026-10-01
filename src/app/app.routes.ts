@@ -12,6 +12,7 @@ import { MainLayout } from './layout/menu/main-layout';
 import { ProveedoresComponent } from './pages/proveedores/proveedores';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { BodegasComponent } from './pages/bodegas/bodegas.component';
+import { ListarInventarioComponent } from './pages/inventario/inventario.component';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,10 @@ export const routes: Routes = [
       {
         path: 'bodegas',
         component: BodegasComponent
+      },
+      {
+        path: 'inventario',
+        component: ListarInventarioComponent
       }
     ]
   },
