@@ -65,6 +65,52 @@ export interface InventoryAdjustmentResponse {
   movementAt: string;
 }
 
+export interface SkuInventoryResponse {
+  variantId: number;
+  sku: string;
+  productId: number;
+  productCode: string;
+  productName: string;
+  balances: InventoryBalance[];
+}
+
+export interface InventoryMovement {
+  id: number;
+  variantId: number;
+  sku: string;
+  productId: number;
+  productCode: string;
+  productName: string;
+  warehouseId: number;
+  warehouseCode: string;
+  warehouseName: string;
+  type: string;
+  quantity: number;
+  reservedDelta: number;
+  previousAvailable: number;
+  newAvailable: number;
+  previousReserved: number;
+  newReserved: number;
+  sourceDocument?: string;
+  performedBy: string;
+  movementAt: string;
+  reason: string;
+  compensatesMovementId?: number;
+}
+
+export interface InventoryMovementPage {
+  content: InventoryMovement[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface CompensationRequest {
+  sourceDocument: string;
+  reason: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -72,20 +118,12 @@ export class InventarioService {
 
   private readonly apiUrl = '/api/v1/inventory';
 
-  /*
-   * Cambiar únicamente esta ruta si el @PostMapping
-   * del backend utiliza otra URL.
-   */
   private readonly adjustmentUrl =
     `${this.apiUrl}/adjustments`;
 
   constructor(
     private http: HttpClient
-  ) {}
-
-  // =========================================================
-  // INVENTARIO - HU-12
-  // =========================================================
+  ) { }
 
   obtenerInventario(
     sku = '',
@@ -128,10 +166,6 @@ export class InventarioService {
     );
   }
 
-  // =========================================================
-  // INVENTARIO BAJO - HU-12
-  // =========================================================
-
   obtenerInventarioBajo(
     product = '',
     warehouse = '',
@@ -163,38 +197,26 @@ export class InventarioService {
     );
   }
 
-  // =========================================================
-  // INVENTARIO POR SKU
-  // =========================================================
-
   obtenerInventarioPorSku(
     sku: string
-  ): Observable<ApiResponse<any>> {
+  ): Observable<ApiResponse<SkuInventoryResponse>> {
 
-    return this.http.get<ApiResponse<any>>(
+    return this.http.get<ApiResponse<SkuInventoryResponse>>(
       `${this.apiUrl}/sku/${encodeURIComponent(sku)}`
     );
   }
-
-  // =========================================================
-  // AJUSTAR MÍNIMO - HU-12
-  // =========================================================
 
   actualizarMinimo(
     variantId: number,
     warehouseId: number,
     minimum: number
-  ): Observable<ApiResponse<any>> {
+  ): Observable<ApiResponse<InventoryBalance>> {
 
-    return this.http.patch<ApiResponse<any>>(
+    return this.http.patch<ApiResponse<InventoryBalance>>(
       `${this.apiUrl}/variants/${variantId}/warehouses/${warehouseId}/minimum`,
       { minimum }
     );
   }
-
-  // =========================================================
-  // REGISTRAR AJUSTE - HU-11
-  // =========================================================
 
   registrarAjuste(
     request: InventoryAdjustmentRequest
@@ -204,6 +226,89 @@ export class InventarioService {
       ApiResponse<InventoryAdjustmentResponse>
     >(
       this.adjustmentUrl,
+      request
+    );
+  }
+
+  obtenerMovimientos(
+    from?: string,
+    to?: string,
+    sku = '',
+    warehouse = '',
+    type = '',
+    document = '',
+    page = 0,
+    size = 20
+  ): Observable<ApiResponse<InventoryMovementPage>> {
+
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+
+    if (from?.trim()) {
+      params = params.set(
+        'from',
+        from.trim()
+      );
+    }
+
+    if (to?.trim()) {
+      params = params.set(
+        'to',
+        to.trim()
+      );
+    }
+
+    if (sku.trim()) {
+      params = params.set(
+        'sku',
+        sku.trim()
+      );
+    }
+
+    if (warehouse.trim()) {
+      params = params.set(
+        'warehouse',
+        warehouse.trim()
+      );
+    }
+
+    if (type.trim()) {
+      params = params.set(
+        'type',
+        type.trim()
+      );
+    }
+
+    if (document.trim()) {
+      params = params.set(
+        'document',
+        document.trim()
+      );
+    }
+
+    return this.http.get<ApiResponse<InventoryMovementPage>>(
+      `${this.apiUrl}/movements`,
+      { params }
+    );
+  }
+
+  obtenerMovimientoPorId(
+    id: number
+  ): Observable<ApiResponse<InventoryMovement>> {
+
+    return this.http.get<ApiResponse<InventoryMovement>>(
+      `${this.apiUrl}/movements/${id}`
+    );
+  }
+
+  compensarMovimiento(
+    id: number,
+    request: CompensationRequest
+  ): Observable<ApiResponse<InventoryMovement>> {
+
+    return this.http.post<ApiResponse<InventoryMovement>>(
+      `${this.apiUrl}/movements/${id}/compensations`,
       request
     );
   }
