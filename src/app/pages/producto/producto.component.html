@@ -1,0 +1,653 @@
+<main class="page">
+
+  <section class="productos">
+
+    <header class="page__header">
+
+      <div class="page__heading">
+
+        <span class="page__eyebrow">
+          TexERP
+        </span>
+
+        <h1 class="page__title">
+          Productos
+        </h1>
+
+        <p class="page__description">
+          Gestión y consulta del catálogo de productos.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="button button--primary"
+        (click)="nuevoProducto()"
+      >
+        <i class="fi fi-sr-plus"></i>
+        <span>Nuevo producto</span>
+      </button>
+
+    </header>
+
+    @if (mensajeExito) {
+
+      <div class="alert alert--success">
+
+        <i class="fi fi-sr-check-circle"></i>
+
+        <span>
+          {{ mensajeExito }}
+        </span>
+
+      </div>
+
+    }
+
+    @if (mensajeError) {
+
+      <div class="alert alert--error">
+
+        <i class="fi fi-sr-cross-circle"></i>
+
+        <span>
+          {{ mensajeError }}
+        </span>
+
+      </div>
+
+    }
+
+    <section class="filters">
+
+      <div class="filters__header">
+
+        <div>
+
+          <h2 class="filters__title">
+            Filtros de productos
+          </h2>
+
+          <p class="filters__description">
+            Busca productos por código, nombre o tipo de tela.
+          </p>
+
+        </div>
+
+      </div>
+
+      <form
+        class="filters__form"
+        (ngSubmit)="aplicarFiltros()"
+      >
+
+        <div class="form-field">
+
+          <label for="codigo">
+            Código
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-barcode"></i>
+
+            <input
+              id="codigo"
+              type="text"
+              name="codigo"
+              [(ngModel)]="codigo"
+              placeholder="Buscar por código"
+            />
+
+          </div>
+
+        </div>
+
+        <div class="form-field">
+
+          <label for="nombre">
+            Nombre
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-box"></i>
+
+            <input
+              id="nombre"
+              type="text"
+              name="nombre"
+              [(ngModel)]="nombre"
+              placeholder="Buscar por nombre"
+            />
+
+          </div>
+
+        </div>
+
+        <div class="form-field">
+
+          <label for="tipoTela">
+            Tipo de tela
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fi fi-sr-fabric"></i>
+
+            <input
+              id="tipoTela"
+              type="text"
+              name="tipoTela"
+              [(ngModel)]="tipoTela"
+              placeholder="Buscar tipo de tela"
+            />
+
+          </div>
+
+        </div>
+
+        <div class="form-field">
+
+          <label for="estado">
+            Estado
+          </label>
+
+          <select
+            id="estado"
+            name="estado"
+            [(ngModel)]="estado"
+          >
+
+            <option [ngValue]="null">
+              Todos
+            </option>
+
+            <option [ngValue]="true">
+              Activos
+            </option>
+
+            <option [ngValue]="false">
+              Inactivos
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="filters__actions">
+
+          <button
+            type="submit"
+            class="button button--primary"
+          >
+            <i class="fi fi-sr-search"></i>
+            <span>Buscar</span>
+          </button>
+
+          <button
+            type="button"
+            class="button button--secondary"
+            (click)="limpiarFiltros()"
+          >
+            <i class="fi fi-sr-cross"></i>
+            <span>Limpiar</span>
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    <section class="table-card">
+
+      @if (cargando) {
+
+        <div class="table-card__loading">
+
+          <app-loading
+            mensaje="Cargando productos..."
+          ></app-loading>
+
+        </div>
+
+      } @else if (productos.length === 0) {
+
+        <div class="empty-state">
+
+          <div class="empty-state__icon">
+
+            <i class="fi fi-sr-box"></i>
+
+          </div>
+
+          <h2 class="empty-state__title">
+            No hay productos disponibles
+          </h2>
+
+          <p class="empty-state__description">
+            No se encontraron productos con los filtros seleccionados.
+          </p>
+
+        </div>
+
+      } @else {
+
+        <div class="table-wrapper">
+
+          <table class="products-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Código
+                </th>
+
+                <th>
+                  Producto
+                </th>
+
+                <th>
+                  Tipo de tela
+                </th>
+
+                <th>
+                  Composición
+                </th>
+
+                <th>
+                  Estado
+                </th>
+
+                <th>
+                  Acciones
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              @for (producto of productos; track producto.id) {
+
+                <tr>
+
+                  <td>
+
+                    <span class="product-code">
+                      {{ producto.code }}
+                    </span>
+
+                  </td>
+
+                  <td>
+
+                    <div class="product">
+
+                      <span class="product__name">
+                        {{ producto.name }}
+                      </span>
+
+                      <span class="product__id">
+                        ID: {{ producto.id }}
+                      </span>
+
+                    </div>
+
+                  </td>
+
+                  <td>
+                    {{ producto.fabricType }}
+                  </td>
+
+                  <td>
+
+                    <span class="composition">
+                      {{ producto.composition }}
+                    </span>
+
+                  </td>
+
+                  <td>
+
+                    @if (producto.active) {
+
+                      <span class="status status--active">
+
+                        <i class="fi fi-sr-check-circle"></i>
+
+                        Activo
+
+                      </span>
+
+                    } @else {
+
+                      <span class="status status--inactive">
+
+                        <i class="fi fi-sr-cross-circle"></i>
+
+                        Inactivo
+
+                      </span>
+
+                    }
+
+                  </td>
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button
+                        type="button"
+                        class="action-button"
+                        (click)="editarProducto(producto)"
+                        aria-label="Editar producto"
+                        title="Editar producto"
+                      >
+                        <i class="fi fi-sr-pencil"></i>
+                      </button>
+
+                      <button
+                        type="button"
+                        class="action-button"
+                        (click)="cambiarEstado(producto)"
+                        [attr.aria-label]="producto.active ? 'Desactivar producto' : 'Activar producto'"
+                        [attr.title]="producto.active ? 'Desactivar producto' : 'Activar producto'"
+                      >
+
+                        @if (producto.active) {
+
+                          <i class="fi fi-sr-toggle-on"></i>
+
+                        } @else {
+
+                          <i class="fi fi-sr-toggle-off"></i>
+
+                        }
+
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <footer class="pagination">
+
+          <div class="pagination__info">
+
+            Mostrando
+            <strong>{{ productos.length }}</strong>
+            de
+            <strong>{{ totalElementos }}</strong>
+            registros
+
+          </div>
+
+          <div class="pagination__controls">
+
+            <button
+              type="button"
+              class="pagination__button"
+              [disabled]="paginaActual === 0"
+              (click)="paginaAnterior()"
+              aria-label="Página anterior"
+            >
+              <i class="fi fi-sr-angle-left"></i>
+            </button>
+
+            <span class="pagination__current">
+
+              Página
+              <strong>{{ paginaActual + 1 }}</strong>
+              de
+              <strong>{{ totalPaginas || 1 }}</strong>
+
+            </span>
+
+            <button
+              type="button"
+              class="pagination__button"
+              [disabled]="paginaActual + 1 >= totalPaginas"
+              (click)="paginaSiguiente()"
+              aria-label="Página siguiente"
+            >
+              <i class="fi fi-sr-angle-right"></i>
+            </button>
+
+          </div>
+
+        </footer>
+
+      }
+
+    </section>
+
+  </section>
+
+  @if (mostrarFormulario) {
+
+    <div
+      class="modal-overlay"
+      (click)="cerrarFormulario()"
+    >
+
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        (click)="$event.stopPropagation()"
+      >
+
+        <header class="modal__header">
+
+          <div>
+
+            <span class="modal__eyebrow">
+              Productos
+            </span>
+
+            <h2
+              id="modal-title"
+              class="modal__title"
+            >
+              {{ editando ? 'Editar producto' : 'Nuevo producto' }}
+            </h2>
+
+            <p class="modal__description">
+              {{ editando
+                ? 'Actualiza la información del producto.'
+                : 'Registra un nuevo producto en el catálogo.'
+              }}
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="modal__close"
+            (click)="cerrarFormulario()"
+            [disabled]="guardando"
+            aria-label="Cerrar"
+          >
+            <i class="fi fi-sr-cross"></i>
+          </button>
+
+        </header>
+
+        <form
+          class="modal__form"
+          (ngSubmit)="guardarProducto()"
+        >
+
+          <div class="form-field">
+
+            <label for="formularioCodigo">
+              Código
+            </label>
+
+            <input
+              id="formularioCodigo"
+              type="text"
+              name="formularioCodigo"
+              [(ngModel)]="formularioCodigo"
+              maxlength="50"
+              placeholder="Código del producto"
+              [disabled]="guardando"
+            />
+
+            <small>
+              Máximo 50 caracteres.
+            </small>
+
+          </div>
+
+          <div class="form-field">
+
+            <label for="formularioNombre">
+              Nombre
+            </label>
+
+            <input
+              id="formularioNombre"
+              type="text"
+              name="formularioNombre"
+              [(ngModel)]="formularioNombre"
+              maxlength="150"
+              placeholder="Nombre del producto"
+              [disabled]="guardando"
+            />
+
+            <small>
+              Máximo 150 caracteres.
+            </small>
+
+          </div>
+
+          <div class="form-field">
+
+            <label for="formularioTipoTela">
+              Tipo de tela
+            </label>
+
+            <input
+              id="formularioTipoTela"
+              type="text"
+              name="formularioTipoTela"
+              [(ngModel)]="formularioTipoTela"
+              maxlength="100"
+              placeholder="Ejemplo: Algodón"
+              [disabled]="guardando"
+            />
+
+            <small>
+              Máximo 100 caracteres.
+            </small>
+
+          </div>
+
+          <div class="form-field">
+
+            <label for="formularioComposicion">
+              Composición
+            </label>
+
+            <textarea
+              id="formularioComposicion"
+              name="formularioComposicion"
+              [(ngModel)]="formularioComposicion"
+              maxlength="500"
+              rows="4"
+              placeholder="Indique la composición del producto"
+              [disabled]="guardando"
+            ></textarea>
+
+            <small>
+              Máximo 500 caracteres.
+            </small>
+
+          </div>
+
+          <div class="form-field form-field--checkbox">
+
+            <label class="checkbox">
+
+              <input
+                type="checkbox"
+                name="formularioActivo"
+                [(ngModel)]="formularioActivo"
+                [disabled]="guardando"
+              />
+
+              <span class="checkbox__box"></span>
+
+              <span class="checkbox__label">
+                Producto activo
+              </span>
+
+            </label>
+
+          </div>
+
+          <footer class="modal__actions">
+
+            <button
+              type="button"
+              class="button button--secondary"
+              (click)="cancelar()"
+              [disabled]="guardando"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              class="button button--primary"
+              [disabled]="guardando"
+            >
+
+              @if (guardando) {
+
+                <span>
+                  Guardando...
+                </span>
+
+              } @else {
+
+                <i class="fi fi-sr-check"></i>
+
+                <span>
+                  {{ editando ? 'Guardar cambios' : 'Crear producto' }}
+                </span>
+
+              }
+
+            </button>
+
+          </footer>
+
+        </form>
+
+      </section>
+
+    </div>
+
+  }
+
+</main>
