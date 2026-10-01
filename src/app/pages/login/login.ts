@@ -14,6 +14,7 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './login.scss',
 })
 export class Login {
+
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -84,6 +85,9 @@ export class Login {
         return 'Ocurrió un problema al iniciar sesión. Inténtalo nuevamente.';
     }
   }
+  volverAlInicio(): void {
+  this.router.navigate(['/']);
+}
 }
 
 export { Login as LoginComponent };

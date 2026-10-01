@@ -1,3 +1,13 @@
+
+<button
+  type="button"
+  class="back-home"
+  (click)="volverAlInicio()"
+  aria-label="Volver al inicio">
+  <span class="back-home__text">Volver al inicio</span>
+
+</button>
+
 <div class="login-container">
   <div class="hero-brand">
     <div class="brand-content">
@@ -38,14 +48,8 @@
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
           </span>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            formControlName="email" 
-            placeholder="Usuario" 
-            autocomplete="username" 
-          />
+          <input type="email" id="email" name="email" formControlName="email" placeholder="Usuario"
+            autocomplete="username" />
         </div>
 
         <div class="input-group">
@@ -88,19 +92,6 @@
         </button>
       </form>
 
-      <div class="divider">
-        <span>o</span>
-      </div>
-
-      <button type="button" class="btn-secondary" (click)="ingresar()">
-        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-        Ingresar como administrador
-      </button>
 
       <div class="industry-icons">
         <div class="icon-item" title="Hilos e insumos">
