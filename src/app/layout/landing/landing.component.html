@@ -1,0 +1,529 @@
+<main class="landing">
+
+    <header class="navbar">
+
+
+        <div class="navbar__container">
+
+            <a routerLink="/" class="navbar__brand">
+                <span class="navbar__logo">
+                    Creaciones Vannesa
+                </span>
+
+                <span class="navbar__tagline">
+                    Empresa textil
+                </span>
+            </a>
+
+            <nav class="navbar__navigation">
+
+                <a routerLink="/" class="navbar__link navbar__link--active">
+                    Inicio
+                </a>
+
+                <a href="#productos" class="navbar__link">
+                    Productos
+                </a>
+
+                <a href="#nosotros" class="navbar__link">
+                    Nosotros
+                </a>
+
+                <a href="#contacto" class="navbar__link">
+                    Contacto
+                </a>
+
+            </nav>
+
+            <a routerLink="/login" class="button button--login">
+                <i class="fi fi-sr-user"></i>
+                <span>Iniciar sesión</span>
+            </a>
+
+        </div>
+
+
+    </header>
+
+    <section class="hero">
+
+
+        <div class="hero__container">
+
+            <div class="hero__content">
+
+                <span class="hero__eyebrow">
+                    Creaciones Vannesa
+                </span>
+
+                <h1 class="hero__title">
+                    Calidad y diseño
+                    <span>en cada creación.</span>
+                </h1>
+
+                <p class="hero__description">
+                    En Creaciones Vannesa trabajamos para ofrecer
+                    productos textiles de calidad, combinando diseño,
+                    experiencia y compromiso con nuestros clientes.
+                </p>
+
+                <div class="hero__actions">
+
+                    <a href="#productos" class="button button--primary">
+                        <span>Ver productos</span>
+                        <i class="fi fi-sr-arrow-right"></i>
+                    </a>
+
+                    <a href="#nosotros" class="button button--outline">
+                        <span>Conocer la empresa</span>
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="hero__visual">
+
+                <div class="hero-card">
+
+                    <div class="hero-card__header">
+
+                        <div>
+
+                            <span class="hero-card__eyebrow">
+                                Creaciones Vannesa
+                            </span>
+
+                            <h2 class="hero-card__title">
+                                Nuestra empresa
+                            </h2>
+
+                        </div>
+
+                        <div class="hero-card__icon">
+                            <i class="fi fi-sr-chart-histogram"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="hero-card__body">
+
+                        <div class="hero-card__item">
+
+                            <div class="hero-card__item-icon">
+                                <i class="fi fi-sr-box"></i>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Productos
+                                </strong>
+
+                                <span>
+                                    Catálogo de productos textiles
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div class="hero-card__item">
+
+                            <div class="hero-card__item-icon">
+                                <i class="fi fi-sr-warehouse-alt"></i>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Producción
+                                </strong>
+
+                                <span>
+                                    Organización de nuestras operaciones
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div class="hero-card__item">
+
+                            <div class="hero-card__item-icon">
+                                <i class="fi fi-sr-chart-line-up"></i>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Gestión
+                                </strong>
+
+                                <span>
+                                    Información centralizada
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+    <section id="productos" class="products-section">
+
+
+        <div class="section-container">
+
+            <div class="section-header">
+
+                <div>
+
+                    <span class="section-eyebrow">
+                        Catálogo
+                    </span>
+
+                    <h2 class="section-title">
+                        Nuestros productos
+                    </h2>
+
+                    <p class="section-description">
+                        Conoce algunos de los productos disponibles
+                        en el catálogo de Creaciones Vannesa.
+                    </p>
+
+                </div>
+
+                <a routerLink="/productos" class="section-link">
+                    Ver catálogo completo
+                    <i class="fi fi-sr-arrow-right"></i>
+                </a>
+
+            </div>
+
+
+            @if (cargandoProductos) {
+
+            <div class="products-loading">
+
+                <app-loading mensaje="Cargando productos..."></app-loading>
+
+            </div>
+
+            } @else if (mensajeError) {
+
+            <div class="products-message">
+
+                <i class="fi fi-sr-cross-circle"></i>
+
+                <span>
+                    {{ mensajeError }}
+                </span>
+
+            </div>
+
+            } @else if (productos.length === 0) {
+
+            <div class="products-message">
+
+                <i class="fi fi-sr-box"></i>
+
+                <span>
+                    Actualmente no hay productos disponibles.
+                </span>
+
+            </div>
+
+            } @else {
+
+            <div class="products-grid">
+
+                @for (
+                producto of productos;
+                track producto.id
+                ) {
+
+                <article class="product-card">
+
+                    <div class="product-card__visual">
+
+                        <div class="product-card__icon">
+                            <i class="fi fi-sr-box"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="product-card__content">
+
+                        <span class="product-card__code">
+                            {{ producto.code }}
+                        </span>
+
+                        <h3 class="product-card__name">
+                            {{ producto.name }}
+                        </h3>
+
+                        <p class="product-card__type">
+                            {{ producto.fabricType }}
+                        </p>
+
+                        <p class="product-card__composition">
+                            {{ obtenerDescripcionProducto(producto) }}
+                        </p>
+
+                    </div>
+
+                </article>
+
+                }
+
+            </div>
+
+            }
+
+        </div>
+
+
+    </section>
+
+    <section id="nosotros" class="about-section">
+
+
+        <div class="section-container">
+
+            <div class="about">
+
+                <div class="about__content">
+
+                    <span class="section-eyebrow">
+                        Nosotros
+                    </span>
+
+                    <h2 class="section-title">
+                        Creaciones Vannesa,
+                        tradición y compromiso textil.
+                    </h2>
+
+                    <p class="about__text">
+                        Creaciones Vannesa es una empresa dedicada al
+                        sector textil, enfocada en ofrecer productos
+                        que combinan calidad, diseño y funcionalidad.
+                    </p>
+
+                    <p class="about__text">
+                        Nuestro objetivo es brindar a nuestros clientes
+                        productos confiables y una atención orientada a
+                        sus necesidades.
+                    </p>
+
+                    <a href="#productos" class="button button--primary">
+                        <span>Conocer nuestros productos</span>
+                        <i class="fi fi-sr-arrow-right"></i>
+                    </a>
+
+                </div>
+
+
+                <div class="about__features">
+
+                    <article class="feature">
+
+                        <div class="feature__icon">
+                            <i class="fi fi-sr-box"></i>
+                        </div>
+
+                        <div>
+
+                            <h3 class="feature__title">
+                                Productos textiles
+                            </h3>
+
+                            <p class="feature__description">
+                                Contamos con un catálogo orientado a las
+                                necesidades de nuestros clientes.
+                            </p>
+
+                        </div>
+
+                    </article>
+
+
+                    <article class="feature">
+
+                        <div class="feature__icon">
+                            <i class="fi fi-sr-warehouse-alt"></i>
+                        </div>
+
+                        <div>
+
+                            <h3 class="feature__title">
+                                Organización
+                            </h3>
+
+                            <p class="feature__description">
+                                Gestionamos nuestros productos y operaciones
+                                de manera organizada y centralizada.
+                            </p>
+
+                        </div>
+
+                    </article>
+
+
+                    <article class="feature">
+
+                        <div class="feature__icon">
+                            <i class="fi fi-sr-chart-line-up"></i>
+                        </div>
+
+                        <div>
+
+                            <h3 class="feature__title">
+                                Gestión con tecnología
+                            </h3>
+
+                            <p class="feature__description">
+                                Utilizamos TexERP como herramienta para
+                                apoyar la gestión de nuestra empresa.
+                            </p>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+    <section class="access-section">
+
+
+        <div class="section-container">
+
+            <div class="access">
+
+                <div>
+
+                    <span class="section-eyebrow">
+                        Gestión empresarial
+                    </span>
+
+                    <h2 class="access__title">
+                        Creaciones Vannesa,
+                        gestionada con TexERP.
+                    </h2>
+
+                    <p class="access__description">
+                        Accede a la plataforma TexERP para consultar
+                        y administrar la información de la empresa.
+                    </p>
+
+                </div>
+
+                <a routerLink="/login" class="button button--light">
+                    <span>Iniciar sesión</span>
+                    <i class="fi fi-sr-arrow-right"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+    <footer id="contacto" class="footer">
+
+
+        <div class="section-container">
+
+            <div class="footer__content">
+
+                <div class="footer__brand">
+
+                    <span class="footer__logo">
+                        Creaciones Vannesa
+                    </span>
+
+                    <p class="footer__description">
+                        Calidad, diseño y compromiso en cada creación.
+                    </p>
+
+                </div>
+
+                <div class="footer__links">
+
+                    <div class="footer__column">
+
+                        <h3>
+                            Navegación
+                        </h3>
+
+                        <a routerLink="/">
+                            Inicio
+                        </a>
+
+                        <a href="#productos">
+                            Productos
+                        </a>
+
+                        <a href="#nosotros">
+                            Nosotros
+                        </a>
+
+                    </div>
+
+                    <div class="footer__column">
+
+                        <h3>
+                            Plataforma
+                        </h3>
+
+                        <a routerLink="/login">
+                            Iniciar sesión
+                        </a>
+
+                    </div>
+
+                    <div class="footer__column">
+
+                        <h3>
+                            Contacto
+                        </h3>
+
+                        <span>
+                            Información comercial
+                        </span>
+
+                        <span>
+                            Atención al cliente
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="footer__bottom">
+
+                <span>
+                    © 2026 Creaciones Vannesa. Todos los derechos reservados.
+                </span>
+
+            </div>
+
+        </div>
+
+
+    </footer>
+
+</main>
