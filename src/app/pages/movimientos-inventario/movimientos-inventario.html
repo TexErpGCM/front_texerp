@@ -1,0 +1,241 @@
+<div class="movimientos-container">
+
+  <!-- BANNER CABECERA -->
+  <header class="header-banner">
+    <div class="header-title-block">
+      <span class="badge-tag">Auditoría & Trazabilidad</span>
+      <h2>Kardex / Historial de Movimientos</h2>
+      <p>Registro de entradas, salidas, transferencias y ajustes de inventario.</p>
+    </div>
+    <button class="btn-refresh" (click)="consultarMovimientos()" [disabled]="cargando">
+      <span class="icon" [class.spin]="cargando">🔄</span>
+      <span>{{ cargando ? 'Actualizando...' : 'Actualizar' }}</span>
+    </button>
+  </header>
+
+  <!-- FILTROS COMBINADOS HORIZONTALES -->
+  <section class="filter-card">
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label for="filter-sku">SKU / Variante</label>
+        <input id="filter-sku" type="text" [(ngModel)]="filtros.sku" (input)="aplicarFiltros()" placeholder="Ej: TEX-ALG-301" />
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-bodega">Bodega</label>
+        <select id="filter-bodega" [(ngModel)]="filtros.bodegaId" (change)="aplicarFiltros()">
+          <option value="">Todas las bodegas</option>
+          <option *ngFor="let b of listaBodegas" [value]="b.id">{{ b.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-tipo">Tipo Movimiento</label>
+        <select id="filter-tipo" [(ngModel)]="filtros.tipo" (change)="aplicarFiltros()">
+          <option value="">Todos los tipos</option>
+          <option value="ENTRADA">📥 Entrada (+)</option>
+          <option value="SALIDA">📤 Salida (-)</option>
+          <option value="TRANSFERENCIA">🔄 Transferencia</option>
+          <option value="AJUSTE_POSITIVO">🛠️ Ajuste (+)</option>
+          <option value="AJUSTE_NEGATIVO">⚠️ Ajuste (-)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-doc">Doc. Origen</label>
+        <input id="filter-doc" type="text" [(ngModel)]="filtros.documentoOrigen" (input)="aplicarFiltros()" placeholder="Ej: FAC-2026-0412" />
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLA KARDEX AJUSTADA AL 100% SIN SCROLL HORIZONTAL -->
+  <section class="table-card">
+    <table class="texerp-table">
+      <thead>
+        <tr>
+          <th style="width: 14%;">Fecha & Hora</th>
+          <th style="width: 22%;">SKU / Producto</th>
+          <th style="width: 14%;">Bodega</th>
+          <th style="width: 13%;">Tipo Mov.</th>
+          <th style="width: 8%;" class="text-right">Cant.</th>
+          <th style="width: 12%;" class="text-center">Saldo (Ant → Nuevo)</th>
+          <th style="width: 11%;">Doc. / Usuario</th>
+          <th style="width: 6%;" class="text-center">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of respuesta.data">
+          <!-- Fecha -->
+          <td>
+            <span class="datetime-tag font-mono">{{ item.fechaHora }}</span>
+          </td>
+
+          <!-- SKU & Producto -->
+          <td>
+            <div class="product-cell">
+              <strong class="font-mono sku-code">{{ item.sku }}</strong>
+              <span class="product-sub" [title]="item.producto">{{ item.producto }}</span>
+            </div>
+          </td>
+
+          <!-- Bodega -->
+          <td>
+            <span class="bodega-name">{{ item.bodegaNombre }}</span>
+          </td>
+          
+          <!-- Tipo Badge -->
+          <td>
+            <span class="type-badge" [ngClass]="{
+              'type-entrada': item.tipo === 'ENTRADA' || item.tipo === 'AJUSTE_POSITIVO',
+              'type-salida': item.tipo === 'SALIDA' || item.tipo === 'AJUSTE_NEGATIVO',
+              'type-transferencia': item.tipo === 'TRANSFERENCIA'
+            }">
+              {{ item.tipo }}
+            </span>
+          </td>
+
+          <!-- Cantidad -->
+          <td class="text-right bold-quantity font-mono" [ngClass]="{
+            'qty-positive': item.tipo === 'ENTRADA' || item.tipo === 'AJUSTE_POSITIVO',
+            'qty-negative': item.tipo === 'SALIDA' || item.tipo === 'AJUSTE_NEGATIVO'
+          }">
+            {{ (item.tipo === 'SALIDA' || item.tipo === 'AJUSTE_NEGATIVO') ? '-' : '+' }}{{ item.cantidad | number }}
+          </td>
+
+          <!-- Variación de Saldo -->
+          <td class="text-center balance-comparison font-mono">
+            <span class="old-bal">{{ item.saldoAnterior | number }}</span>
+            <span class="arrow">→</span>
+            <span class="new-bal">{{ item.saldoNuevo | number }}</span>
+          </td>
+
+          <!-- Documento y Usuario agrupados -->
+          <td>
+            <div class="doc-user-group">
+              <span class="doc-badge font-mono">{{ item.documentoOrigen }}</span>
+              <span class="user-chip">👤 {{ item.usuario }}</span>
+            </div>
+          </td>
+
+          <!-- Botón Acción compacto -->
+          <td class="text-center">
+            <button class="btn-detail-icon" (click)="verDetalle(item)" title="Ver detalle completo">
+             ver
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="respuesta.data.length === 0 && !cargando">
+          <td colspan="8" class="empty-cell">
+            <div class="empty-state">
+              <span>📑</span>
+              <p>No se registraron movimientos que coincidan con la búsqueda.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination-bar" *ngIf="respuesta.totalRegistros > 0">
+      <span class="page-info">
+        Página <strong>{{ respuesta.paginaActual }}</strong> de <strong>{{ respuesta.totalPaginas }}</strong>
+      </span>
+      <div class="pagination-controls">
+        <button [disabled]="respuesta.paginaActual === 1" (click)="cambiarPagina(respuesta.paginaActual - 1)">Anterior</button>
+        <button [disabled]="respuesta.paginaActual === respuesta.totalPaginas" (click)="cambiarPagina(respuesta.paginaActual + 1)">Siguiente</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL DE DETALLE COMPLETO -->
+  <div class="modal-backdrop" *ngIf="movimientoSeleccionado" (click)="cerrarDetalle()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="header-title-group">
+          <div class="icon-badge">📋</div>
+          <div>
+            <div class="title-row">
+              <h2>Detalle de Movimiento</h2>
+              <span class="badge-id font-mono">#{{ movimientoSeleccionado.id }}</span>
+            </div>
+            <span class="type-badge" [ngClass]="{
+              'type-entrada': movimientoSeleccionado.tipo === 'ENTRADA' || movimientoSeleccionado.tipo === 'AJUSTE_POSITIVO',
+              'type-salida': movimientoSeleccionado.tipo === 'SALIDA' || movimientoSeleccionado.tipo === 'AJUSTE_NEGATIVO',
+              'type-transferencia': movimientoSeleccionado.tipo === 'TRANSFERENCIA'
+            }">
+              {{ movimientoSeleccionado.tipo }}
+            </span>
+          </div>
+        </div>
+        <button class="btn-close" (click)="cerrarDetalle()" aria-label="Cerrar modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="product-banner">
+          <div class="info-item">
+            <span class="label">SKU</span>
+            <span class="value font-mono highlight-code">{{ movimientoSeleccionado.sku }}</span>
+          </div>
+          <div class="info-item flex-2">
+            <span class="label">Producto</span>
+            <span class="value product-name">{{ movimientoSeleccionado.producto }}</span>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Saldo Anterior</span>
+            <span class="kpi-value font-mono">{{ movimientoSeleccionado.saldoAnterior | number }}</span>
+          </div>
+          <div class="kpi-card impact-card" [ngClass]="{
+            'type-entrada': movimientoSeleccionado.tipo === 'ENTRADA' || movimientoSeleccionado.tipo === 'AJUSTE_POSITIVO',
+            'type-salida': movimientoSeleccionado.tipo === 'SALIDA' || movimientoSeleccionado.tipo === 'AJUSTE_NEGATIVO'
+          }">
+            <span class="kpi-label">Cantidad</span>
+            <span class="kpi-value font-mono font-bold">
+              {{ (movimientoSeleccionado.tipo === 'SALIDA' || movimientoSeleccionado.tipo === 'AJUSTE_NEGATIVO') ? '-' : '+' }}{{ movimientoSeleccionado.cantidad | number }}
+            </span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Saldo Nuevo</span>
+            <span class="kpi-value font-mono font-bold">{{ movimientoSeleccionado.saldoNuevo | number }}</span>
+          </div>
+        </div>
+
+        <div class="metadata-grid">
+          <div class="meta-item">
+            <span class="label">Bodega</span>
+            <span class="value">{{ movimientoSeleccionado.bodegaNombre }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Doc. Origen</span>
+            <span class="value font-mono">{{ movimientoSeleccionado.documentoOrigen }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Usuario Registra</span>
+            <span class="value">👤 {{ movimientoSeleccionado.usuario }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Fecha y Hora</span>
+            <span class="value font-mono">{{ movimientoSeleccionado.fechaHora }}</span>
+          </div>
+        </div>
+
+        <div class="observations-box" *ngIf="movimientoSeleccionado.observaciones">
+          <span class="label">Observaciones</span>
+          <p class="text">{{ movimientoSeleccionado.observaciones }}</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-close" (click)="cerrarDetalle()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -24,6 +24,7 @@
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s ease;
   &:hover { background-color: #1d4ed8; }
 }
 
@@ -46,49 +47,109 @@
   .btn-close-alert { background: transparent; border: none; cursor: pointer; color: inherit; }
 }
 
+/* =========================================================
+   BUSCADOR Y FILTROS HORIZONTALES (ESTILO TRAZABILIDAD)
+   ========================================================= */
 .filters-card {
-  background: #fff;
-  padding: 1.25rem;
+  background: #ffffff;
+  padding: 1.25rem 1.5rem;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  align-items: flex-end;
 
+  .filter-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  /* Grid horizontal para los campos del filtro */
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  /* Estilos para los elementos de filtro (soporta tanto directo como dentro de .filter-grid) */
   .filter-item {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: #334155;
+    gap: 0.35rem;
+
+    label {
+      font-size: 0.725rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase; /* Mayúsculas tipo Trazabilidad */
+      letter-spacing: 0.03em;
+    }
 
     input, select {
-      height: 38px;
-      padding: 0 0.75rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
+      height: 40px;
+      padding: 0 0.85rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: #334155;
+      background-color: #f8fafc; /* Fondo suave idéntico al buscador de trazabilidad */
       outline: none;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+
+      &:focus {
+        background-color: #ffffff;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      &::placeholder {
+        color: #94a3b8;
+      }
     }
   }
 
   .filter-actions {
     display: flex;
     gap: 0.5rem;
+    align-items: flex-end;
+
     button {
-      height: 38px;
-      padding: 0 1rem;
-      border-radius: 6px;
+      height: 40px;
+      padding: 0 1.25rem;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
       font-weight: 600;
-      &.btn-search { background: #2563eb; color: #fff; }
-      &.btn-clear { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+      font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+
+      &.btn-search {
+        background: #2563eb;
+        color: #ffffff;
+        &:hover { background: #1d4ed8; }
+      }
+
+      &.btn-clear {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        &:hover { background: #e2e8f0; }
+      }
     }
   }
 }
 
+/* =========================================================
+   TABLA DE RESULTADOS
+   ========================================================= */
 .table-card {
   background: #fff;
   border-radius: 12px;
@@ -164,6 +225,9 @@
   }
 }
 
+/* =========================================================
+   MODAL DE REGISTRO / EDICIÓN
+   ========================================================= */
 .modal-backdrop {
   position: fixed;
   inset: 0;

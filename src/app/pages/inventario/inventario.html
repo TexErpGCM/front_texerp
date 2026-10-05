@@ -1,0 +1,170 @@
+<div class="inventario-container">
+
+  <!-- BANNER CABECERA -->
+  <div class="header-banner">
+    <div class="header-title-block">
+      <span class="badge-tag">Módulo de Operaciones</span>
+      <h2>Consulta de Balance e Inventario</h2>
+      <p>Gestión de existencias por SKU, seguimiento multi-bodega y alertas de reabastecimiento.</p>
+    </div>
+    <button class="btn-refresh" (click)="consultarInventario()" [disabled]="cargando">
+      <span class="spin-icon" [class.spinning]="cargando">🔄</span>
+      <span>{{ cargando ? 'Actualizando...' : 'Actualizar Saldo' }}</span>
+    </button>
+  </div>
+
+  <!-- TARJETAS RESUMEN (KPIS) -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon blue">📦</div>
+      <div class="kpi-data">
+        <span class="kpi-value">{{ totalRegistros }}</span>
+        <span class="kpi-label">Balances Consultados</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon green">📊</div>
+      <div class="kpi-data">
+        <span class="kpi-value">{{ totalUnidades | number }}</span>
+        <span class="kpi-label">Unidades Disponibles</span>
+      </div>
+    </div>
+
+    <div class="kpi-card" [class.alert]="totalBajoStock > 0">
+      <div class="kpi-icon amber">⚠️</div>
+      <div class="kpi-data">
+        <span class="kpi-value">{{ totalBajoStock }}</span>
+        <span class="kpi-label">Stock en Mínimo</span>
+      </div>
+    </div>
+
+    <div class="kpi-card" [class.danger]="totalAgotados > 0">
+      <div class="kpi-icon red">🚫</div>
+      <div class="kpi-data">
+        <span class="kpi-value">{{ totalAgotados }}</span>
+        <span class="kpi-label">Sin Existencia (0)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TARJETA DE FILTROS COMBINADOS -->
+  <div class="filter-card">
+    <div class="filter-header">
+      <h4> Filtros de Búsqueda Avanzada</h4>
+    </div>
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label>SKU</label>
+        <div class="input-with-icon">
+          <input type="text" [(ngModel)]="filtros.sku" (input)="aplicarFiltros()" placeholder="Ej: TEX-ALG-301" />
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Producto / Variante</label>
+        <input type="text" [(ngModel)]="filtros.producto" (input)="aplicarFiltros()" placeholder="Nombre o tejido" />
+      </div>
+
+      <div class="filter-group">
+        <label>Bodega Ubicación</label>
+        <select [(ngModel)]="filtros.bodegaId" (change)="aplicarFiltros()">
+          <option value="">Todas las bodegas</option>
+          <option *ngFor="let b of listaBodegas" [value]="b.id">{{ b.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Estado de Inventario</label>
+        <select [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
+          <option value="">Todos los estados</option>
+          <option value="Disponible">🟢 Disponible</option>
+          <option value="Bajo Stock">⚠️ Bajo Stock (Alerta)</option>
+          <option value="Agotado">🔴 Sin Existencia (0)</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-clear" (click)="limpiarFiltros()">Limpiar Filtros</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA DE RESULTADOS -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="texerp-table">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Producto / Variante</th>
+            <th>Bodega</th>
+            <th class="text-right">Disponible</th>
+            <th class="text-right">Reservado</th>
+            <th class="text-right">Mínimo</th>
+            <th>Último Movimiento</th>
+            <th class="text-center">Estado / Alerta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of respuesta.data">
+            <td><span class="sku-tag">{{ item.sku }}</span></td>
+            <td>
+              <div class="product-info">
+                <strong>{{ item.producto }}</strong>
+                <small>{{ item.categoria }}</small>
+              </div>
+            </td>
+            <td><span class="location-chip"> {{ item.bodegaNombre }}</span></td>
+            
+            <td class="text-right bold-value" [ngClass]="{
+              'text-danger': item.cantidadDisponible === 0,
+              'text-warning': item.cantidadDisponible > 0 && item.cantidadDisponible <= item.stockMinimo
+            }">
+              {{ item.cantidadDisponible | number }}
+            </td>
+
+            <td class="text-right muted-value">{{ item.cantidadReservada | number }}</td>
+            <td class="text-right">{{ item.stockMinimo | number }}</td>
+            <td><span class="date-chip">{{ item.fechaUltimoMovimiento }}</span></td>
+            
+            <td class="text-center">
+              <span class="status-badge" [ngClass]="{
+                'status-available': item.estado === 'Disponible',
+                'status-low': item.estado === 'Bajo Stock',
+                'status-out': item.estado === 'Agotado'
+              }">
+                <span class="dot"></span>
+                <span>{{ item.estado }}</span>
+              </span>
+            </td>
+          </tr>
+
+          <!-- ESTADO VACÍO MEJORADO -->
+          <tr *ngIf="respuesta.data.length === 0 && !cargando">
+            <td colspan="8" class="empty-cell">
+              <div class="empty-state-box">
+                <div class="empty-icon">📂</div>
+                <h3>No se encontraron coincidencias</h3>
+                <p>No existen balances de inventario que coincidan con los filtros ingresados.</p>
+                <button class="btn-reset-filters" (click)="limpiarFiltros()">Restablecer Búsqueda</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination-bar" *ngIf="respuesta.totalRegistros > 0">
+      <span class="page-info">
+        Página {{ respuesta.paginaActual }} de {{ respuesta.totalPaginas }} ({{ respuesta.totalRegistros }} registros totales)
+      </span>
+      <div class="pagination-controls">
+        <button [disabled]="respuesta.paginaActual === 1" (click)="cambiarPagina(respuesta.paginaActual - 1)">← Anterior</button>
+        <button [disabled]="respuesta.paginaActual === respuesta.totalPaginas" (click)="cambiarPagina(respuesta.paginaActual + 1)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+</div>

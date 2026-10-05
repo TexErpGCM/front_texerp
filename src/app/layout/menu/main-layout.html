@@ -18,57 +18,19 @@
 
     <!-- MENÚ DE NAVEGACIÓN -->
     <nav class="sidebar-menu">
-
-      <!-- DASHBOARD -->
-      <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Dashboard</span>
-      </a>
-
-      <!-- USUARIOS -->
-      <a routerLink="/usuario" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Usuarios</span>
-      </a>
-
-      <!-- CLIENTES -->
-      <a routerLink="/clientes" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Clientes</span>
-      </a>
-
-      <!-- BODEGAS -->
-      <a routerLink="/bodegas" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Bodegas</span>
-      </a>
-
-      <!-- VARIANTE PRODUCTO -->
-      <a routerLink="/variante" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Variante producto</span>
-      </a>
-
-      <!-- PROVEEDORES -->
-      <a routerLink="/Proveedor" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Proveedores</span>
-      </a>
-
+      <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">Dashboard</a>
+      <a routerLink="/usuario" routerLinkActive="active" class="menu-item">Usuarios</a>
+      <a routerLink="/clientes" routerLinkActive="active" class="menu-item">Clientes</a>
+      <a routerLink="/bodegas" routerLinkActive="active" class="menu-item">Bodegas</a>
+      <a routerLink="/inventario" routerLinkActive="active" class="menu-item">Inventario</a>
+      <a routerLink="/movimientos" routerLinkActive="active" class="menu-item">Movimientos</a>
+      <a routerLink="/variante" routerLinkActive="active" class="menu-item">Variante producto</a>
+      <a routerLink="/Proveedor" routerLinkActive="active" class="menu-item">Proveedores</a>
     </nav>
-
-    <!-- TARJETA INFORMATIVA INFERIOR DE LA SIDEBAR -->
-    <div class="sidebar-promo-card">
-      <div class="promo-content">
-        <span class="promo-icon">🧵</span>
-        <p>Tejemos un futuro más sostenible</p>
-      </div>
-    </div>
 
     <!-- BOTÓN DE CERRAR SESIÓN -->
     <div class="sidebar-footer">
       <button type="button" class="logout-button" (click)="cerrarSesion()">
-        <span class="logout-icon">🚪</span>
         <span>Cerrar sesión</span>
       </button>
     </div>
@@ -77,8 +39,6 @@
 
   <!-- CONTENIDO PRINCIPAL -->
   <div class="main-wrapper">
-
-    <!-- BARRA SUPERIOR AZUL OSCURO -->
     <header class="top-header">
       <div class="header-info">
         <h1>Sistema de Gestión Textil</h1>
@@ -94,11 +54,9 @@
       </div>
     </header>
 
-    <!-- ÁREA DE RUTAS HIJAS -->
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
-
   </div>
 
 </div>

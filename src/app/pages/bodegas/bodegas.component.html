@@ -18,32 +18,38 @@
     </div>
   }
 
+  <!-- TARJETA DE FILTROS HORIZONTAL (ESTILO BUSCADOR DE TRAZABILIDAD) -->
   <form [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" class="filters-card">
-    <div class="filter-item">
-      <label for="fCode">Código</label>
-      <input id="fCode" type="text" formControlName="code" placeholder="Ej. BOD-01" />
-    </div>
+    <h3 class="filter-title">Buscador de Bodegas</h3>
 
-    <div class="filter-item">
-      <label for="fName">Nombre</label>
-      <input id="fName" type="text" formControlName="name" placeholder="Buscar por nombre" />
-    </div>
+    <div class="filter-grid">
+      <div class="filter-item">
+        <label for="fCode">Código</label>
+        <input id="fCode" type="text" formControlName="code" placeholder="Ej. BOD-01" />
+      </div>
 
-    <div class="filter-item">
-      <label for="fActive">Estado</label>
-      <select id="fActive" formControlName="active">
-        <option [ngValue]="null">Todos</option>
-        <option [value]="true">Activa</option>
-        <option [value]="false">Inactiva</option>
-      </select>
-    </div>
+      <div class="filter-item">
+        <label for="fName">Nombre</label>
+        <input id="fName" type="text" formControlName="name" placeholder="Buscar por nombre" />
+      </div>
 
-    <div class="filter-actions">
-      <button type="submit" class="btn-search">Buscar</button>
-      <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
+      <div class="filter-item">
+        <label for="fActive">Estado</label>
+        <select id="fActive" formControlName="active">
+          <option [ngValue]="null">Todos</option>
+          <option [value]="true">Activa</option>
+          <option [value]="false">Inactiva</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button type="submit" class="btn-search">Buscar</button>
+        <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
+      </div>
     </div>
   </form>
 
+  <!-- TABLA DE RESULTADOS -->
   <div class="table-card">
     <div class="table-card-header">
       <h3>Ubicaciones y Depósitos</h3>
@@ -110,6 +116,7 @@
     }
   </div>
 
+  <!-- MODAL DE FORMULARIO -->
   @if (mostrarFormulario) {
     <div class="modal-backdrop" (click)="cancelar()">
       <div class="modal-card" (click)="$event.stopPropagation()">

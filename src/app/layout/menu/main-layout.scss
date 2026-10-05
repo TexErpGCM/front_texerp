@@ -1,255 +1,172 @@
+$navy-sidebar: #060e1e;
+$navy-header: #0b1727;
+$blue-active: #2262ed;
+$text-light: #cbd5e1;
+$text-muted: #94a3b8;
+
+/* CONTENEDOR PRINCIPAL: Bloquea el scroll general de la pantalla */
 .app-layout {
   display: flex;
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Congela toda la ventana del navegador */
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background-color: #081120;
-}
+  overflow: hidden;
+  background-color: #f1f5f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-/* ==========================================
-   SIDEBAR LATERAL (FIJA Y ESTÁTICA)
-   ========================================== */
-.sidebar {
-  width: 250px;
-  height: 100vh;
-  box-sizing: border-box;
-  background: linear-gradient(180deg, #07152b 0%, #0c1d38 100%);
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem 0.85rem;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  flex-shrink: 0;
-  overflow: hidden; /* Imposibilita cualquier scroll en la barra lateral */
-
-  .sidebar-brand {
+  /* SIDEBAR AZUL: Fijo al 100% de la altura */
+  .sidebar {
+    width: 250px;
+    height: 100vh;
+    flex-shrink: 0; /* Evita que la barra se comprima */
+    background-color: $navy-sidebar;
     display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.25rem;
-    margin-bottom: 1rem;
-    flex-shrink: 0;
+    flex-direction: column;
+    padding: 1.25rem 1rem;
+    box-sizing: border-box;
 
-    .brand-logo {
-      width: 34px;
-      height: 34px;
-      background: linear-gradient(135deg, #00b4db, #0083b0);
-      border-radius: 8px;
+    .sidebar-brand {
+      flex-shrink: 0; /* Mantiene el logo siempre visible arriba */
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 6px;
-      box-shadow: 0 4px 10px rgba(0, 180, 219, 0.3);
+      gap: 0.75rem;
+      padding-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
-      svg {
-        fill: #ffffff;
-        width: 100%;
-        height: 100%;
+      .brand-logo svg {
+        width: 28px;
+        height: 28px;
+        fill: #3b82f6;
       }
-    }
-
-    .brand-text {
-      display: flex;
-      flex-direction: column;
 
       .brand-title {
-        font-size: 1rem;
-        font-weight: 700;
+        display: block;
         color: #ffffff;
-        letter-spacing: -0.3px;
+        font-weight: 700;
+        font-size: 0.95rem;
       }
 
       .brand-subtitle {
-        font-size: 0.68rem;
-        color: #38bdf8;
+        display: block;
+        color: $text-muted;
+        font-size: 0.725rem;
+      }
+    }
+
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+      overflow-y: auto; /* Permite scroll interno sólo si la pantalla es muy pequeña */
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 0.7rem 1.1rem;
+        color: $text-light;
+        text-decoration: none;
+        font-size: 0.9rem;
         font-weight: 500;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.07);
+          color: #ffffff;
+        }
+
+        &.active {
+          background-color: $blue-active;
+          color: #ffffff;
+          font-weight: 600;
+          border: 2px solid #ffffff;
+          box-shadow: 0 4px 12px rgba(34, 98, 237, 0.3);
+        }
+      }
+    }
+
+    /* BOTÓN CERRAR SESIÓN: Siempre anclado al fondo */
+    .sidebar-footer {
+      flex-shrink: 0;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+      .logout-button {
+        width: 100%;
+        padding: 0.65rem;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: $text-light;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+
+        &:hover {
+          background: rgba(239, 68, 68, 0.15);
+          color: #fca5a5;
+          border-color: rgba(239, 68, 68, 0.3);
+        }
       }
     }
   }
 
-  .sidebar-menu {
+  /* ÁREA DERECHA */
+  .main-wrapper {
+    flex: 1;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    flex: 1;
+    overflow: hidden;
 
-    .menu-item {
+    /* BARRA SUPERIOR FIJA */
+    .top-header {
+      flex-shrink: 0;
+      background-color: $navy-header;
+      color: #ffffff;
+      padding: 1.25rem 2rem;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.55rem 0.85rem;
-      color: #94a3b8;
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
 
-      .menu-icon {
-        font-size: 1rem;
+      .header-info {
+        h1 { margin: 0; font-size: 1.25rem; font-weight: 700; }
+        p { margin: 0.2rem 0 0; font-size: 0.8rem; color: $text-muted; }
+      }
+
+      .header-user-panel {
         display: flex;
         align-items: center;
-        justify-content: center;
-      }
+        gap: 0.75rem;
 
-      &:hover {
-        background: rgba(255, 255, 255, 0.05);
-        color: #f1f5f9;
-        transform: translateX(2px);
-      }
+        .user-avatar {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background-color: $blue-active;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 0.85rem;
+        }
 
-      &.active {
-        background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
-        color: #ffffff;
-        font-weight: 600;
-        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35);
-
-        .menu-icon {
-          transform: scale(1.05);
+        .user-info {
+          display: flex;
+          flex-direction: column;
+          .user-name { font-size: 0.85rem; font-weight: 600; }
+          .user-role { font-size: 0.725rem; color: $text-muted; }
         }
       }
     }
-  }
 
-  .sidebar-promo-card {
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.5), rgba(15, 23, 42, 0.7));
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    border-radius: 8px;
-    padding: 0.6rem 0.75rem;
-    margin-bottom: 0.75rem;
-    flex-shrink: 0;
-
-    .promo-content {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-
-      .promo-icon {
-        font-size: 1.1rem;
-      }
-
-      p {
-        margin: 0;
-        font-size: 0.72rem;
-        color: #cbd5e1;
-        line-height: 1.2;
-        font-weight: 500;
-      }
+    /* ÚNICA ZONA CON SCROLL VERTICAL (PÁGINA BLANCA) */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      box-sizing: border-box;
     }
-  }
-
-  .sidebar-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 0.75rem;
-    flex-shrink: 0;
-
-    .logout-button {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.55rem;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      color: #fca5a5;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.82rem;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: rgba(239, 68, 68, 0.2);
-        color: #ffffff;
-        border-color: #ef4444;
-      }
-    }
-  }
-}
-
-/* ==========================================
-   ESTRUCTURA Y ÁREA DE CONTENIDO
-   ========================================== */
-.main-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-
-  /* ENCABEZADO SUPERIOR FIJO */
-  .top-header {
-    flex-shrink: 0;
-    background: linear-gradient(90deg, #0b1e3d 0%, #112a54 100%);
-    color: #ffffff;
-    padding: 0.85rem 1.75rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-
-    .header-info {
-      h1 {
-        margin: 0;
-        font-size: 1.2rem;
-        font-weight: 700;
-        letter-spacing: -0.3px;
-      }
-
-      p {
-        margin: 0.15rem 0 0;
-        font-size: 0.78rem;
-        color: #94a3b8;
-      }
-    }
-
-    .header-user-panel {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: rgba(255, 255, 255, 0.06);
-      padding: 0.4rem 0.85rem;
-      border-radius: 50px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-
-      .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #2563eb;
-        color: #ffffff;
-        font-weight: 700;
-        font-size: 0.8rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .user-info {
-        display: flex;
-        flex-direction: column;
-
-        .user-name {
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: #f8fafc;
-        }
-
-        .user-role {
-          font-size: 0.68rem;
-          color: #38bdf8;
-        }
-      }
-    }
-  }
-
-  /* ÚNICO ELEMENTO CON SCROLL HABILITADO */
-  .main-content {
-    flex: 1;
-    padding: 1.25rem 1.75rem;
-    overflow-y: auto;
-    background-color: #f1f5f9;
   }
 }

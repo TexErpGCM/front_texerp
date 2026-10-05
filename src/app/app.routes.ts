@@ -12,6 +12,8 @@ import { MainLayout } from './layout/menu/main-layout';
 import { ProveedoresComponent } from './pages/proveedores/proveedores';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { BodegasComponent } from './pages/bodegas/bodegas.component';
+import { InventarioComponent } from './pages/inventario/inventario';
+import { MovimientosInventarioComponent } from './pages/movimientos-inventario/movimientos-inventario';
 
 export const routes: Routes = [
   {
@@ -56,6 +58,14 @@ export const routes: Routes = [
       {
         path: 'bodegas',
         component: BodegasComponent
+      },
+      {
+        path: 'inventario',
+        component: InventarioComponent
+      },
+      {
+        path: 'movimientos',
+        component: MovimientosInventarioComponent
       }
     ]
   },

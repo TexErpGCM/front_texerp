@@ -1,4 +1,3 @@
-<p>clientes works!</p>
 <div class="clientes-container">
 
   <div class="header">
@@ -26,41 +25,47 @@
     </div>
   }
 
+  <!-- BUSCADOR / FILTRADOR HORIZONTAL (ESTILO TRAZABILIDAD) -->
   <form [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" class="filters-card">
-    <div class="filter-item">
-      <label for="fTaxId">Documento</label>
-      <input id="fTaxId" type="text" formControlName="taxId" placeholder="Buscar por documento" />
-    </div>
+    <h3 class="filter-title">Buscador de Clientes</h3>
 
-    <div class="filter-item">
-      <label for="fName">Nombre</label>
-      <input id="fName" type="text" formControlName="name" placeholder="Buscar por nombre" />
-    </div>
+    <div class="filter-grid">
+      <div class="filter-item">
+        <label for="fTaxId">Documento</label>
+        <input id="fTaxId" type="text" formControlName="taxId" placeholder="Ej. 1012345678" />
+      </div>
 
-    <div class="filter-item">
-      <label for="fType">Tipo de cliente</label>
-      <select id="fType" formControlName="type">
-        <option value="">Todos</option>
-        <option value="NATURAL">Persona Natural</option>
-        <option value="JURIDICO">Persona Jurídica</option>
-      </select>
-    </div>
+      <div class="filter-item">
+        <label for="fName">Nombre</label>
+        <input id="fName" type="text" formControlName="name" placeholder="Buscar por nombre" />
+      </div>
 
-    <div class="filter-item">
-      <label for="fActive">Estado</label>
-      <select id="fActive" formControlName="active">
-        <option [ngValue]="null">Todos</option>
-        <option [value]="true">Activo</option>
-        <option [value]="false">Inactivo</option>
-      </select>
-    </div>
+      <div class="filter-item">
+        <label for="fType">Tipo de cliente</label>
+        <select id="fType" formControlName="type">
+          <option value="">Todos</option>
+          <option value="NATURAL">Persona Natural</option>
+          <option value="JURIDICO">Persona Jurídica</option>
+        </select>
+      </div>
 
-    <div class="filter-actions">
-      <button type="submit" class="btn-search">Buscar</button>
-      <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
+      <div class="filter-item">
+        <label for="fActive">Estado</label>
+        <select id="fActive" formControlName="active">
+          <option [ngValue]="null">Todos</option>
+          <option [value]="true">Activo</option>
+          <option [value]="false">Inactivo</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button type="submit" class="btn-search">Buscar</button>
+        <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar Filtros</button>
+      </div>
     </div>
   </form>
 
+  <!-- TABLA DE RESULTADOS -->
   <div class="table-card">
     <div class="table-card-header">
       <h3>Lista de clientes</h3>
@@ -129,6 +134,7 @@
     }
   </div>
 
+  <!-- MODAL DE CREACIÓN / EDICIÓN -->
   @if (mostrarFormulario) {
     <div class="modal-backdrop" (click)="cancelar()">
       <div class="modal-card" (click)="$event.stopPropagation()">

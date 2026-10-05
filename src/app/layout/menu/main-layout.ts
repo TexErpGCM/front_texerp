@@ -14,16 +14,11 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './main-layout.scss'
 })
 export class MainLayout {
-
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-
   cerrarSesion(): void {
     this.authService.logout();
-    void this.router.navigate(
-      ['/login']
-    );
-
+    void this.router.navigate(['/login']);
   }
 }
