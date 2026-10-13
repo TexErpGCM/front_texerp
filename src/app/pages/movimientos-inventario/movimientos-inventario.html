@@ -7,8 +7,8 @@
       <h2>Kardex / Historial de Movimientos</h2>
       <p>Registro de entradas, salidas, transferencias y ajustes de inventario.</p>
     </div>
-    <button class="btn-refresh" (click)="consultarMovimientos()" [disabled]="cargando">
-      <span class="icon" [class.spin]="cargando">🔄</span>
+    <button type="button" class="btn-refresh" (click)="consultarMovimientos()" [disabled]="cargando">
+      <i class="fa-solid fa-rotate-right" [class.fa-spin]="cargando"></i>
       <span>{{ cargando ? 'Actualizando...' : 'Actualizar' }}</span>
     </button>
   </header>
@@ -33,11 +33,11 @@
         <label for="filter-tipo">Tipo Movimiento</label>
         <select id="filter-tipo" [(ngModel)]="filtros.tipo" (change)="aplicarFiltros()">
           <option value="">Todos los tipos</option>
-          <option value="ENTRADA">📥 Entrada (+)</option>
-          <option value="SALIDA">📤 Salida (-)</option>
-          <option value="TRANSFERENCIA">🔄 Transferencia</option>
-          <option value="AJUSTE_POSITIVO">🛠️ Ajuste (+)</option>
-          <option value="AJUSTE_NEGATIVO">⚠️ Ajuste (-)</option>
+          <option value="ENTRADA">Entrada (+)</option>
+          <option value="SALIDA">Salida (-)</option>
+          <option value="TRANSFERENCIA">Transferencia</option>
+          <option value="AJUSTE_POSITIVO">Ajuste Positivo (+)</option>
+          <option value="AJUSTE_NEGATIVO">Ajuste Negativo (-)</option>
         </select>
       </div>
 
@@ -47,7 +47,7 @@
       </div>
 
       <div class="filter-actions">
-        <button class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
+        <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
       </div>
     </div>
   </section>
@@ -62,7 +62,7 @@
           <th style="width: 14%;">Bodega</th>
           <th style="width: 13%;">Tipo Mov.</th>
           <th style="width: 8%;" class="text-right">Cant.</th>
-          <th style="width: 12%;" class="text-center">Saldo (Ant → Nuevo)</th>
+          <th style="width: 12%;" class="text-center">Saldo (Ant &rarr; Nuevo)</th>
           <th style="width: 11%;">Doc. / Usuario</th>
           <th style="width: 6%;" class="text-center">Acción</th>
         </tr>
@@ -109,7 +109,7 @@
           <!-- Variación de Saldo -->
           <td class="text-center balance-comparison font-mono">
             <span class="old-bal">{{ item.saldoAnterior | number }}</span>
-            <span class="arrow">→</span>
+            <span class="arrow">&rarr;</span>
             <span class="new-bal">{{ item.saldoNuevo | number }}</span>
           </td>
 
@@ -117,14 +117,16 @@
           <td>
             <div class="doc-user-group">
               <span class="doc-badge font-mono">{{ item.documentoOrigen }}</span>
-              <span class="user-chip">👤 {{ item.usuario }}</span>
+              <span class="user-chip">
+                <i class="fa-solid fa-user user-icon"></i> {{ item.usuario }}
+              </span>
             </div>
           </td>
 
           <!-- Botón Acción compacto -->
           <td class="text-center">
-            <button class="btn-detail-icon" (click)="verDetalle(item)" title="Ver detalle completo">
-             ver
+            <button type="button" class="btn-detail-icon" (click)="verDetalle(item)" title="Ver detalle completo">
+              <i class="fa-solid fa-eye"></i>
             </button>
           </td>
         </tr>
@@ -132,7 +134,7 @@
         <tr *ngIf="respuesta.data.length === 0 && !cargando">
           <td colspan="8" class="empty-cell">
             <div class="empty-state">
-              <span>📑</span>
+              <i class="fa-solid fa-folder-open empty-icon"></i>
               <p>No se registraron movimientos que coincidan con la búsqueda.</p>
             </div>
           </td>
@@ -146,8 +148,8 @@
         Página <strong>{{ respuesta.paginaActual }}</strong> de <strong>{{ respuesta.totalPaginas }}</strong>
       </span>
       <div class="pagination-controls">
-        <button [disabled]="respuesta.paginaActual === 1" (click)="cambiarPagina(respuesta.paginaActual - 1)">Anterior</button>
-        <button [disabled]="respuesta.paginaActual === respuesta.totalPaginas" (click)="cambiarPagina(respuesta.paginaActual + 1)">Siguiente</button>
+        <button type="button" [disabled]="respuesta.paginaActual === 1" (click)="cambiarPagina(respuesta.paginaActual - 1)">Anterior</button>
+        <button type="button" [disabled]="respuesta.paginaActual === respuesta.totalPaginas" (click)="cambiarPagina(respuesta.paginaActual + 1)">Siguiente</button>
       </div>
     </div>
   </section>
@@ -157,7 +159,9 @@
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div class="header-title-group">
-          <div class="icon-badge">📋</div>
+          <div class="icon-badge">
+            <i class="fa-solid fa-file-lines"></i>
+          </div>
           <div>
             <div class="title-row">
               <h2>Detalle de Movimiento</h2>
@@ -172,7 +176,7 @@
             </span>
           </div>
         </div>
-        <button class="btn-close" (click)="cerrarDetalle()" aria-label="Cerrar modal">&times;</button>
+        <button type="button" class="btn-close" (click)="cerrarDetalle()" aria-label="Cerrar modal">&times;</button>
       </div>
 
       <div class="modal-body">
@@ -218,7 +222,9 @@
           </div>
           <div class="meta-item">
             <span class="label">Usuario Registra</span>
-            <span class="value">👤 {{ movimientoSeleccionado.usuario }}</span>
+            <span class="value">
+              <i class="fa-solid fa-user user-icon"></i> {{ movimientoSeleccionado.usuario }}
+            </span>
           </div>
           <div class="meta-item">
             <span class="label">Fecha y Hora</span>
@@ -233,7 +239,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-modal-close" (click)="cerrarDetalle()">Cerrar</button>
+        <button type="button" class="btn-modal-close" (click)="cerrarDetalle()">Cerrar</button>
       </div>
     </div>
   </div>

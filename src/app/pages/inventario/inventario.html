@@ -1,170 +1,144 @@
 <div class="inventario-container">
 
   <!-- BANNER CABECERA -->
-  <div class="header-banner">
+  <header class="header-banner">
     <div class="header-title-block">
-      <span class="badge-tag">Módulo de Operaciones</span>
+      <span class="badge-tag">Control de Existencias</span>
       <h2>Consulta de Balance e Inventario</h2>
-      <p>Gestión de existencias por SKU, seguimiento multi-bodega y alertas de reabastecimiento.</p>
+      <p>Monitoreo de existencias por SKU, seguimiento multi-bodega y alertas de reabastecimiento.</p>
     </div>
-    <button class="btn-refresh" (click)="consultarInventario()" [disabled]="cargando">
-      <span class="spin-icon" [class.spinning]="cargando">🔄</span>
+    <button type="button" class="btn-refresh" (click)="consultarBalances()" [disabled]="cargando">
+      <i class="fa-solid fa-rotate-right" [class.fa-spin]="cargando"></i>
       <span>{{ cargando ? 'Actualizando...' : 'Actualizar Saldo' }}</span>
     </button>
-  </div>
+  </header>
 
-  <!-- TARJETAS RESUMEN (KPIS) -->
-  <div class="kpi-grid">
+  <!-- TARJETAS DE MÉTRICAS Y RESUMEN DE STOCK -->
+  <section class="kpi-summary-grid" *ngIf="resumen">
     <div class="kpi-card">
-      <div class="kpi-icon blue">📦</div>
-      <div class="kpi-data">
-        <span class="kpi-value">{{ totalRegistros }}</span>
+      <div class="kpi-info">
         <span class="kpi-label">Balances Consultados</span>
+        <span class="kpi-value font-mono">{{ resumen.totalRegistros | number }}</span>
       </div>
     </div>
 
-    <div class="kpi-card">
-      <div class="kpi-icon green">📊</div>
-      <div class="kpi-data">
-        <span class="kpi-value">{{ totalUnidades | number }}</span>
-        <span class="kpi-label">Unidades Disponibles</span>
-      </div>
-    </div>
-
-    <div class="kpi-card" [class.alert]="totalBajoStock > 0">
-      <div class="kpi-icon amber">⚠️</div>
-      <div class="kpi-data">
-        <span class="kpi-value">{{ totalBajoStock }}</span>
+    <div class="kpi-card warning-card">
+      <div class="kpi-info">
         <span class="kpi-label">Stock en Mínimo</span>
+        <span class="kpi-value font-mono text-warning">{{ resumen.totalBajoStock | number }}</span>
       </div>
     </div>
 
-    <div class="kpi-card" [class.danger]="totalAgotados > 0">
-      <div class="kpi-icon red">🚫</div>
-      <div class="kpi-data">
-        <span class="kpi-value">{{ totalAgotados }}</span>
-        <span class="kpi-label">Sin Existencia (0)</span>
+    <div class="kpi-card danger-card">
+      <div class="kpi-info">
+        <span class="kpi-label">Sin Existencia (Agotado)</span>
+        <span class="kpi-value font-mono text-danger">{{ resumen.totalAgotados | number }}</span>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- TARJETA DE FILTROS COMBINADOS -->
-  <div class="filter-card">
-    <div class="filter-header">
-      <h4> Filtros de Búsqueda Avanzada</h4>
-    </div>
+  <!-- BARRA DE FILTROS HORIZONTALES -->
+  <section class="filter-card">
     <div class="filter-grid">
       <div class="filter-group">
-        <label>SKU</label>
-        <div class="input-with-icon">
-          <input type="text" [(ngModel)]="filtros.sku" (input)="aplicarFiltros()" placeholder="Ej: TEX-ALG-301" />
-        </div>
+        <label for="filter-sku">SKU / Variante</label>
+        <input id="filter-sku" type="text" [(ngModel)]="filtros.sku" (input)="aplicarFiltros()" placeholder="Ej: TEX-ALG-301" />
       </div>
 
       <div class="filter-group">
-        <label>Producto / Variante</label>
-        <input type="text" [(ngModel)]="filtros.producto" (input)="aplicarFiltros()" placeholder="Nombre o tejido" />
-      </div>
-
-      <div class="filter-group">
-        <label>Bodega Ubicación</label>
-        <select [(ngModel)]="filtros.bodegaId" (change)="aplicarFiltros()">
+        <label for="filter-bodega">Bodega</label>
+        <select id="filter-bodega" [(ngModel)]="filtros.bodegaId" (change)="aplicarFiltros()">
           <option value="">Todas las bodegas</option>
           <option *ngFor="let b of listaBodegas" [value]="b.id">{{ b.nombre }}</option>
         </select>
       </div>
 
       <div class="filter-group">
-        <label>Estado de Inventario</label>
-        <select [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
+        <label for="filter-categoria">Categoría</label>
+        <select id="filter-categoria" [(ngModel)]="filtros.categoria" (change)="aplicarFiltros()">
+          <option value="">Todas las categorías</option>
+          <option value="Telas / Algodón">Telas / Algodón</option>
+          <option value="Sintéticos">Sintéticos</option>
+          <option value="Insumos / Hilos">Insumos / Hilos</option>
+          <option value="Acabados / Tintes">Acabados / Tintes</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-estado">Estado de Stock</label>
+        <select id="filter-estado" [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
           <option value="">Todos los estados</option>
-          <option value="Disponible">🟢 Disponible</option>
-          <option value="Bajo Stock">⚠️ Bajo Stock (Alerta)</option>
-          <option value="Agotado">🔴 Sin Existencia (0)</option>
+          <option value="OPTIMO">Óptimo</option>
+          <option value="MINIMO">Stock Mínimo</option>
+          <option value="AGOTADO">Agotado</option>
         </select>
       </div>
 
       <div class="filter-actions">
-        <button class="btn-clear" (click)="limpiarFiltros()">Limpiar Filtros</button>
+        <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- TABLA DE RESULTADOS -->
-  <div class="table-card">
-    <div class="table-responsive">
-      <table class="texerp-table">
-        <thead>
-          <tr>
-            <th>SKU</th>
-            <th>Producto / Variante</th>
-            <th>Bodega</th>
-            <th class="text-right">Disponible</th>
-            <th class="text-right">Reservado</th>
-            <th class="text-right">Mínimo</th>
-            <th>Último Movimiento</th>
-            <th class="text-center">Estado / Alerta</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of respuesta.data">
-            <td><span class="sku-tag">{{ item.sku }}</span></td>
-            <td>
-              <div class="product-info">
-                <strong>{{ item.producto }}</strong>
-                <small>{{ item.categoria }}</small>
-              </div>
-            </td>
-            <td><span class="location-chip"> {{ item.bodegaNombre }}</span></td>
-            
-            <td class="text-right bold-value" [ngClass]="{
-              'text-danger': item.cantidadDisponible === 0,
-              'text-warning': item.cantidadDisponible > 0 && item.cantidadDisponible <= item.stockMinimo
+  <!-- TABLA DE BALANCE DE INVENTARIO -->
+  <section class="table-card">
+    <table class="texerp-table">
+      <thead>
+        <tr>
+          <th style="width: 15%;">SKU</th>
+          <th style="width: 25%;">Producto / Categoría</th>
+          <th style="width: 15%;">Bodega</th>
+          <th style="width: 12%;" class="text-right">Disponible</th>
+          <th style="width: 12%;" class="text-right">Reservado</th>
+          <th style="width: 11%;" class="text-right">Stock Mín.</th>
+          <th style="width: 10%;" class="text-center">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of respuesta.data">
+          <td><strong class="font-mono sku-code">{{ item.sku }}</strong></td>
+          <td>
+            <div class="product-cell">
+              <span class="product-name">{{ item.producto }}</span>
+              <span class="product-sub">{{ item.categoria }}</span>
+            </div>
+          </td>
+          <td><span class="bodega-name">{{ item.bodegaNombre }}</span></td>
+          <td class="text-right font-mono font-bold">{{ item.cantidadDisponible | number }}</td>
+          <td class="text-right font-mono text-muted">{{ item.cantidadReservada | number }}</td>
+          <td class="text-right font-mono text-muted">{{ item.stockMinimo | number }}</td>
+          <td class="text-center">
+            <span class="status-pill" [ngClass]="{
+              'status-optimo': item.cantidadDisponible > item.stockMinimo,
+              'status-minimo': item.cantidadDisponible <= item.stockMinimo && item.cantidadDisponible > 0,
+              'status-agotado': item.cantidadDisponible === 0
             }">
-              {{ item.cantidadDisponible | number }}
-            </td>
+              {{ item.cantidadDisponible === 0 ? 'Agotado' : (item.cantidadDisponible <= item.stockMinimo ? 'Stock Mínimo' : 'Óptimo') }}
+            </span>
+          </td>
+        </tr>
 
-            <td class="text-right muted-value">{{ item.cantidadReservada | number }}</td>
-            <td class="text-right">{{ item.stockMinimo | number }}</td>
-            <td><span class="date-chip">{{ item.fechaUltimoMovimiento }}</span></td>
-            
-            <td class="text-center">
-              <span class="status-badge" [ngClass]="{
-                'status-available': item.estado === 'Disponible',
-                'status-low': item.estado === 'Bajo Stock',
-                'status-out': item.estado === 'Agotado'
-              }">
-                <span class="dot"></span>
-                <span>{{ item.estado }}</span>
-              </span>
-            </td>
-          </tr>
-
-          <!-- ESTADO VACÍO MEJORADO -->
-          <tr *ngIf="respuesta.data.length === 0 && !cargando">
-            <td colspan="8" class="empty-cell">
-              <div class="empty-state-box">
-                <div class="empty-icon">📂</div>
-                <h3>No se encontraron coincidencias</h3>
-                <p>No existen balances de inventario que coincidan con los filtros ingresados.</p>
-                <button class="btn-reset-filters" (click)="limpiarFiltros()">Restablecer Búsqueda</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        <tr *ngIf="respuesta.data.length === 0 && !cargando">
+          <td colspan="7" class="empty-cell">
+            <div class="empty-state">
+              <i class="fa-solid fa-boxes-stacked empty-icon"></i>
+              <p>No se encontraron registros de inventario.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- PAGINACIÓN -->
     <div class="pagination-bar" *ngIf="respuesta.totalRegistros > 0">
       <span class="page-info">
-        Página {{ respuesta.paginaActual }} de {{ respuesta.totalPaginas }} ({{ respuesta.totalRegistros }} registros totales)
+        Página <strong>{{ respuesta.paginaActual }}</strong> de <strong>{{ respuesta.totalPaginas }}</strong>
       </span>
       <div class="pagination-controls">
-        <button [disabled]="respuesta.paginaActual === 1" (click)="cambiarPagina(respuesta.paginaActual - 1)">← Anterior</button>
-        <button [disabled]="respuesta.paginaActual === respuesta.totalPaginas" (click)="cambiarPagina(respuesta.paginaActual + 1)">Siguiente →</button>
+        <button type="button" [disabled]="respuesta.paginaActual === 1" (click)="cambiarPagina(respuesta.paginaActual - 1)">Anterior</button>
+        <button type="button" [disabled]="respuesta.paginaActual === respuesta.totalPaginas" (click)="cambiarPagina(respuesta.paginaActual + 1)">Siguiente</button>
       </div>
     </div>
-  </div>
+  </section>
 
 </div>

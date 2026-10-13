@@ -1,166 +1,102 @@
 <div class="bodegas-container">
 
-  <div class="header">
-    <div class="header-title">
-      <h2>Gestión de Bodegas</h2>
-      <p>Control de ubicaciones físicas e inventarios por depósito</p>
+  <!-- BANNER CABECERA -->
+  <header class="header-banner">
+    <div class="header-title-block">
+      <span class="badge-tag">Gestión de Almacenes</span>
+      <h2>Administración de Bodegas</h2>
+      <p>Configuración y control de ubicaciones físicas y centros de distribución.</p>
     </div>
-
-    <button type="button" class="btn-primary" (click)="nuevaBodega()">
-      <span>+ Nueva Bodega</span>
+    <button type="button" class="btn-primary" (click)="abrirModalCrear()">
+      <i class="fa-solid fa-plus"></i>
+      <span>Nueva Bodega</span>
     </button>
-  </div>
+  </header>
 
-  @if (mensajeExito) {
-    <div class="alert alert-success">
-      <span>{{ mensajeExito }}</span>
-      <button type="button" class="btn-close-alert" (click)="mensajeExito = ''">✕</button>
-    </div>
-  }
-
-  <!-- TARJETA DE FILTROS HORIZONTAL (ESTILO BUSCADOR DE TRAZABILIDAD) -->
-  <form [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" class="filters-card">
-    <h3 class="filter-title">Buscador de Bodegas</h3>
-
+  <!-- BARRA DE FILTROS RECONSTRUIDA -->
+  <section class="filter-card">
     <div class="filter-grid">
-      <div class="filter-item">
-        <label for="fCode">Código</label>
-        <input id="fCode" type="text" formControlName="code" placeholder="Ej. BOD-01" />
+      <div class="filter-group">
+        <label for="filter-codigo">Código</label>
+        <input 
+          id="filter-codigo" 
+          type="text" 
+          [(ngModel)]="filtros.codigo" 
+          (input)="aplicarFiltros()" 
+          placeholder="Ej: BOD-01" />
       </div>
 
-      <div class="filter-item">
-        <label for="fName">Nombre</label>
-        <input id="fName" type="text" formControlName="name" placeholder="Buscar por nombre" />
+      <div class="filter-group">
+        <label for="filter-nombre">Nombre</label>
+        <input 
+          id="filter-nombre" 
+          type="text" 
+          [(ngModel)]="filtros.nombre" 
+          (input)="aplicarFiltros()" 
+          placeholder="Ej: Bodega Principal" />
       </div>
 
-      <div class="filter-item">
-        <label for="fActive">Estado</label>
-        <select id="fActive" formControlName="active">
-          <option [ngValue]="null">Todos</option>
-          <option [value]="true">Activa</option>
-          <option [value]="false">Inactiva</option>
+      <div class="filter-group">
+        <label for="filter-estado">Estado</label>
+        <select id="filter-estado" [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
+          <option value="">Todos los estados</option>
+          <option value="Active">Activo</option>
+          <option value="Inactive">Inactivo</option>
         </select>
       </div>
 
       <div class="filter-actions">
-        <button type="submit" class="btn-search">Buscar</button>
         <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
       </div>
     </div>
-  </form>
+  </section>
 
-  <!-- TABLA DE RESULTADOS -->
-  <div class="table-card">
-    <div class="table-card-header">
-      <h3>Ubicaciones y Depósitos</h3>
-      <span class="total-badge">Total: {{ totalElementos }}</span>
-    </div>
+  <!-- TABLA DE BODEGAS -->
+  <section class="table-card">
+    <table class="texerp-table">
+      <thead>
+        <tr>
+          <th style="width: 15%;">Código</th>
+          <th style="width: 25%;">Nombre</th>
+          <th style="width: 25%;">Dirección / Ciudad</th>
+          <th style="width: 15%;">Teléfono</th>
+          <th style="width: 10%;" class="text-center">Estado</th>
+          <th style="width: 10%;" class="text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of listaBodegasFiltrada">
+          <td><strong class="font-mono sku-code">{{ item.codigo }}</strong></td>
+          <td><span class="product-name">{{ item.nombre }}</span></td>
+          <td>{{ item.direccion }}</td>
+          <td><span class="font-mono">{{ item.telefono }}</span></td>
+          <td class="text-center">
+            <span class="status-pill" [ngClass]="{
+              'status-optimo': item.estado === 'Active',
+              'status-agotado': item.estado === 'Inactive'
+            }">
+              {{ item.estado === 'Active' ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="actions-group">
+              <button type="button" class="btn-detail-icon" (click)="editarBodega(item)" title="Editar">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Ubicación Física</th>
-            <th>Trazabilidad</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          @if (bodegasFiltradas.length === 0) {
-            <tr>
-              <td colspan="6" class="empty-state">No se encontraron bodegas registradas.</td>
-            </tr>
-          } @else {
-            @for (bodega of bodegasFiltradas; track bodega.id) {
-              <tr>
-                <td><strong>{{ bodega.code }}</strong></td>
-                <td>{{ bodega.name }}</td>
-                <td>{{ bodega.location }}</td>
-                <td>
-                  <span class="trace-badge" [class.has-history]="bodega.hasMovements">
-                    {{ bodega.hasMovements ? 'Con Histórico' : 'Sin Movimientos' }}
-                  </span>
-                </td>
-                <td>
-                  <span class="status-badge" [class.active]="bodega.active" [class.inactive]="!bodega.active">
-                    {{ bodega.active ? 'Activa' : 'Inactiva' }}
-                  </span>
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button type="button" class="btn-action" (click)="editarBodega(bodega)">Editar</button>
-                    <button type="button" class="btn-action" (click)="cambiarEstado(bodega)">
-                      {{ bodega.active ? 'Inactivar' : 'Activar' }}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          }
-        </tbody>
-      </table>
-    </div>
-
-    @if (totalPaginas > 0) {
-      <div class="pagination">
-        <span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span>
-        <div class="pagination-controls">
-          <button type="button" [disabled]="paginaActual === 0" (click)="cambiarPagina(paginaActual - 1)">Anterior</button>
-          <button type="button" [disabled]="paginaActual >= totalPaginas - 1" (click)="cambiarPagina(paginaActual + 1)">Siguiente</button>
-        </div>
-      </div>
-    }
-  </div>
-
-  <!-- MODAL DE FORMULARIO -->
-  @if (mostrarFormulario) {
-    <div class="modal-backdrop" (click)="cancelar()">
-      <div class="modal-card" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>{{ modoEdicion ? 'Editar Bodega' : 'Registrar Nueva Bodega' }}</h3>
-          <button type="button" class="btn-close" (click)="cancelar()">✕</button>
-        </div>
-
-        @if (errorFormulario) {
-          <div class="alert alert-error">
-            <span>{{ errorFormulario }}</span>
-          </div>
-        }
-
-        <form [formGroup]="bodegaForm" (ngSubmit)="guardar()" class="modal-body">
-          <div class="form-group">
-            <label for="code">Código Único *</label>
-            <input id="code" type="text" formControlName="code" placeholder="Ej. BOD-01" />
-          </div>
-
-          <div class="form-group">
-            <label for="name">Nombre de la Bodega *</label>
-            <input id="name" type="text" formControlName="name" placeholder="Ej. Bodega Principal Central" />
-          </div>
-
-          <div class="form-group">
-            <label for="location">Ubicación Física *</label>
-            <input id="location" type="text" formControlName="location" placeholder="Ej. Planta Principal - Zona Norte" />
-          </div>
-
-          <div class="form-group checkbox-container">
-            <label>
-              <input type="checkbox" formControlName="active" />
-              <span>Bodega Activa (Disponible para movimientos)</span>
-            </label>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn-secondary" (click)="cancelar()">Cancelar</button>
-            <button type="submit" class="btn-primary">Guardar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  }
+        <tr *ngIf="listaBodegasFiltrada.length === 0">
+          <td colspan="6" class="empty-cell">
+            <div class="empty-state">
+              <i class="fa-solid fa-warehouse empty-icon"></i>
+              <p>No se encontraron bodegas que coincidan con la búsqueda.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
 </div>

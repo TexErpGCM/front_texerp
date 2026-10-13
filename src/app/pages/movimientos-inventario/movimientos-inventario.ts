@@ -1,38 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MovimientoInventarioService } from '../../core/services/movimiento-inventario.service';
-import { MovimientoInventario, FiltrosMovimientos, RespuestaPaginadaMovimientos } from '../../core/models/movimiento-inventario.model';
+import { InventarioService } from '../../core/services/inventario.service';
+import { MovimientoInventario, FiltrosInventario } from '../../core/models/inventario.model';
 
 @Component({
   selector: 'app-movimientos-inventario',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './movimientos-inventario.html',
-  styleUrl: './movimientos-inventario.scss'
+  styleUrls: ['./movimientos-inventario.scss']
 })
 export class MovimientosInventarioComponent implements OnInit {
 
-  filtros: FiltrosMovimientos = {
+  cargando: boolean = false;
+  movimientoSeleccionado: MovimientoInventario | null = null;
+
+  filtros: FiltrosInventario = {
     sku: '',
     bodegaId: '',
     tipo: '',
-    documentoOrigen: '',
-    fechaInicio: '',
-    fechaFin: '',
-    page: 1,
-    pageSize: 5
+    documentoOrigen: ''
   };
-
-  respuesta: RespuestaPaginadaMovimientos = {
-    data: [],
-    totalRegistros: 0,
-    totalPaginas: 1,
-    paginaActual: 1
-  };
-
-  cargando = false;
-  movimientoSeleccionado: MovimientoInventario | null = null; // CA-1: Para modal de detalle
 
   listaBodegas = [
     { id: 1, nombre: 'Bodega Principal' },
@@ -41,7 +30,19 @@ export class MovimientosInventarioComponent implements OnInit {
     { id: 4, nombre: 'Bodega Cali' }
   ];
 
-  constructor(private movimientoService: MovimientoInventarioService) {}
+  respuesta: {
+    data: MovimientoInventario[];
+    totalRegistros: number;
+    totalPaginas: number;
+    paginaActual: number;
+  } = {
+    data: [],
+    totalRegistros: 0,
+    totalPaginas: 1,
+    paginaActual: 1
+  };
+
+  constructor(private inventarioService: InventarioService) {}
 
   ngOnInit(): void {
     this.consultarMovimientos();
@@ -49,9 +50,11 @@ export class MovimientosInventarioComponent implements OnInit {
 
   consultarMovimientos(): void {
     this.cargando = true;
-    this.movimientoService.obtenerMovimientos(this.filtros).subscribe({
+    this.inventarioService.obtenerMovimientos(this.filtros).subscribe({
       next: (res) => {
-        this.respuesta = res;
+        this.respuesta.data = res.data;
+        this.respuesta.totalRegistros = res.totalRegistros;
+        this.respuesta.totalPaginas = Math.ceil(res.totalRegistros / 10) || 1;
         this.cargando = false;
       },
       error: () => {
@@ -61,7 +64,7 @@ export class MovimientosInventarioComponent implements OnInit {
   }
 
   aplicarFiltros(): void {
-    this.filtros.page = 1;
+    this.respuesta.paginaActual = 1;
     this.consultarMovimientos();
   }
 
@@ -70,24 +73,20 @@ export class MovimientosInventarioComponent implements OnInit {
       sku: '',
       bodegaId: '',
       tipo: '',
-      documentoOrigen: '',
-      fechaInicio: '',
-      fechaFin: '',
-      page: 1,
-      pageSize: 5
+      documentoOrigen: ''
     };
-    this.consultarMovimientos();
+    this.aplicarFiltros();
   }
 
   cambiarPagina(nuevaPagina: number): void {
     if (nuevaPagina >= 1 && nuevaPagina <= this.respuesta.totalPaginas) {
-      this.filtros.page = nuevaPagina;
+      this.respuesta.paginaActual = nuevaPagina;
       this.consultarMovimientos();
     }
   }
 
-  verDetalle(movimiento: MovimientoInventario): void {
-    this.movimientoSeleccionado = movimiento;
+  verDetalle(item: MovimientoInventario): void {
+    this.movimientoSeleccionado = item;
   }
 
   cerrarDetalle(): void {
