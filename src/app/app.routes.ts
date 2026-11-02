@@ -17,6 +17,7 @@ import { CotizacionesComponent } from './pages/cotizaciones/cotizaciones.compone
 import { AuditoriaComponent } from './pages/auditoria/auditoria.component';
 import { OrdenesCompraComponent } from './pages/ordenes-compra/ordenes-compra.component';
 import { VentasComponent } from './pages/ventas/ventas.component';
+import { RolesComponent } from './pages/roles/roles.component';
 
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
@@ -58,6 +59,12 @@ export const routes: Routes = [
       {
         path: 'usuario',
         component: Usuarios
+      },
+      {
+        path: 'roles',
+        component: RolesComponent,
+        canActivate: [permissionGuard],
+        data: { permissions: [APP_PERMISSIONS.ROLE_READ] }
       },
 
       {

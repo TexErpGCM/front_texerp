@@ -1,0 +1,116 @@
+<main class="page">
+  <section class="roles-page">
+    <header class="page__header">
+      <div>
+        <span class="page__eyebrow">TEXERP</span>
+        <h1>Roles y permisos</h1>
+        <p>Administra perfiles de acceso aplicando el principio de mínimo privilegio.</p>
+      </div>
+      <button class="button button--primary" type="button" (click)="nuevoRol()">+ Nuevo rol</button>
+    </header>
+
+    @if (mensajeExito) { <div class="alert alert--success">{{ mensajeExito }}</div> }
+    @if (mensajeError && !mostrarFormulario) { <div class="alert alert--error">{{ mensajeError }}</div> }
+
+    <section class="card">
+      <div class="card__header">
+        <div>
+          <span class="section-eyebrow">SEGURIDAD</span>
+          <h2>Roles configurados</h2>
+        </div>
+        <span>{{ roles.length }} roles</span>
+      </div>
+
+      @if (cargando) {
+      <div class="state">Cargando roles...</div>
+      } @else {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Rol</th>
+              <th>Descripción</th>
+              <th>Permisos</th>
+              <th>Usuarios activos</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rol of roles; track rol.id) {
+            <tr>
+              <td><strong>{{ rol.name }}</strong>@if (rol.systemRole) { <span class="badge">Base</span> }</td>
+              <td>{{ rol.description || 'Sin descripción' }}</td>
+              <td>{{ rol.permissions.length }}</td>
+              <td>{{ rol.activeUsers }}</td>
+              <td class="actions">
+                <button type="button" class="icon-button" (click)="editarRol(rol)" title="Editar">✎</button>
+                <button type="button" class="icon-button icon-button--danger" (click)="eliminar(rol)"
+                  title="Eliminar">×</button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+    </section>
+  </section>
+
+  @if (mostrarFormulario) {
+  <div class="modal-overlay" (click)="cerrarFormulario()">
+    <section class="modal" (click)="$event.stopPropagation()">
+      <header class="modal__header">
+        <div><span class="page__eyebrow">SEGURIDAD</span>
+          <h2>{{ editando ? 'Editar rol' : 'Nuevo rol' }}</h2>
+        </div>
+        <button type="button" class="icon-button" (click)="cerrarFormulario()">×</button>
+      </header>
+
+      <div class="modal__body">
+        @if (mensajeError) { <div class="alert alert--error">{{ mensajeError }}</div> }
+        <div class="form-grid">
+          <label>
+            Nombre del rol
+            <input [(ngModel)]="formulario.name"
+              [disabled]="editando && (roles.find(r => r.id === rolId)?.systemRole ?? false)"
+              placeholder="Ej. SUPERVISOR" />
+          </label>
+
+          <label>
+            Descripción
+            <input [(ngModel)]="formulario.description" placeholder="Responsabilidad del rol" />
+          </label>
+        </div>
+        <div class="permissions-title">
+          <h3>Permisos</h3><span>{{ formulario.permissions.length }} seleccionados</span>
+        </div>
+
+        <div class="permissions-grid">
+          @for (grupo of permisosPorModulo; track grupo.module) {
+          <section class="permission-group">
+            <label class="module-check">
+              <input type="checkbox" [checked]="moduloCompleto(grupo.module)"
+                (change)="seleccionarModulo(grupo.module, $any($event.target).checked)" />
+              <strong>{{ grupo.module }}</strong>
+            </label>
+            @for (permiso of grupo.permissions; track permiso.code) {
+            <label class="permission-item">
+              <input type="checkbox" [checked]="tienePermiso(permiso.code)"
+                (change)="togglePermiso(permiso.code, $any($event.target).checked)" />
+              <span><strong>{{ permiso.code }}</strong><small>{{ permiso.description }}</small></span>
+            </label>
+            }
+          </section>
+          }
+        </div>
+      </div>
+
+      <footer class="modal__footer">
+        <button class="button button--secondary" type="button" (click)="cerrarFormulario()">Cancelar</button>
+        <button class="button button--primary" type="button" [disabled]="guardando" (click)="guardar()">{{ guardando ?
+          'Guardando...' : 'Guardar rol' }}</button>
+      </footer>
+    </section>
+  </div>
+  }
+</main>
