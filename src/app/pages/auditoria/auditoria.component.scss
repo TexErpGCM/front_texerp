@@ -1,0 +1,829 @@
+
+/* ==========================================
+   ESTRUCTURA GENERAL
+========================================== */
+
+.page {
+  min-height: 100vh;
+  padding: 2rem;
+  background: #f8fafc;
+}
+
+.content {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header,
+.card-header,
+.lines-header,
+.form-actions,
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-header {
+  flex-wrap: wrap;
+}
+
+.page-header h1,
+.card-header h2,
+.lines-header h3 {
+  margin: 0.25rem 0 0;
+  color: #0f172a;
+}
+
+.page-header p {
+  margin: 0.4rem 0 0;
+  color: #64748b;
+}
+
+.page-eyebrow {
+  color: #2563eb;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ==========================================
+   BOTONES
+========================================== */
+
+.btn-primary,
+.btn-secondary,
+.btn-link,
+.btn-remove,
+.pagination button,
+.btn-close {
+  cursor: pointer;
+  font: inherit;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  color: white;
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+/* ==========================================
+   BOTÓN GENERAR PDF
+========================================== */
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-actions .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 40px;
+  padding: 0.65rem 1rem;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.page-actions .btn-secondary i {
+  font-size: 1rem;
+}
+
+.page-actions .btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   ALERTAS
+========================================== */
+
+.alert {
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.alert.success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+.alert.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+/* ==========================================
+   TARJETAS
+========================================== */
+
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* ==========================================
+   FORMULARIOS
+========================================== */
+
+.form-card form {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.6rem 0.7rem;
+  color: #0f172a;
+  background: white;
+}
+
+.field input,
+.field select {
+  height: 40px;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* ==========================================
+   LÍNEAS DE FORMULARIO
+========================================== */
+
+.lines-header {
+  margin: 1.5rem 0 0.75rem;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.line {
+  display: grid;
+  grid-template-columns:
+    1.65fr 0.55fr 0.7fr 0.65fr
+    0.55fr 0.8fr 38px;
+  gap: 0.75rem;
+  align-items: end;
+  padding: 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.line-total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-height: 40px;
+  justify-content: center;
+}
+
+.line-total span {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.line-total strong {
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.btn-remove {
+  width: 38px;
+  height: 40px;
+  border: 1px solid #fecaca;
+  background: white;
+  color: #dc2626;
+  border-radius: 6px;
+  font-size: 1.2rem;
+}
+
+.btn-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   RESÚMENES
+========================================== */
+
+.summary {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #eff6ff;
+  border-radius: 8px;
+  color: #1e3a8a;
+}
+
+.summary strong {
+  font-size: 1.25rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.summary-grid > div {
+  padding: 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-grid span,
+.sale-summary span {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.summary-grid strong,
+.sale-summary strong {
+  color: #0f172a;
+}
+
+.summary-grid .grand {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.atomic-note {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.balance-open {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+/* ==========================================
+   TABLAS
+========================================== */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.9rem 1.25rem;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.73rem;
+  text-transform: uppercase;
+}
+
+td {
+  color: #334155;
+  font-size: 0.85rem;
+}
+
+.status {
+  display: inline-flex;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.btn-link {
+  border: 1px solid #bfdbfe;
+  color: #2563eb;
+  background: white;
+  border-radius: 6px;
+  padding: 0.4rem 0.65rem;
+  font-weight: 700;
+}
+
+.btn-link.danger {
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.state {
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+/* ==========================================
+   PAGINACIÓN
+========================================== */
+
+.pagination {
+  padding: 0.8rem 1.25rem;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.pagination div {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination button {
+  padding: 0.35rem 0.75rem;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+}
+
+/* ==========================================
+   MODALES
+========================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modal {
+  width: min(520px, 100%);
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-body p {
+  margin-top: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.modal-body h3 {
+  margin: 1.25rem 0 0.6rem;
+  color: #0f172a;
+}
+
+.btn-close {
+  border: none;
+  background: transparent;
+  font-size: 1.35rem;
+  color: #64748b;
+}
+
+.detail-modal {
+  width: min(900px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.payment-modal {
+  width: min(480px, 100%);
+}
+
+.payment-layer {
+  z-index: 1100;
+}
+
+/* ==========================================
+   VENTAS Y PAGOS
+========================================== */
+
+.sale-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.sale-summary > div {
+  padding: 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mini-table {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.mini-table th,
+.mini-table td {
+  padding: 0.65rem 0.8rem;
+}
+
+.payments-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-primary.small {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.payment-balance {
+  padding: 0.8rem;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.compact-state {
+  color: #64748b;
+  font-size: 0.8rem;
+  padding-bottom: 0.5rem;
+}
+
+.sale-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.action-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.action-form .form-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.decision-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.reason {
+  margin-top: 1rem;
+  color: #475569;
+}
+
+/* ==========================================
+   FILTROS DE AUDITORÍA
+========================================== */
+
+.filter-fields {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: end;
+  gap: 0.5rem;
+}
+
+/* ==========================================
+   RECEPCIONES
+========================================== */
+
+.receipt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.receipt-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.receipt-line {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.6rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.receipt-proof {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+/* ==========================================
+   AUDITORÍA - RESUMEN DEL REGISTRO
+========================================== */
+
+.audit-summary {
+  margin-bottom: 1.5rem;
+}
+
+.audit-summary p {
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.audit-summary strong {
+  color: #0f172a;
+}
+
+.changes-title {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ==========================================
+   AUDITORÍA - TABLA DE CAMBIOS
+========================================== */
+
+.audit-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.audit-changes-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.audit-changes-table th {
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.audit-changes-table td {
+  padding: 0.9rem 1rem;
+  color: #334155;
+  font-size: 0.85rem;
+  vertical-align: top;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.audit-changes-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.audit-changes-table th:first-child,
+.audit-changes-table td:first-child {
+  width: 28%;
+}
+
+.audit-field {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.audit-value {
+  display: inline-block;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.old-value {
+  color: #b45309;
+}
+
+.new-value {
+  color: #047857;
+}
+
+/* ==========================================
+   AUDITORÍA - ESTADO SIN CAMBIOS
+========================================== */
+
+.audit-empty {
+  padding: 1.75rem 1rem;
+  text-align: center;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width: 1100px) {
+  .line {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .line .product-field {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1000px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .page-header,
+  .card-header,
+  .lines-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-actions {
+    width: 100%;
+  }
+
+  .page-actions .btn-secondary {
+    width: 100%;
+  }
+
+  .form-grid,
+  .line {
+    grid-template-columns: 1fr;
+  }
+
+  .field.full,
+  .line .product-field {
+    grid-column: auto;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .summary-grid,
+  .sale-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .receipt-line {
+    grid-template-columns: 1fr;
+  }
+
+  .audit-changes-table {
+    min-width: 520px;
+  }
+
+  .detail-modal {
+    width: 100%;
+  }
+}

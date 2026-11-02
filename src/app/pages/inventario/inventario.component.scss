@@ -54,6 +54,14 @@
 }
 
 
+.page__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 /* =========================================================
    BOTONES
 ========================================================= */
@@ -744,8 +752,12 @@ textarea {
     flex-direction: column;
   }
 
-  .page__header .button {
+  .page__actions {
     width: 100%;
+  }
+
+  .page__actions .button {
+    flex: 1;
   }
 
   .filters {
@@ -818,4 +830,13 @@ textarea {
     width: 100%;
   }
 
+}
+@media (max-width: 560px) {
+  .page__actions {
+    flex-direction: column;
+  }
+
+  .page__actions .button {
+    width: 100%;
+  }
 }

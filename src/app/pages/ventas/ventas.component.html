@@ -1,0 +1,111 @@
+<main class="page">
+  <section class="content">
+    <header class="page-header">
+      <div><span class="page-eyebrow">Comercial</span><h1>Ventas</h1><p>Confirma ventas, descuenta existencias y controla pagos y saldos pendientes.</p></div>
+      @if (canCreate) { <button class="btn-primary" (click)="mostrarFormulario = !mostrarFormulario">{{ mostrarFormulario ? 'Cerrar formulario' : 'Nueva venta' }}</button> }
+    </header>
+
+    @if (mensajeExito) { <div class="alert success">{{ mensajeExito }}</div> }
+    @if (mensajeError) { <div class="alert error">{{ mensajeError }}</div> }
+
+    @if (mostrarFormulario && canCreate) {
+      <section class="card form-card">
+        <div class="card-header"><div><span class="page-eyebrow">Venta directa</span><h2>Registrar y confirmar venta</h2></div></div>
+        <form [formGroup]="form" (ngSubmit)="confirmarVenta()">
+          <div class="form-grid">
+            <div class="field"><label>Cliente *</label><select formControlName="customerId"><option [ngValue]="null">Seleccione...</option>@for (c of clientes; track c.id) { <option [ngValue]="c.id">{{ c.document }} - {{ c.name }}</option> }</select></div>
+            <div class="field"><label>Bodega *</label><select formControlName="warehouseId"><option [ngValue]="null">Seleccione...</option>@for (b of bodegas; track b.id) { <option [ngValue]="b.id">{{ b.code }} - {{ b.name }}</option> }</select></div>
+            <div class="field full"><label>Observaciones</label><textarea rows="2" formControlName="notes"></textarea></div>
+          </div>
+
+          <div class="lines-header"><div><span class="page-eyebrow">Productos</span><h3>Detalle de venta</h3></div><button type="button" class="btn-secondary" (click)="agregarLinea()">+ Agregar producto</button></div>
+          <div formArrayName="lines" class="lines">
+            @for (linea of lineas.controls; track $index; let i = $index) {
+              <div class="line" [formGroupName]="i">
+                <div class="field product-field"><label>Variante *</label><select formControlName="variantId" (change)="seleccionarVariante(i)"><option [ngValue]="null">Seleccione...</option>@for (v of variantes; track v.id) { <option [ngValue]="v.id">{{ v.sku }} · {{ v.productCode }} · {{ v.color }}</option> }</select></div>
+                <div class="field"><label>Cantidad *</label><input type="number" min="0.000001" step="0.01" formControlName="quantity"></div>
+                <div class="field"><label>Precio *</label><input type="number" min="0" step="0.01" formControlName="unitPrice"></div>
+                <div class="field"><label>Descuento</label><input type="number" min="0" step="0.01" formControlName="discount"></div>
+                <div class="field"><label>IVA %</label><input type="number" min="0" step="0.01" formControlName="taxPercent"></div>
+                <div class="line-total"><span>Total</span><strong>{{ calculoLinea(i).total | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+                <button type="button" class="btn-remove" [disabled]="lineas.length === 1" (click)="eliminarLinea(i)">×</button>
+              </div>
+            }
+          </div>
+          <div class="summary-grid">
+            <div><span>Subtotal</span><strong>{{ resumen().subtotal | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+            <div><span>Descuento</span><strong>- {{ resumen().descuento | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+            <div><span>Impuestos</span><strong>{{ resumen().impuesto | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+            <div class="grand"><span>Total</span><strong>{{ resumen().total | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+          </div>
+          <div class="atomic-note">La confirmación debe guardar cabecera, líneas, salidas de inventario y balances en una sola transacción del backend.</div>
+          <div class="form-actions"><button type="button" class="btn-secondary" (click)="mostrarFormulario = false">Cancelar</button><button type="submit" class="btn-primary" [disabled]="guardando">{{ guardando ? 'Confirmando...' : 'Confirmar venta' }}</button></div>
+        </form>
+      </section>
+    }
+
+    <section class="card">
+      <div class="card-header"><div><span class="page-eyebrow">Histórico</span><h2>Ventas registradas</h2></div><span class="total-badge">{{ totalElementos }} ventas</span></div>
+      @if (cargando) { <div class="state">Cargando ventas...</div> }
+      @else {
+        <div class="table-wrapper"><table><thead><tr><th>Número</th><th>Cliente</th><th>Bodega</th><th>Estado</th><th>Total</th><th>Pagado</th><th>Saldo</th><th>Origen</th><th></th></tr></thead><tbody>
+          @for (v of ventas; track v.id) {
+            <tr><td><strong>{{ v.number }}</strong></td><td>{{ v.customerName || ('Cliente #' + v.customerId) }}</td><td>{{ v.warehouseName || ('Bodega #' + v.warehouseId) }}</td><td><span class="status">{{ estadoTexto(v.status) }}</span></td><td>{{ v.total | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td>{{ v.totalPaid | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td [class.balance-open]="v.pendingBalance > 0">{{ v.pendingBalance | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td>{{ v.quotationNumber || 'Directa' }}</td><td><button class="btn-link" (click)="verDetalle(v)">Ver detalle</button></td></tr>
+          } @empty { <tr><td colspan="9"><div class="state">No hay ventas registradas.</div></td></tr> }
+        </tbody></table></div>
+      }
+      @if (!cargando && totalPaginas > 0) { <div class="pagination"><span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span><div><button [disabled]="paginaActual === 0" (click)="cambiarPagina(paginaActual - 1)">Anterior</button><button [disabled]="paginaActual + 1 >= totalPaginas" (click)="cambiarPagina(paginaActual + 1)">Siguiente</button></div></div> }
+    </section>
+  </section>
+</main>
+
+@if (mostrarDetalle && ventaSeleccionada) {
+  <div class="modal-backdrop" (click)="mostrarDetalle = false">
+    <section class="modal detail-modal" (click)="$event.stopPropagation()">
+      <div class="card-header"><div><span class="page-eyebrow">{{ ventaSeleccionada.number }}</span><h2>Detalle de venta</h2></div><button class="btn-close" (click)="mostrarDetalle = false">×</button></div>
+      <div class="modal-body">
+        @if (mensajeError) { <div class="alert error">{{ mensajeError }}</div> }
+        @if (cargandoDetalle) { <div class="compact-state">Actualizando detalle...</div> }
+        <div class="sale-summary"><div><span>Estado</span><strong>{{ estadoTexto(ventaSeleccionada.status) }}</strong></div><div><span>Total</span><strong>{{ ventaSeleccionada.total | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div><div><span>Pagado</span><strong>{{ ventaSeleccionada.totalPaid | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div><div><span>Saldo</span><strong>{{ ventaSeleccionada.pendingBalance | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div></div>
+        <div class="sale-actions">
+          @if (canDispatch && puedeDespachar()) { <button type="button" class="btn-primary small" [disabled]="guardando || cargandoDetalle" (click)="mostrarDespacho = !mostrarDespacho; mostrarCancelacion = false">Confirmar despacho</button> }
+          @if (canDeliver && puedeEntregar()) { <button type="button" class="btn-primary small" [disabled]="guardando || cargandoDetalle" (click)="completarEntrega()">Confirmar entrega</button> }
+          @if (canCancel && puedeCancelar()) { <button type="button" class="btn-link danger" [disabled]="guardando || cargandoDetalle" (click)="mostrarCancelacion = !mostrarCancelacion; mostrarDespacho = false; cancelacionForm.reset()">Cancelar venta</button> }
+        </div>
+        @if (mostrarDespacho) {
+          <form [formGroup]="despachoForm" (ngSubmit)="despacharVenta()" class="action-form">
+            <div class="field"><label>Evidencia del despacho (opcional)</label><textarea rows="2" formControlName="evidence" placeholder="Referencia, guía u observación"></textarea></div>
+            <div class="form-actions"><button type="button" class="btn-secondary" (click)="mostrarDespacho = false">Volver</button><button class="btn-primary" type="submit" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Registrar despacho' }}</button></div>
+          </form>
+        }
+        @if (mostrarCancelacion) {
+          <form [formGroup]="cancelacionForm" (ngSubmit)="cancelarVenta()" class="action-form">
+            <div class="field"><label>Motivo de cancelación *</label><textarea rows="3" formControlName="reason" placeholder="Indica el motivo de la cancelación"></textarea></div>
+            <p>El backend aplicará la política de cancelación y registrará los movimientos compensatorios que correspondan.</p>
+            <div class="form-actions"><button type="button" class="btn-secondary" (click)="mostrarCancelacion = false">Volver</button><button class="btn-primary" type="submit" [disabled]="guardando || cancelacionForm.invalid">{{ guardando ? 'Cancelando...' : 'Confirmar cancelación' }}</button></div>
+          </form>
+        }
+        <h3>Productos</h3><div class="mini-table"><table><thead><tr><th>SKU</th><th>Cant.</th><th>Precio histórico</th><th>Costo histórico</th><th>Total</th></tr></thead><tbody>@for (l of ventaSeleccionada.lines || []; track $index) { <tr><td>{{ l.sku || ('#' + l.variantId) }}</td><td>{{ l.quantity }}</td><td>{{ l.unitPrice | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td>{{ (l.unitCost ?? 0) | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td>{{ l.total | currency:'COP':'symbol-narrow':'1.0-2' }}</td></tr> }</tbody></table></div>
+        <div class="payments-title"><h3>Pagos</h3>@if (canPay && puedeRegistrarPago()) { <button class="btn-primary small" (click)="abrirPago()">Registrar pago</button> }</div>
+        <div class="mini-table"><table><thead><tr><th>Fecha</th><th>Método</th><th>Referencia</th><th>Monto</th></tr></thead><tbody>@for (p of ventaSeleccionada.payments || []; track p.id) { <tr><td>{{ p.paidAt | date:'dd/MM/yyyy' }}</td><td>{{ p.method }}</td><td>{{ p.reference || '—' }}</td><td>{{ p.amount | currency:'COP':'symbol-narrow':'1.0-2' }}</td></tr> } @empty { <tr><td colspan="4">Sin pagos registrados.</td></tr> }</tbody></table></div>
+      </div>
+    </section>
+  </div>
+}
+
+@if (mostrarPago && ventaSeleccionada) {
+  <div class="modal-backdrop payment-layer" (click)="mostrarPago = false">
+    <section class="modal payment-modal" (click)="$event.stopPropagation()">
+      <div class="card-header"><div><span class="page-eyebrow">{{ ventaSeleccionada.number }}</span><h2>Registrar pago</h2></div><button class="btn-close" (click)="mostrarPago = false">×</button></div>
+      <form class="modal-body" [formGroup]="pagoForm" (ngSubmit)="registrarPago()">
+        @if (mensajeError) { <div class="alert error">{{ mensajeError }}</div> }
+        <div class="payment-balance">Saldo pendiente: <strong>{{ ventaSeleccionada.pendingBalance | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+        <div class="field"><label>Método *</label><select formControlName="method"><option value="CASH">Efectivo</option><option value="TRANSFER">Transferencia</option><option value="CARD">Tarjeta</option><option value="OTHER">Otro</option></select></div>
+        <div class="field"><label>Monto *</label><input type="number" min="0.01" step="0.01" formControlName="amount"></div>
+        <div class="field"><label>Fecha *</label><input type="date" formControlName="paymentDate"></div>
+        <div class="field"><label>Referencia</label><input type="text" formControlName="reference" placeholder="Número de comprobante, transferencia..."></div>
+        <div class="form-actions"><button type="button" class="btn-secondary" (click)="mostrarPago = false">Cancelar</button><button type="submit" class="btn-primary" [disabled]="guardando || pagoForm.invalid || !puedeRegistrarPago()">{{ guardando ? 'Registrando...' : 'Guardar pago' }}</button></div>
+      </form>
+    </section>
+  </div>
+}

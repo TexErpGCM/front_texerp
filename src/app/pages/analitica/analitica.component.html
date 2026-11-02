@@ -1,0 +1,77 @@
+<section class="analytics-page">
+  <div class="heading">
+    <div><span class="eyebrow">INTELIGENCIA DE NEGOCIO</span><h2>Centro de analítica</h2><p>Indicadores de ventas, inventario, compras y clientes.</p></div>
+  </div>
+  <nav class="analytics-tabs" aria-label="Áreas de analítica">
+    @for (tab of tabs; track tab.id) {
+      <button type="button" [class.selected]="area === tab.id" [attr.aria-pressed]="area === tab.id" (click)="choose(tab.id)">
+        <strong>{{ tab.title }}</strong>
+      </button>
+    }
+  </nav>
+  <form class="filters" (ngSubmit)="load()">
+    <label>Desde<input type="date" name="from" [(ngModel)]="filters.from" required /></label>
+    <label>Hasta<input type="date" name="to" [(ngModel)]="filters.to" required /></label>
+    <label>Resultados<input type="number" name="limit" [(ngModel)]="filters.limit" min="1" max="100" required /></label>
+    @if (area === 'customers' || area === 'purchases') {
+      <label>Ordenar por<select name="rankingBy" [(ngModel)]="filters.rankingBy">
+        @if (area === 'customers') {
+          <option value="SALES">Ventas</option><option value="PROFIT">Utilidad</option><option value="FREQUENCY">Frecuencia</option>
+        } @else {
+          <option value="AMOUNT">Monto</option><option value="PENDING">Pendientes</option><option value="DELIVERY">Entrega</option>
+        }
+      </select></label>
+    }
+    @if (area === 'customers') {
+      <label>Tipo de cliente<input name="type" [(ngModel)]="filters.type" placeholder="Ej. NATURAL" /></label>
+      <label>Clasificación<input name="segment" [(ngModel)]="filters.segment" placeholder="Ej. Mayorista" /></label>
+    }
+    @if (area === 'purchases') {
+      <label>Proveedor ID<input type="number" name="supplierId" [(ngModel)]="filters.supplierId" min="1" placeholder="Todos" /></label>
+      <label>Bodega ID<input type="number" name="warehouseId" [(ngModel)]="filters.warehouseId" min="1" placeholder="Todas" /></label>
+    }
+    @if (area === 'customers' || area === 'purchases') {
+      <label>Producto ID<input type="number" name="productId" [(ngModel)]="filters.productId" min="1" placeholder="Todos" /></label>
+    }
+    <button class="apply" type="submit" [disabled]="loading()">{{ loading() ? 'Consultando…' : 'Aplicar filtros' }}</button>
+  </form>
+  <div class="section-head"><h3>{{ title }}</h3><span>{{ filters.from }} — {{ filters.to }}</span></div>
+  @if (loading()) {
+    <div class="message" role="status">Consultando información del servidor…</div>
+  } @else if (error()) {
+    <div class="message error" role="alert">{{ error() }} <button type="button" (click)="load()">Reintentar</button></div>
+  } @else if (data(); as dashboard) {
+    @if (dashboard.hasData === false) { <div class="message">No se encontraron registros para los filtros seleccionados.</div> }
+    @if (metrics().length) {
+      <div class="metrics">
+        @for (metric of metrics(); track metric.key) {
+          <article class="metric"><span>{{ metric.label }}</span><strong>{{ format(metric.value, metric.key) }}</strong></article>
+        }
+      </div>
+    }
+    @if (bars().length) {
+      <section class="chart-card" aria-label="Comparación de resultados">
+        <div class="table-title"><h4>{{ chartTitle() }}</h4><span>Comparación de los principales registros</span></div>
+        <div class="bar-list">
+          @for (bar of bars(); track $index) {
+            <div class="bar-row">
+              <div class="bar-info"><span [title]="bar.label">{{ bar.label }}</span><strong>{{ bar.formatted }}</strong></div>
+              <div class="bar-track"><div class="bar-fill" [style.width.%]="bar.width"></div></div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+    @if (rows().length) {
+      <section class="table-card">
+        <div class="table-title"><h4>{{ area === 'customers' ? 'Ranking de clientes' : area === 'purchases' ? 'Ranking de proveedores' : 'Detalle de resultados' }}</h4><span>{{ rows().length }} registros</span></div>
+        <div class="table-scroll"><table>
+          <thead><tr>@for (column of columns(); track column) {<th scope="col">{{ label(column) }}</th>}</tr></thead>
+          <tbody>@for (row of rows(); track $index) {<tr>@for (column of columns(); track column) {<td [title]="format(row[column], column)">{{ format(row[column], column) }}</td>}</tr>}</tbody>
+        </table></div>
+      </section>
+    } @else if (dashboard.hasData !== false) {
+      <div class="message">La respuesta no contiene filas de detalle para esta vista.</div>
+    }
+  }
+</section>

@@ -1,0 +1,149 @@
+<main class="page">
+  <section>
+    <header class="page-header">
+      <div>
+        <span class="page-eyebrow">TexERP</span>
+        <h1>Movimientos de inventario</h1>
+        <p>Consulta la trazabilidad de entradas, salidas, reservas y ajustes de inventario.</p>
+      </div>
+    </header>
+
+    @if (mensajeError) {
+      <div class="alert alert-error">
+        <span>{{ mensajeError }}</span>
+        <button type="button" class="btn-close-alert" (click)="mensajeError = ''">×</button>
+      </div>
+    }
+
+    <section class="filters">
+      <form [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" class="filters__form movement-filters">
+        <div class="filter-item">
+          <label for="sku">SKU</label>
+          <input id="sku" type="search" formControlName="sku" placeholder="Ej. SKU-001">
+        </div>
+        <div class="filter-item">
+          <label for="warehouse">Bodega</label>
+          <input id="warehouse" type="search" formControlName="warehouse" placeholder="Nombre o código">
+        </div>
+        <div class="filter-item">
+          <label for="type">Tipo</label>
+          <select id="type" formControlName="type">
+            <option value="">Todos</option>
+            <option value="ENTRY">Entrada</option>
+            <option value="EXIT">Salida</option>
+            <option value="ADJUSTMENT">Ajuste</option>
+            <option value="RESERVATION">Reserva</option>
+            <option value="RELEASE">Liberación</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label for="from">Desde</label>
+          <input id="from" type="date" formControlName="from">
+        </div>
+        <div class="filter-item">
+          <label for="to">Hasta</label>
+          <input id="to" type="date" formControlName="to">
+        </div>
+        <div class="filter-actions">
+          <button type="submit" class="btn-search">Buscar</button>
+          <button type="button" class="btn-clear" (click)="limpiarFiltros()">Limpiar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="table-card">
+      <div class="table-card-header">
+        <div>
+          <span class="page-eyebrow">Trazabilidad</span>
+          <h2>Historial de movimientos</h2>
+        </div>
+        <span class="total-badge">{{ totalElementos }} movimientos</span>
+      </div>
+
+      @if (cargando) {
+        <div class="loading-state">Cargando movimientos...</div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>SKU</th>
+                <th>Bodega</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Referencia</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (movimiento of movimientos; track movimiento.id) {
+                <tr>
+                  <td><span class="movement-id">#{{ movimiento.id }}</span></td>
+                  <td>{{ movimiento.movementAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td><span class="code">{{ movimiento.sku }}</span></td>
+                  <td>
+                    <strong>{{ movimiento.warehouseName }}</strong>
+                    @if (movimiento.warehouseCode) { <small>{{ movimiento.warehouseCode }}</small> }
+                  </td>
+                  <td><span class="movement-type">{{ tipoTexto(movimiento.type) }}</span></td>
+                  <td [class.qty-positive]="movimiento.quantity > 0" [class.qty-negative]="movimiento.quantity < 0">
+                    {{ movimiento.quantity > 0 ? '+' : '' }}{{ movimiento.quantity }}
+                  </td>
+                  <td>{{ movimiento.sourceDocument || '—' }}</td>
+                  <td><button type="button" class="btn-detail" (click)="verDetalle(movimiento)">Ver detalle</button></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="8"><div class="empty-state">No hay movimientos que coincidan con los filtros.</div></td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (!cargando && totalPaginas > 0) {
+        <div class="pagination">
+          <span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span>
+          <div class="pagination-controls">
+            <button type="button" [disabled]="paginaActual === 0" (click)="cambiarPagina(paginaActual - 1)">Anterior</button>
+            <button type="button" [disabled]="paginaActual + 1 >= totalPaginas" (click)="cambiarPagina(paginaActual + 1)">Siguiente</button>
+          </div>
+        </div>
+      }
+    </section>
+  </section>
+</main>
+
+@if (mostrarDetalle && movimientoSeleccionado) {
+  <div class="modal-backdrop" (click)="cerrarDetalle()">
+    <section class="modal-card detail-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="page-eyebrow">Movimiento #{{ movimientoSeleccionado.id }}</span>
+          <h2>Detalle inmutable</h2>
+        </div>
+        <button type="button" class="btn-close" (click)="cerrarDetalle()">×</button>
+      </div>
+
+      <div class="modal-body">
+        @if (cargandoDetalle) { <div class="loading-state compact">Actualizando detalle...</div> }
+        <div class="detail-grid">
+          <div><span>Fecha</span><strong>{{ movimientoSeleccionado.movementAt | date:'dd/MM/yyyy HH:mm:ss' }}</strong></div>
+          <div><span>SKU</span><strong>{{ movimientoSeleccionado.sku }}</strong></div>
+          <div><span>Producto</span><strong>{{ movimientoSeleccionado.productName || '—' }}</strong></div>
+          <div><span>Bodega</span><strong>{{ movimientoSeleccionado.warehouseName }}</strong></div>
+          <div><span>Tipo</span><strong>{{ tipoTexto(movimientoSeleccionado.type) }}</strong></div>
+          <div><span>Cantidad</span><strong>{{ movimientoSeleccionado.quantity }}</strong></div>
+          <div><span>Saldo anterior</span><strong>{{ movimientoSeleccionado.previousAvailable ?? '—' }}</strong></div>
+          <div><span>Saldo nuevo</span><strong>{{ movimientoSeleccionado.newAvailable ?? '—' }}</strong></div>
+          <div><span>Referencia</span><strong>{{ movimientoSeleccionado.sourceDocument || '—' }}</strong></div>
+          <div><span>Usuario</span><strong>{{ movimientoSeleccionado.performedBy || '—' }}</strong></div>
+          <div class="detail-full"><span>Motivo</span><strong>{{ movimientoSeleccionado.reason || '—' }}</strong></div>
+        </div>
+        <div class="immutable-note">Este registro es de consulta y no puede modificarse desde esta pantalla.</div>
+        <div class="modal-footer"><button type="button" class="btn-primary" (click)="cerrarDetalle()">Cerrar</button></div>
+      </div>
+    </section>
+  </div>
+}

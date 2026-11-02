@@ -1,0 +1,311 @@
+
+<main class="page">
+  <section class="content">
+
+    <header class="page-header">
+      <div>
+        <span class="page-eyebrow">Control interno</span>
+        <h1>Auditoría</h1>
+        <p>
+          Consulta los cambios de operaciones críticas.
+          Los registros son de solo lectura.
+        </p>
+      </div>
+
+      <div class="page-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="generarPdf()"
+          [disabled]="generandoPdf || cargando || registros.length === 0"
+        >
+          <i class="pi pi-file-pdf"></i>
+          {{ generandoPdf ? 'Generando PDF...' : 'Generar PDF' }}
+        </button>
+      </div>
+    </header>
+
+    @if (error) {
+      <div class="alert error">
+        {{ error }}
+      </div>
+    }
+
+    <section class="card">
+
+      <div class="card-header">
+        <h2>Filtros de auditoría</h2>
+      </div>
+
+      <div class="filter-fields">
+
+        <div class="field">
+          <label>Entidad</label>
+          <input
+            [(ngModel)]="filtros.entity"
+            placeholder="Venta, compra, inventario..."
+          />
+        </div>
+
+        <div class="field">
+          <label>Acción</label>
+          <input
+            [(ngModel)]="filtros.action"
+            placeholder="CREATE, UPDATE..."
+          />
+        </div>
+
+        <div class="field">
+          <label>Usuario</label>
+          <input
+            [(ngModel)]="filtros.user"
+            placeholder="Usuario"
+          />
+        </div>
+
+        <div class="field">
+          <label>Desde</label>
+          <input
+            type="date"
+            [(ngModel)]="filtros.fromDate"
+          />
+        </div>
+
+        <div class="field">
+          <label>Hasta</label>
+          <input
+            type="date"
+            [(ngModel)]="filtros.toDate"
+          />
+        </div>
+
+        <div class="filter-actions">
+          <button
+            class="btn-primary"
+            (click)="filtrar()"
+          >
+            Buscar
+          </button>
+
+          <button
+            class="btn-secondary"
+            (click)="limpiar()"
+          >
+            Limpiar
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="card">
+
+      <div class="card-header">
+        <h2>Registro de operaciones</h2>
+
+        <span class="total-badge">
+          {{ totalElementos }} registros
+        </span>
+      </div>
+
+      @if (cargando) {
+        <div class="state">
+          Cargando registros...
+        </div>
+      } @else {
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Entidad</th>
+                <th>Identificador</th>
+                <th>Acción</th>
+                <th>Usuario</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (r of registros; track r.id) {
+                <tr>
+                  <td>
+                    {{ r.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}
+                  </td>
+
+                  <td>{{ r.entity }}</td>
+                  <td>{{ r.entityId }}</td>
+
+                  <td>
+                    <span class="status">
+                      {{ r.action }}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{ r.username || r.user }}
+                  </td>
+
+                  <td>
+                    <button
+                      class="btn-link"
+                      (click)="abrirDetalle(r)"
+                    >
+                      Ver cambios
+                    </button>
+                  </td>
+                </tr>
+              }
+
+              @empty {
+                <tr>
+                  <td colspan="6">
+                    <div class="state">
+                      No se encontraron registros.
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (totalPaginas > 0) {
+        <div class="pagination">
+          <span>
+            Página {{ pagina + 1 }} de {{ totalPaginas }}
+          </span>
+
+          <div>
+            <button
+              [disabled]="pagina === 0"
+              (click)="cambiarPagina(pagina - 1)"
+            >
+              Anterior
+            </button>
+
+            <button
+              [disabled]="pagina + 1 >= totalPaginas"
+              (click)="cambiarPagina(pagina + 1)"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
+
+    </section>
+  </section>
+</main>
+
+@if (seleccionado) {
+
+  <div
+    class="modal-backdrop"
+    (click)="cerrarDetalle()"
+  >
+
+    <section
+      class="modal detail-modal"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="card-header">
+        <h2>Detalle de auditoría</h2>
+
+        <button
+          class="btn-close"
+          (click)="cerrarDetalle()"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="audit-summary">
+          <p>
+            <strong>
+              {{ seleccionado.entity }}
+              #{{ seleccionado.entityId }}
+            </strong>
+            · {{ seleccionado.action }}
+          </p>
+
+          <p>
+            Usuario:
+            {{ seleccionado.username || seleccionado.user }}
+          </p>
+
+          <p>
+            Fecha:
+            {{ seleccionado.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}
+          </p>
+        </div>
+
+        <h3 class="changes-title">
+          Cambios realizados
+        </h3>
+
+        @if (cambiosSeleccionados.length > 0) {
+
+          <div class="audit-table-wrapper">
+            <table class="audit-changes-table">
+
+              <thead>
+                <tr>
+                  <th>Campo</th>
+                  <th>Valor anterior</th>
+                  <th>Valor nuevo</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (
+                  cambio of cambiosSeleccionados;
+                  track cambio.campo
+                ) {
+                  <tr>
+                    <td class="audit-field">
+                      {{ cambio.campo }}
+                    </td>
+
+                    <td>
+                      <span class="audit-value old-value">
+                        {{ cambio.anterior }}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="audit-value new-value">
+                        {{ cambio.nuevo }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+
+            </table>
+          </div>
+
+        } @else {
+
+          <div class="audit-empty">
+            No hay cambios detallados disponibles
+            para este registro.
+          </div>
+
+        }
+
+        <p class="hint">
+          Los valores sensibles deben venir
+          enmascarados desde el servidor.
+        </p>
+
+      </div>
+    </section>
+  </div>
+}

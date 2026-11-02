@@ -1,0 +1,76 @@
+<main class="page">
+  <section class="content">
+    <header class="page-header">
+      <div>
+        <span class="page-eyebrow">Comercial</span>
+        <h1>Cotizaciones</h1>
+        <p>Crea propuestas comerciales sin afectar el inventario y conviértelas en ventas cuando sean aprobadas.</p>
+      </div>
+      @if (canCreate) {
+        <button type="button" class="btn-primary" (click)="mostrarFormulario = !mostrarFormulario">
+          {{ mostrarFormulario ? 'Cerrar formulario' : 'Nueva cotización' }}
+        </button>
+      }
+    </header>
+
+    @if (mensajeExito) { <div class="alert success">{{ mensajeExito }}</div> }
+    @if (mensajeError) { <div class="alert error">{{ mensajeError }}</div> }
+
+    @if (mostrarFormulario && canCreate) {
+      <section class="card form-card">
+        <div class="card-header"><div><span class="page-eyebrow">Nueva propuesta</span><h2>Datos de la cotización</h2></div></div>
+        <form [formGroup]="form" (ngSubmit)="guardar()">
+          <div class="form-grid">
+            <div class="field">
+              <label>Cliente *</label>
+              <select formControlName="customerId">
+                <option [ngValue]="null">Seleccione...</option>
+                @for (cliente of clientes; track cliente.id) { <option [ngValue]="cliente.id">{{ cliente.document }} - {{ cliente.name }}</option> }
+              </select>
+            </div>
+            <div class="field"><label>Fecha emisión *</label><input type="date" formControlName="issueDate"></div>
+            <div class="field"><label>Vencimiento *</label><input type="date" formControlName="expirationDate"></div>
+            <div class="field full"><label>Condiciones / notas</label><textarea rows="2" formControlName="notes" placeholder="Condiciones comerciales, forma de entrega, observaciones..."></textarea></div>
+          </div>
+
+          <div class="lines-header"><div><span class="page-eyebrow">Productos</span><h3>Líneas de cotización</h3></div><button type="button" class="btn-secondary" (click)="agregarLinea()">+ Agregar producto</button></div>
+          <div formArrayName="lines" class="lines">
+            @for (linea of lineas.controls; track $index; let i = $index) {
+              <div class="line" [formGroupName]="i">
+                <div class="field product-field"><label>Variante *</label><select formControlName="variantId" (change)="seleccionarVariante(i)"><option [ngValue]="null">Seleccione...</option>@for (v of variantes; track v.id) { <option [ngValue]="v.id">{{ v.sku }} · {{ v.productCode }} · {{ v.color }}</option> }</select></div>
+                <div class="field"><label>Cantidad *</label><input type="number" min="0.000001" step="0.01" formControlName="quantity"></div>
+                <div class="field"><label>Precio unitario *</label><input type="number" min="0" step="0.01" formControlName="unitPrice"></div>
+                <div class="line-total"><span>Subtotal</span><strong>{{ subtotalLinea(i) | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+                <button type="button" class="btn-remove" [disabled]="lineas.length === 1" (click)="eliminarLinea(i)">×</button>
+              </div>
+            }
+          </div>
+          <div class="summary"><span>Total cotización</span><strong>{{ totalCotizacion() | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+          <div class="form-actions"><button type="button" class="btn-secondary" (click)="mostrarFormulario = false">Cancelar</button><button type="submit" class="btn-primary" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Crear cotización' }}</button></div>
+        </form>
+      </section>
+    }
+
+    <section class="card">
+      <div class="card-header"><div><span class="page-eyebrow">Trazabilidad comercial</span><h2>Historial de cotizaciones</h2></div><span class="total-badge">{{ totalElementos }} registros</span></div>
+      @if (cargando) { <div class="state">Cargando cotizaciones...</div> }
+      @else {
+        <div class="table-wrapper"><table><thead><tr><th>Número</th><th>Cliente</th><th>Emisión</th><th>Vencimiento</th><th>Estado</th><th>Total</th><th>Venta</th><th>Acciones</th></tr></thead><tbody>
+          @for (c of cotizaciones; track c.id) {
+            <tr><td><strong>{{ c.number }}</strong></td><td>{{ c.customerName || ('Cliente #' + c.customerId) }}</td><td>{{ c.issueDate | date:'dd/MM/yyyy' }}</td><td>{{ c.expirationDate | date:'dd/MM/yyyy' }}</td><td><span class="status">{{ estadoTexto(c.status) }}</span></td><td>{{ c.total | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td>{{ c.convertedSaleNumber || '—' }}</td><td><div class="actions">@if (canConvert && puedeConvertirse(c)) { <button type="button" class="btn-link" (click)="abrirConversion(c)">Convertir</button> } @if (canCancel && puedeCancelarse(c)) { <button type="button" class="btn-link danger" (click)="cancelar(c)">Cancelar</button> }</div></td></tr>
+          } @empty { <tr><td colspan="8"><div class="state">No hay cotizaciones registradas.</div></td></tr> }
+        </tbody></table></div>
+      }
+      @if (!cargando && totalPaginas > 0) { <div class="pagination"><span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span><div><button [disabled]="paginaActual === 0" (click)="cambiarPagina(paginaActual - 1)">Anterior</button><button [disabled]="paginaActual + 1 >= totalPaginas" (click)="cambiarPagina(paginaActual + 1)">Siguiente</button></div></div> }
+    </section>
+  </section>
+</main>
+
+@if (mostrarConversion && cotizacionConversion) {
+  <div class="modal-backdrop" (click)="mostrarConversion = false">
+    <section class="modal" (click)="$event.stopPropagation()">
+      <div class="card-header"><div><span class="page-eyebrow">{{ cotizacionConversion.number }}</span><h2>Convertir en venta</h2></div><button class="btn-close" (click)="mostrarConversion = false">×</button></div>
+      <div class="modal-body"><p>Se volverán a validar cliente, precios y disponibilidad. La conversión debe ser atómica y no admite venta parcial.</p><div class="field"><label>Bodega *</label><select [(ngModel)]="bodegaConversion" [ngModelOptions]="{standalone: true}"><option [ngValue]="null">Seleccione...</option>@for (b of bodegas; track b.id) { <option [ngValue]="b.id">{{ b.code }} - {{ b.name }}</option> }</select></div><div class="form-actions"><button class="btn-secondary" (click)="mostrarConversion = false">Cancelar</button><button class="btn-primary" [disabled]="guardando || !bodegaConversion" (click)="convertir()">{{ guardando ? 'Convirtiendo...' : 'Confirmar conversión' }}</button></div></div>
+    </section>
+  </div>
+}

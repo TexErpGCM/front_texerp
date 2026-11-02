@@ -1,0 +1,81 @@
+<main class="page"><section class="content">
+  <header class="page-header"><div><span class="page-eyebrow">Abastecimiento</span><h1>Órdenes de compra</h1><p>Solicita variantes a proveedores y controla la aprobación de cada orden.</p></div>
+    @if (canCreate) { <button class="btn-primary" (click)="mostrarFormulario = !mostrarFormulario">{{ mostrarFormulario ? 'Cerrar formulario' : 'Nueva orden' }}</button> }
+  </header>
+  @if (mensajeExito) { <div class="alert success">{{ mensajeExito }}</div> }
+  @if (mensajeError) { <div class="alert error">{{ mensajeError }}</div> }
+  @if (mostrarFormulario && canCreate) {
+    <section class="card form-card"><div class="card-header"><div><span class="page-eyebrow">Compras</span><h2>Crear orden de compra</h2></div></div>
+      <form [formGroup]="form" (ngSubmit)="crearOrden()">
+        <div class="form-grid"><div class="field"><label>Proveedor *</label><select formControlName="supplierId"><option [ngValue]="null">Seleccione...</option>@for (p of proveedores; track p.id) { <option [ngValue]="p.id">{{ p.taxId }} - {{ p.name }}</option> }</select></div>
+          <div class="field"><label>Fecha *</label><input type="date" formControlName="orderDate"></div></div>
+        <div class="lines-header"><div><span class="page-eyebrow">Productos</span><h3>Líneas de compra</h3></div><button type="button" class="btn-secondary" (click)="agregarLinea()">+ Agregar variante</button></div>
+        <div formArrayName="lines" class="lines">
+          @for (linea of lineas.controls; track $index; let i = $index) {
+            <div class="line" [formGroupName]="i"><div class="field product-field"><label>Variante *</label><select formControlName="variantId" (change)="seleccionarVariante(i)"><option [ngValue]="null">Seleccione...</option>@for (v of variantes; track v.id) { <option [ngValue]="v.id">{{ v.sku }} · {{ v.productCode }} · {{ v.color }}</option> }</select></div>
+              <div class="field"><label>Cantidad *</label><input type="number" min="0.000001" step="0.01" formControlName="quantity"></div>
+              <div class="field"><label>Costo unitario *</label><input type="number" min="0.01" step="0.01" formControlName="unitCost"></div>
+              <div class="line-total"><span>Subtotal</span><strong>{{ (linea.value.quantity || 0) * (linea.value.unitCost || 0) | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+              <button type="button" class="btn-remove" [disabled]="lineas.length === 1" (click)="eliminarLinea(i)">×</button></div>
+          }
+        </div>
+        <div class="summary"><span>Total estimado</span><strong>{{ total() | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div>
+        <div class="atomic-note">El backend valida proveedores y variantes, calcula el total y persiste cabecera y líneas en una sola transacción.</div>
+        <div class="form-actions"><button type="button" class="btn-secondary" (click)="mostrarFormulario = false">Cancelar</button><button class="btn-primary" type="submit" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Crear orden' }}</button></div>
+      </form>
+    </section>
+  }
+  <section class="card filter-card"><div class="card-header"><h2>Consultar abastecimiento</h2></div>
+    <div class="filter-fields"><div class="field"><label>Proveedor</label><select [(ngModel)]="filtros.supplierId" [ngModelOptions]="{standalone: true}"><option [ngValue]="null">Todos</option>@for (p of proveedores; track p.id) { <option [ngValue]="p.id">{{ p.name }}</option> }</select></div>
+    <div class="field"><label>Estado</label><select [(ngModel)]="filtros.status" [ngModelOptions]="{standalone: true}"><option value="">Todos</option>@for (e of ['PENDING_APPROVAL','APPROVED','REJECTED','PARTIALLY_RECEIVED','RECEIVED','COMPLETED']; track e) { <option [value]="e">{{ estadoTexto(e) }}</option> }</select></div>
+    <div class="field"><label>Desde</label><input type="date" [(ngModel)]="filtros.fromDate" [ngModelOptions]="{standalone: true}"></div>
+    <div class="field"><label>Hasta</label><input type="date" [(ngModel)]="filtros.toDate" [ngModelOptions]="{standalone: true}"></div>
+    <div class="field"><label>Variante</label><select [(ngModel)]="filtros.variantId" [ngModelOptions]="{standalone: true}"><option [ngValue]="null">Todas</option>@for (v of variantes; track v.id) { <option [ngValue]="v.id">{{ v.sku }}</option> }</select></div>
+    <div class="filter-actions"><button class="btn-primary" (click)="aplicarFiltros()">Buscar</button><button class="btn-secondary" (click)="limpiarFiltros()">Limpiar</button></div></div></section>
+  <section class="card"><div class="card-header"><div><span class="page-eyebrow">Histórico</span><h2>Órdenes registradas</h2></div><span class="total-badge">{{ totalElementos }} órdenes</span></div>
+    @if (cargando) { <div class="state">Cargando órdenes...</div> } @else {
+      <div class="table-wrapper"><table><thead><tr><th>Número</th><th>Proveedor</th><th>Fecha</th><th>Estado</th><th>Total</th><th></th></tr></thead><tbody>
+        @for (o of ordenes; track o.id) { <tr><td><strong>{{ o.number }}</strong></td><td>{{ o.supplierName || ('Proveedor #' + o.supplierId) }}</td><td>{{ o.orderDate | date:'dd/MM/yyyy' }}</td><td><span class="status">{{ estadoTexto(o.status) }}</span></td><td>{{ o.total | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td><button class="btn-link" (click)="verDetalle(o)">Ver detalle</button></td></tr> }
+        @empty { <tr><td colspan="6"><div class="state">No hay órdenes registradas.</div></td></tr> }
+      </tbody></table></div>
+    }
+    @if (!cargando && totalPaginas > 0) { <div class="pagination"><span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span><div><button [disabled]="paginaActual === 0" (click)="cambiarPagina(paginaActual - 1)">Anterior</button><button [disabled]="paginaActual + 1 >= totalPaginas" (click)="cambiarPagina(paginaActual + 1)">Siguiente</button></div></div> }
+  </section>
+</section></main>
+@if (mostrarDetalle && seleccionada) {
+  <div class="modal-backdrop" (click)="mostrarDetalle = false"><section class="modal detail-modal" (click)="$event.stopPropagation()">
+    <div class="card-header"><div><span class="page-eyebrow">{{ seleccionada.number }}</span><h2>Detalle de orden</h2></div><button class="btn-close" (click)="mostrarDetalle = false">×</button></div>
+    <div class="modal-body">
+      @if (mensajeError) { <div class="alert error">{{ mensajeError }}</div> }
+      @if (cargandoDetalle) { <div class="compact-state">Actualizando detalle...</div> }
+      <div class="sale-summary"><div><span>Estado</span><strong>{{ estadoTexto(seleccionada.status) }}</strong></div><div><span>Proveedor</span><strong>{{ seleccionada.supplierName || seleccionada.supplierId }}</strong></div><div><span>Fecha</span><strong>{{ seleccionada.orderDate | date:'dd/MM/yyyy' }}</strong></div><div><span>Total</span><strong>{{ seleccionada.total | currency:'COP':'symbol-narrow':'1.0-2' }}</strong></div></div>
+      <h3>Variantes</h3><div class="mini-table"><table><thead><tr><th>SKU</th><th>Cantidad</th><th>Recibida</th><th>Pendiente</th><th>Costo unitario</th><th>Subtotal</th></tr></thead><tbody>
+        @for (l of seleccionada.lines || []; track $index) { <tr><td>{{ l.sku || ('#' + l.variantId) }}</td><td>{{ l.quantity }}</td><td>{{ l.receivedQuantity ?? 0 }}</td><td>{{ pendiente(l) }}</td><td>{{ l.unitCost | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td>{{ (l.subtotal ?? l.quantity * l.unitCost) | currency:'COP':'symbol-narrow':'1.0-2' }}</td></tr> }
+      </tbody></table></div>
+      <div class="receipt-header"><h3>Recepciones asociadas</h3><strong>{{ estadoRecepcion() }}</strong></div>
+      <div class="mini-table"><table><thead><tr><th>Comprobante</th><th>Fecha</th><th>Bodega</th><th>Documento</th><th></th></tr></thead><tbody>
+        @for (r of recepciones; track r.id) { <tr><td>{{ r.number }}</td><td>{{ r.receivedAt | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ r.warehouseName || r.warehouseId }}</td><td>{{ r.document }}</td><td><button class="btn-link" (click)="verRecepcion(r.id)">Ver comprobante</button></td></tr> }
+        @empty { <tr><td colspan="5">Sin recepciones registradas.</td></tr> }
+      </tbody></table></div>
+      @if (canReceive && (seleccionada.status === 'APPROVED' || seleccionada.status === 'PARTIALLY_RECEIVED') && !cargandoDetalle) {
+        <div class="decision-actions"><button class="btn-primary small" [disabled]="guardando" (click)="prepararRecepcion()">Registrar recepción</button></div>
+      }
+      @if (mostrarRecepcion && canReceive) {
+        <form class="action-form" [formGroup]="recepcionForm" (ngSubmit)="confirmarRecepcion()">
+          <h3>Nueva recepción</h3><div class="form-grid"><div class="field"><label>Bodega activa *</label><select formControlName="warehouseId"><option [ngValue]="null">Seleccione...</option>@for (b of bodegas; track b.id) { <option [ngValue]="b.id">{{ b.name }}</option> }</select></div><div class="field"><label>Documento *</label><input formControlName="document" placeholder="Remisión o factura"></div></div>
+          <div formArrayName="lines" class="receipt-lines">@for (l of lineasRecepcion.controls; track $index; let i = $index) { <div class="receipt-line" [formGroupName]="i"><span>{{ l.value.sku }}</span><span>Pendiente: {{ l.value.pending }}</span><div class="field"><label>Recibir</label><input type="number" min="0" [max]="l.value.pending" step="0.01" formControlName="quantity"></div></div> }</div>
+          <div class="form-actions"><button type="button" class="btn-secondary" (click)="mostrarRecepcion = false">Cancelar</button><button class="btn-primary" type="submit" [disabled]="guardando">{{ guardando ? 'Registrando...' : 'Confirmar recepción' }}</button></div>
+        </form>
+      }
+      @if (recepcionSeleccionada) { <section class="receipt-proof"><div class="receipt-header"><h3>Comprobante {{ recepcionSeleccionada.number }}</h3><button class="btn-link" (click)="recepcionSeleccionada = null">Cerrar</button></div>
+        <p>Fecha: {{ recepcionSeleccionada.receivedAt | date:'dd/MM/yyyy HH:mm' }} · Orden: {{ seleccionada.number }} · Bodega: {{ recepcionSeleccionada.warehouseName || recepcionSeleccionada.warehouseId }} · Documento: {{ recepcionSeleccionada.document }}</p>
+        <div class="mini-table"><table><thead><tr><th>Variante</th><th>Cantidad</th><th>Costo unitario</th><th>Total</th></tr></thead><tbody>@for (l of recepcionSeleccionada.lines; track $index) { <tr><td>{{ l.sku || l.variantId || l.orderLineId }}</td><td>{{ l.quantity }}</td><td>{{ (l.unitCost ?? 0) | currency:'COP':'symbol-narrow':'1.0-2' }}</td><td>{{ l.quantity * (l.unitCost ?? 0) | currency:'COP':'symbol-narrow':'1.0-2' }}</td></tr> }</tbody></table></div></section> }
+      @if (seleccionada.rejectionReason) { <p class="reason"><strong>Motivo de rechazo:</strong> {{ seleccionada.rejectionReason }}</p> }
+      @if (seleccionada.approvedBy) { <p class="reason">Aprobada por {{ seleccionada.approvedBy }} · {{ seleccionada.approvedAt | date:'dd/MM/yyyy HH:mm' }}</p> }
+      @if (puedeDecidir()) {
+        <div class="decision-actions"><button class="btn-primary small" [disabled]="guardando || cargandoDetalle" (click)="aprobar()">{{ guardando ? 'Guardando...' : 'Aprobar orden' }}</button><button class="btn-link danger" [disabled]="guardando || cargandoDetalle" (click)="mostrarRechazo = !mostrarRechazo; rechazoForm.reset()">Rechazar orden</button></div>
+        @if (mostrarRechazo) { <form class="action-form" [formGroup]="rechazoForm" (ngSubmit)="rechazar()"><div class="field"><label>Motivo de rechazo *</label><textarea rows="3" formControlName="reason"></textarea></div><div class="form-actions"><button type="button" class="btn-secondary" (click)="mostrarRechazo = false">Volver</button><button type="submit" class="btn-primary" [disabled]="guardando || rechazoForm.invalid">Confirmar rechazo</button></div></form> }
+      }
+    </div>
+  </section></div>
+}

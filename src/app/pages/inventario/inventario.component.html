@@ -20,14 +20,36 @@
 
       </div>
 
-      <button
-        type="button"
-        class="button button--primary"
-        (click)="nuevoAjuste()"
-      >
-        <i class="fi fi-sr-plus"></i>
-        <span>Registrar ajuste</span>
-      </button>
+      <div class="page__actions">
+        <button
+          type="button"
+          class="button button--secondary"
+          [disabled]="cargando || inventario.length === 0"
+          (click)="generarPdf()"
+        >
+          <i class="fi fi-sr-file-pdf"></i>
+          <span>Generar PDF</span>
+        </button>
+
+        <button
+          type="button"
+          class="button button--secondary"
+          [disabled]="cargando || inventario.length === 0"
+          (click)="generarExcel()"
+        >
+          <i class="fi fi-sr-file-excel"></i>
+          <span>Generar Excel</span>
+        </button>
+
+        <button
+          type="button"
+          class="button button--primary"
+          (click)="nuevoAjuste()"
+        >
+          <i class="fi fi-sr-plus"></i>
+          <span>Registrar ajuste</span>
+        </button>
+      </div>
 
     </header>
 

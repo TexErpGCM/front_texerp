@@ -1,85 +1,186 @@
+
 <div class="app-layout">
-
-  <!-- SIDEBAR LATERAL IZQUIERDO -->
   <aside class="sidebar">
-
-    <!-- LOGO Y MARCA -->
     <div class="sidebar-brand">
       <div class="brand-logo">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
       </div>
+
       <div class="brand-text">
         <span class="brand-title">Creaciones Vanessa</span>
         <span class="brand-subtitle">Textil & Moda Dynamics</span>
       </div>
     </div>
 
-    <!-- MENÚ DE NAVEGACIÓN -->
     <nav class="sidebar-menu">
 
-      <!-- DASHBOARD -->
-      <a routerLink="/dashboard" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Dashboard</span>
-      </a>
+      @if (can(P.DASHBOARD_READ)) {
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Dashboard</span>
+        </a>
+      }
 
-      <!-- USUARIOS -->
-      <a routerLink="/usuario" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Usuarios</span>
-      </a>
+      @if (can(P.USER_READ)) {
+        <a
+          routerLink="/usuario"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Usuarios</span>
+        </a>
+      }
 
-      <!-- CLIENTES -->
-      <a routerLink="/clientes" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Clientes</span>
-      </a>
+      @if (can(P.USER_READ)) {
+        <a
+          routerLink="/clientes"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Clientes</span>
+        </a>
 
-      <!-- BODEGAS -->
-      <a routerLink="/bodegas" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Bodegas</span>
-      </a>
+        <a
+          routerLink="/bodegas"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Bodegas</span>
+        </a>
 
-      <!-- VARIANTE PRODUCTO -->
-      <a routerLink="/variante" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Variante producto</span>
-      </a>
+        <a
+          routerLink="/variante"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Variante producto</span>
+        </a>
 
-      <!-- PROVEEDORES -->
-      <a routerLink="/Proveedor" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Proveedores</span>
-      </a>
-        <!-- INVENTARIO -->
-      <a routerLink="/inventario" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Inventario</span>
-      </a>
-      <!-- producto -->
-      <a routerLink="/producto" routerLinkActive="active" class="menu-item">
-        <span class="menu-icon"></span>
-        <span class="menu-label">Producto</span>
-      </a>
+        <a
+          routerLink="/Proveedor"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Proveedores</span>
+        </a>
+
+        <a
+          routerLink="/producto"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Producto</span>
+        </a>
+      }
+
+      @if (can(P.INVENTORY_READ)) {
+        <a
+          routerLink="/inventario"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Inventario</span>
+        </a>
+      }
+
+      @if (can(P.INVENTORY_MOVEMENT_READ)) {
+        <a
+          routerLink="/movimientos"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Movimientos</span>
+        </a>
+      }
+
+      @if (can(P.QUOTE_READ)) {
+        <a
+          routerLink="/cotizaciones"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Cotizaciones</span>
+        </a>
+      }
+
+      @if (can(P.AUDIT_READ)) {
+        <a
+          routerLink="/auditoria"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Auditoría</span>
+        </a>
+      }
+
+      @if (can(P.PURCHASE_ORDER_READ)) {
+        <a
+          routerLink="/ordenes-compra"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Órdenes de compra</span>
+        </a>
+      }
+
+      @if (can(P.SALE_READ)) {
+        <a
+          routerLink="/ventas"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Ventas y pagos</span>
+        </a>
+      }
+
+      <!-- ANALÍTICA HU-27, HU-28, HU-29 Y HU-30 -->
+      @if (can(P.DASHBOARD_READ)) {
+        <a
+          routerLink="/analitica"
+          routerLinkActive="active"
+          class="menu-item"
+        >
+          <span class="menu-icon"></span>
+          <span class="menu-label">Analítica</span>
+        </a>
+      }
 
     </nav>
 
-    <!-- BOTÓN DE CERRAR SESIÓN -->
     <div class="sidebar-footer">
-      <button type="button" class="logout-button" (click)="cerrarSesion()">
+      <button
+        type="button"
+        class="logout-button"
+        (click)="cerrarSesion()"
+      >
         <span>Cerrar sesión</span>
       </button>
     </div>
-
   </aside>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <div class="main-wrapper">
-
-    <!-- BARRA SUPERIOR AZUL OSCURO -->
     <header class="top-header">
       <div class="header-info">
         <h1>Sistema de Gestión Textil</h1>
@@ -87,19 +188,19 @@
       </div>
 
       <div class="header-user-panel">
-        <div class="user-avatar">CV</div>
+        <div class="user-avatar">
+          {{ userName.slice(0, 2).toUpperCase() }}
+        </div>
+
         <div class="user-info">
-          <span class="user-name">Administrador</span>
-          <span class="user-role">Creaciones Vanessa</span>
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-role">{{ userRole }}</span>
         </div>
       </div>
     </header>
 
-    <!-- ÁREA DE RUTAS HIJAS -->
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
-
   </div>
-
 </div>

@@ -455,4 +455,223 @@ export class ListarInventarioComponent implements OnInit {
 
       });
   }
+
+  generarExcel(): void {
+    if (this.inventario.length === 0) {
+      this.mensajeError = 'No hay registros visibles para exportar.';
+      return;
+    }
+
+    const encabezados = [
+      'SKU',
+      'Código producto',
+      'Producto',
+      'Código bodega',
+      'Bodega',
+      'Disponible',
+      'Reservado',
+      'Mínimo',
+      'Estado'
+    ];
+
+    const filas = this.inventario.map(item => [
+      item.sku,
+      item.productCode,
+      item.productName,
+      item.warehouseCode,
+      item.warehouseName,
+      item.available,
+      item.reserved,
+      item.minimum,
+      this.obtenerEstado(item)
+    ]);
+
+    const contenido = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+<table border="1">
+  <thead><tr>${encabezados.map(valor => `<th>${this.escaparHtml(valor)}</th>`).join('')}</tr></thead>
+  <tbody>${filas.map(fila => `<tr>${fila.map(valor => `<td>${this.escaparHtml(String(valor ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody>
+</table>
+</body>
+</html>`;
+
+    const blob = new Blob(['\ufeff', contenido], {
+      type: 'application/vnd.ms-excel;charset=utf-8;'
+    });
+
+    this.descargarArchivo(blob, this.nombreReporte('inventario', 'xls'));
+  }
+
+  generarPdf(): void {
+    if (this.inventario.length === 0) {
+      this.mensajeError = 'No hay registros visibles para exportar.';
+      return;
+    }
+
+    const lineas = this.inventario.map(item => [
+      item.sku,
+      item.productName,
+      item.warehouseName,
+      String(item.available),
+      String(item.reserved),
+      String(item.minimum),
+      this.obtenerEstado(item)
+    ]);
+
+    const pdf = this.construirPdf(lineas);
+    const blob = new Blob([pdf.buffer as ArrayBuffer], { type: 'application/pdf' });
+    this.descargarArchivo(blob, this.nombreReporte('inventario', 'pdf'));
+  }
+
+  private construirPdf(filas: string[][]): Uint8Array {
+    const anchoPagina = 842;
+    const altoPagina = 595;
+    const margenX = 32;
+    const margenSuperior = 48;
+    const altoFila = 17;
+    const filasPorPagina = 26;
+    const posicionesX = [32, 125, 285, 455, 545, 620, 690];
+    const anchosTexto = [16, 27, 27, 12, 12, 12, 12];
+    const encabezados = ['SKU', 'Producto', 'Bodega', 'Disponible', 'Reservado', 'Minimo', 'Estado'];
+
+    const paginas: string[] = [];
+
+    for (let inicio = 0; inicio < filas.length; inicio += filasPorPagina) {
+      const bloque = filas.slice(inicio, inicio + filasPorPagina);
+      const comandos: string[] = [];
+
+      comandos.push('BT');
+      comandos.push('/F1 15 Tf');
+      comandos.push(`${margenX} ${altoPagina - margenSuperior} Td`);
+      comandos.push(`(${this.escaparPdf('Reporte de inventario - TexERP')}) Tj`);
+      comandos.push('ET');
+
+      const yEncabezado = altoPagina - margenSuperior - 32;
+      comandos.push('0.93 0.95 0.98 rg');
+      comandos.push(`${margenX - 4} ${yEncabezado - 5} ${anchoPagina - (margenX * 2) + 8} 18 re f`);
+      comandos.push('0 0 0 rg');
+
+      encabezados.forEach((encabezado, indice) => {
+        comandos.push('BT');
+        comandos.push('/F1 8 Tf');
+        comandos.push(`${posicionesX[indice]} ${yEncabezado} Td`);
+        comandos.push(`(${this.escaparPdf(encabezado)}) Tj`);
+        comandos.push('ET');
+      });
+
+      bloque.forEach((fila, indiceFila) => {
+        const y = yEncabezado - ((indiceFila + 1) * altoFila);
+        fila.forEach((valor, indiceColumna) => {
+          const texto = this.limitarTexto(valor, anchosTexto[indiceColumna]);
+          comandos.push('BT');
+          comandos.push('/F1 7.5 Tf');
+          comandos.push(`${posicionesX[indiceColumna]} ${y} Td`);
+          comandos.push(`(${this.escaparPdf(texto)}) Tj`);
+          comandos.push('ET');
+        });
+      });
+
+      paginas.push(comandos.join('\n'));
+    }
+
+    const objetos: string[] = [];
+    const paginasIds: number[] = [];
+
+    objetos.push('<< /Type /Catalog /Pages 2 0 R >>');
+    objetos.push('');
+    objetos.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+
+    paginas.forEach(contenido => {
+      const paginaId = objetos.length + 1;
+      const contenidoId = paginaId + 1;
+      paginasIds.push(paginaId);
+      objetos.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${anchoPagina} ${altoPagina}] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contenidoId} 0 R >>`);
+      objetos.push(`<< /Length ${this.longitudBytes(contenido)} >>\nstream\n${contenido}\nendstream`);
+    });
+
+    objetos[1] = `<< /Type /Pages /Kids [${paginasIds.map(id => `${id} 0 R`).join(' ')}] /Count ${paginasIds.length} >>`;
+
+    let documento = '%PDF-1.4\n';
+    const offsets: number[] = [0];
+
+    objetos.forEach((objeto, indice) => {
+      offsets.push(this.longitudBytes(documento));
+      documento += `${indice + 1} 0 obj\n${objeto}\nendobj\n`;
+    });
+
+    const inicioXref = this.longitudBytes(documento);
+    documento += `xref\n0 ${objetos.length + 1}\n`;
+    documento += '0000000000 65535 f \n';
+
+    for (let indice = 1; indice <= objetos.length; indice++) {
+      documento += `${String(offsets[indice]).padStart(10, '0')} 00000 n \n`;
+    }
+
+    documento += `trailer\n<< /Size ${objetos.length + 1} /Root 1 0 R >>\nstartxref\n${inicioXref}\n%%EOF`;
+
+    return this.aBytesWinAnsi(documento);
+  }
+
+  private limitarTexto(valor: string, maximo: number): string {
+    const texto = (valor ?? '').replace(/\s+/g, ' ').trim();
+    return texto.length > maximo
+      ? `${texto.slice(0, Math.max(0, maximo - 3))}...`
+      : texto;
+  }
+
+  private escaparPdf(valor: string): string {
+    return valor
+      .replace(/\\/g, '\\\\')
+      .replace(/\(/g, '\\(')
+      .replace(/\)/g, '\\)');
+  }
+
+  private aBytesWinAnsi(valor: string): Uint8Array {
+    const bytes = new Uint8Array(valor.length);
+
+    for (let indice = 0; indice < valor.length; indice++) {
+      const codigo = valor.charCodeAt(indice);
+      bytes[indice] = codigo <= 255 ? codigo : 63;
+    }
+
+    return bytes;
+  }
+
+  private longitudBytes(valor: string): number {
+    return this.aBytesWinAnsi(valor).length;
+  }
+
+  private escaparHtml(valor: string): string {
+    return valor
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  private nombreReporte(prefijo: string, extension: string): string {
+    const fecha = new Date();
+    const sello = [
+      fecha.getFullYear(),
+      String(fecha.getMonth() + 1).padStart(2, '0'),
+      String(fecha.getDate()).padStart(2, '0')
+    ].join('-');
+
+    return `${prefijo}-${sello}.${extension}`;
+  }
+
+  private descargarArchivo(blob: Blob, nombre: string): void {
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = nombre;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    URL.revokeObjectURL(url);
+  }
+
 }

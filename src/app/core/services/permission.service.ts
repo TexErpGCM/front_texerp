@@ -1,0 +1,80 @@
+import { Injectable, inject } from '@angular/core';
+import { AuthService } from './auth.service';
+
+export const APP_PERMISSIONS = {
+  DASHBOARD_READ: 'DASHBOARD_READ',
+  USER_READ: 'USER_READ',
+  USER_CREATE: 'USER_CREATE',
+  USER_UPDATE: 'USER_UPDATE',
+  USER_DELETE: 'USER_DELETE',
+  AUDIT_READ: 'AUDIT_READ',
+  INVENTORY_READ: 'INVENTORY_READ',
+  INVENTORY_MOVEMENT_READ: 'INVENTORY_MOVEMENT_READ',
+  INVENTORY_ADJUST: 'INVENTORY_ADJUST',
+  INVENTORY_NEGATIVE_ADJUST: 'INVENTORY_NEGATIVE_ADJUST',
+  QUOTE_READ: 'QUOTE_READ',
+  QUOTE_CREATE: 'QUOTE_CREATE',
+  QUOTE_CONVERT: 'QUOTE_CONVERT',
+  QUOTE_CANCEL: 'QUOTE_CANCEL',
+  SALE_READ: 'SALE_READ',
+  SALE_CREATE: 'SALE_CREATE',
+  SALE_CONFIRM: 'SALE_CONFIRM',
+  PAYMENT_READ: 'PAYMENT_READ',
+  PAYMENT_CREATE: 'PAYMENT_CREATE',
+  SALE_DISPATCH: 'SALE_DISPATCH',
+  SALE_DELIVER: 'SALE_DELIVER',
+  SALE_CANCEL: 'SALE_CANCEL',
+  PURCHASE_ORDER_READ: 'PURCHASE_ORDER_READ',
+  PURCHASE_ORDER_CREATE: 'PURCHASE_ORDER_CREATE',
+  PURCHASE_ORDER_APPROVE: 'PURCHASE_ORDER_APPROVE',
+  PURCHASE_ORDER_RECEIVE: 'PURCHASE_ORDER_RECEIVE'
+} as const;
+
+export type AppPermission = typeof APP_PERMISSIONS[keyof typeof APP_PERMISSIONS];
+
+const ROLE_PERMISSIONS: Record<string, AppPermission[]> = {
+  ADMINISTRADOR: Object.values(APP_PERMISSIONS),
+  ANALISTA: [
+    APP_PERMISSIONS.DASHBOARD_READ,
+    APP_PERMISSIONS.INVENTORY_READ,
+    APP_PERMISSIONS.INVENTORY_MOVEMENT_READ,
+    APP_PERMISSIONS.QUOTE_READ,
+    APP_PERMISSIONS.SALE_READ,
+    APP_PERMISSIONS.PAYMENT_READ
+  ],
+  VENDEDOR: [
+    APP_PERMISSIONS.DASHBOARD_READ,
+    APP_PERMISSIONS.INVENTORY_READ,
+    APP_PERMISSIONS.QUOTE_READ,
+    APP_PERMISSIONS.QUOTE_CREATE,
+    APP_PERMISSIONS.QUOTE_CONVERT,
+    APP_PERMISSIONS.QUOTE_CANCEL,
+    APP_PERMISSIONS.SALE_READ,
+    APP_PERMISSIONS.SALE_CREATE,
+    APP_PERMISSIONS.SALE_CONFIRM,
+    APP_PERMISSIONS.PAYMENT_READ,
+    APP_PERMISSIONS.PAYMENT_CREATE,
+    APP_PERMISSIONS.SALE_DISPATCH,
+    APP_PERMISSIONS.SALE_DELIVER,
+    APP_PERMISSIONS.SALE_CANCEL
+  ]
+};
+
+@Injectable({ providedIn: 'root' })
+export class PermissionService {
+  private readonly auth = inject(AuthService);
+
+  has(permission: AppPermission): boolean {
+    const role = this.auth.getRole()?.toUpperCase().replace(/^ROLE_/, '') ?? '';
+    return (ROLE_PERMISSIONS[role] ?? []).includes(permission);
+  }
+
+  hasAny(permissions: AppPermission[]): boolean {
+    return permissions.some(permission => this.has(permission));
+  }
+
+  permissionsForCurrentRole(): AppPermission[] {
+    const role = this.auth.getRole()?.toUpperCase().replace(/^ROLE_/, '') ?? '';
+    return [...(ROLE_PERMISSIONS[role] ?? [])];
+  }
+}
